@@ -1,10 +1,9 @@
 package com.huifer.bean;
 
+import com.huifer.proxy.BaseService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import static org.junit.Assert.*;
 
 public class SpringIoc {
     private ClassPathXmlApplicationContext context;
@@ -34,6 +33,13 @@ public class SpringIoc {
     public void testIocDemo03(){
         Teacher tea = (Teacher) context.getBean("teacherStatic");
 
+    }
+
+    @Test
+    public void testIocDemo04(){
+        BaseService so = (BaseService) context.getBean("tec");
+        String s = so.doSome();
+        System.out.println(s);
     }
 
 }

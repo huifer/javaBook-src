@@ -60,6 +60,7 @@ public class BeanFactory {
 
     private Map<String, Object> factory;
 
+
     /**
      * 将单例模式的类保存到 Ioc
      *
@@ -70,14 +71,19 @@ public class BeanFactory {
         this.beanDefineds = beanDefineds;
 
         Ioc = new HashMap<>();
-        for (BeanDefined beans : beanDefineds) {
-            if (beans.getScope().equals("singleton")) {
-                Object o = Class.forName(beans.getClassPath()).newInstance();
-                Ioc.put(beans.getBeanId(), Class.forName(beans.getClassPath()).newInstance());
+        for (BeanDefined bean : beanDefineds) {
+            if (bean.getScope().equals("singleton")) {
+                Class<?> classFile = Class.forName(bean.getClassPath());
+                Object o = classFile.newInstance();
+
+                Ioc.put(bean.getBeanId(), o);
+
             }
         }
 
     }
+
+
 
     /**
      * 考虑是否单例模式的获取

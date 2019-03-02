@@ -30,4 +30,10 @@
 
     <!--自定义工厂 ，  静态工厂-->
     <bean id="teacherStatic" class="com.huifer.bean.TeacherFactory" factory-method="createStaticTeacher"></bean>
+
+
+    <!-- bean 的处理-->
+    <bean id="tec" class="com.huifer.proxy.impl.BaseServiceImpl"></bean>
+    <bean class="com.huifer.util.MyBeanPostPro"></bean>
+
 </beans>
