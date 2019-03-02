@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+
+<hibernate-mapping>
+
+    <class name="com.huifer.hibernatebook.bean.Customer" table="cst_customer" lazy="true">
+
+        <!-- 建立OID与主键映射 -->
+        <id name="cust_id" column="cust_id">
+            <generator class="native"/>
+        </id>
+        <!-- 建立普通属性与数据库表字段映射 -->
+        <property name="cust_name" column="cust_name"/>
+        <property name="cust_source" column="cust_source"/>
+        <property name="cust_industry" column="cust_industry"/>
+        <property name="cust_level" column="cust_level"/>
+        <property name="cust_phone" column="cust_phone"/>
+        <property name="cust_mobile" column="cust_mobile"/>
+        <!-- 配置一对多的映射：放置的多的一方的集合 -->
+        <!--
+            set标签 ：
+                * name	：多的一方的对象集合的属性名称。
+                * cascade：级联
+                * inverse：放弃外键维护权。
+        -->
+        <!--cascade="save-update,delete" inverse="true"-->
+        <set name="linkMans" lazy="true" >
+            <!--
+                 key标签
+                    * column：多的一方的外键的名称。
+             -->
+            <key column="lkm_cust_id"/>
+            <!--
+                one-to-many标签
+                    * class	:多的一方的类的全路径
+             -->
+            <one-to-many class="com.huifer.hibernatebook.bean.LinkMan"/>
+        </set>
+    </class>
+
+
+</hibernate-mapping>

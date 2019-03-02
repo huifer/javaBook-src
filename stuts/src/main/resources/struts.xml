@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+        "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+    <!--常量-->
+    <constant name="struts.action.extension" value="action"/>
+    <!--配置struts包-->
+    <package name="com.huifer.struts.action.HelloAction" extends="struts-default" namespace="/">
+        <!--配置action-->
+        <action name="hello" class="com.huifer.struts.action.HelloAction">
+
+        </action>
+    </package>
+
+    <package name="com.huifer.struts.action.ActionTwo" extends="struts-default" namespace="/">
+        <action name="actionTwo" class="com.huifer.struts.action.ActionTwo">
+            <result name="success"></result>
+            <result name="error"></result>
+            <result name="login"></result>
+            <result name="input"></result>
+        </action>
+    </package>
+    <package name="com.huifer.struts.action.ActionThree" extends="struts-default" namespace="/">
+        <action name="actionThree" class="com.huifer.struts.action.ActionThree">
+        </action>
+    </package>
+
+    <package name="com.huifer.struts.action.UserAction" extends="struts-default" namespace="/">
+        <action name="userFind" class="com.huifer.struts.action.UserAction" method="find"></action>
+        <action name="userUpdate" class="com.huifer.struts.action.UserAction" method="update"></action>
+        <action name="userDelete" class="com.huifer.struts.action.UserAction" method="delete"></action>
+        <action name="userSave" class="com.huifer.struts.action.UserAction" method="save"></action>
+    </package>
+
+
+
+    <package name="com.huifer.struts.action.TpfAction" extends="struts-default" namespace="/" >
+        <!--<action name="tpf_*" class="com.huifer.struts.action.TpfAction" method="{1}">-->
+        <!--</action>-->
+        <action name="tpf_*" class="com.huifer.struts.action.TpfAction" method="{1}"></action>
+
+    </package>
+
+</struts>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/dy_java?serverTimezone=UTC&amp;rewriteBatchedStatements=true&amp;useUnicode=true&amp;characterEncoding=utf8
+        </property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.connection.password">root</property>
+        <!--方言-->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
+        <property name="hbm2ddl.auto">update</property>
+<!--设置隔离级别-->
+        <property name="hibernate.connection.isolation">4</property>
+
+        
+        
+        <!--配置统一session-->
+        <property name="hibernate.current_session_context_class" >thread</property>
+
+        
+        
+        <!--映射文件-->
+        <mapping resource="Customer.hbm.xml.tld"/>
+        <mapping resource="LinkMan.hbm.xml.tld"/>
+        <mapping resource="User.hbm.xml.tld"/>
+        <mapping resource="Role.hbm.xml.tld"/>
+
+
+    </session-factory>
+</hibernate-configuration>

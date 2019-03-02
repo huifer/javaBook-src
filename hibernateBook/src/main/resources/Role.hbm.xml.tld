@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="com.huifer.hibernatebook.bean.Role" table="sys_role">
+        <!-- 建立OID与主键的映射 -->
+        <id name="role_id" column="role_id">
+            <generator class="native"/>
+        </id>
+        <!-- 建立普通属性与字段的映射 -->
+        <property name="role_name" column="role_name"/>
+        <property name="role_memo" column="role_memo"/>
+        <!-- 与用户的多对多的映射关系 -->
+        <!--
+            set标签
+                * name		：对方的集合的属性名称。
+                * table		：多对多的关系需要使用中间表，放的是中间表的名称。
+         -->
+        <set name="users" table="sys_user_role" cascade="save-update,delete" inverse="true">
+            <!--
+                key标签：
+                    * column	：当前的对象对应中间表的外键的名称。
+             -->
+            <key column="role_id"/>
+            <!--
+                many-to-many标签：
+                    * class		：对方的类的全路径
+                    * column	：对方的对象在中间表中的外键的名称。
+             -->
+            <many-to-many class="com.huifer.hibernatebook.bean.User" column="user_id"/>
+        </set>
+    </class>
+</hibernate-mapping>

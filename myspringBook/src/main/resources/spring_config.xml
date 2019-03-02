@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xsi:schemaLocation=" http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <bean id="teacher" class="com.huifer.bean.Teacher" scope="singleton">
+        <property name="tname" value="Mr.huifer"/>
+    </bean>
+
+    <bean id="student" class="com.huifer.bean.Student">
+        <property name="age" value="21"/>
+        <property name="sname" value="wang"/>
+        <property name="teacher" ref="teacher"/>
+    </bean>
+
+    <!--scope-->
+    <bean id="teacherScope" class="com.huifer.bean.Teacher" scope="prototype">
+        <property name="tname" value="Mr.Fur"/>
+    </bean>
+
+    <!--自定义工厂 ， 动态工厂-->
+    <bean id="tFactory" class="com.huifer.bean.TeacherFactory"></bean>
+    <bean id="teacher1" factory-bean="tFactory" factory-method="createTeacher"></bean>
+
+    <!--自定义工厂 ，  静态工厂-->
+    <bean id="teacherStatic" class="com.huifer.bean.TeacherFactory" factory-method="createStaticTeacher"></bean>
+</beans>
