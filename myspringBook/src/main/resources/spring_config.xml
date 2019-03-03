@@ -36,4 +36,61 @@
     <bean id="tec" class="com.huifer.proxy.impl.BaseServiceImpl"></bean>
     <bean class="com.huifer.util.MyBeanPostPro"></bean>
 
+    <!--Di-->
+    <bean id="di01" class="com.huifer.bean.Di">
+        <property name="diName" value="dididididi"></property>
+        <property name="ints" value="1,2,3,4,5"/>
+        <property name="integerList">
+            <array>
+                <value>1</value>
+                <value>1</value>
+                <value>1</value>
+                <value>1</value>
+            </array>
+        </property>
+
+    </bean>
+
+
+    <!--AOP-->
+    <!--通知-->
+
+    <!--注册被监控的实现类 -->
+    <bean id="person" class="com.huifer.aop.advice.Person"></bean>
+    <!--注册通知的实现类-->
+    <bean id="befor" class="com.huifer.aop.advice.MyBeforAdvice"/>
+    <!--注册代理监控 对象-->
+    <bean id="personProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="person"></property>
+        <property name="interceptorNames" value="befor"></property>
+    </bean>
+
+    <!--顾问-->
+
+    <!--顾问注册-->
+    <!--被监控实现类-->
+    <bean id="woman" class="com.huifer.aop.advisor.WoMan"></bean>
+    <!--注册 类型过滤器-->
+    <bean id="classFilter" class="com.huifer.aop.advisor.MyClassFilter"/>
+    <!--注册 方法过滤器-->
+    <bean id="methodFilter" class="com.huifer.aop.advisor.MyMethodMatcher"/>
+    <!--注册通知-->
+    <bean id="wcBefor" class="com.huifer.aop.advisor.MyBeforAdvice"></bean>
+    <!--注册切入点 pointCut-->
+    <bean id="pointCut" class="com.huifer.aop.advisor.MyPointCut">
+        <property name="classFilter" ref="classFilter"/>
+        <property name="matcher" ref="methodFilter"/>
+    </bean>
+    <!--注册自定义顾问-->
+    <bean id="myPointCutAdvisor" class="com.huifer.aop.advisor.MyPointCutAdvisor">
+        <property name="pointcut" ref="pointCut"/>
+        <property name="advice" ref="wcBefor"/>
+    </bean>
+    <!--注册代理对象工厂-->
+    <bean id="woManProxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="woman"></property>
+        <property name="proxyTargetClass" value="true"/>
+        <property name="interceptorNames" value="myPointCutAdvisor"/>
+    </bean>
+
 </beans>

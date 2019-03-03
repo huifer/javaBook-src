@@ -42,4 +42,13 @@ public class SpringIoc {
         System.out.println(s);
     }
 
+
+    @Test
+    public void testIocDemo05() {
+        Di di = (Di) context.getBean("di01");
+        System.out.println();
+    }
+
+
+
 }
