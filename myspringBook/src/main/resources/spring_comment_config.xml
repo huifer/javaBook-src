@@ -23,12 +23,27 @@
     <bean id="myAdvice2" class="com.huifer.aop.aspects.MyAdvice"/>
 
 
-
     <!--aop配置-->
     <aop:config>
-    <aop:aspect ref="myAdvice2">
-        <aop:before method="log" pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:before>
-    </aop:aspect>
+        <aop:aspect ref="myAdvice2">
+            <aop:before method="log"
+                        pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:before>
+
+            <aop:around method="around"
+                        pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:around>
+
+            <aop:after-throwing method="throwAdvice"
+                        pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:after-throwing>
+
+        </aop:aspect>
 
     </aop:config>
+
+
+    <!--注解切面-->
+    <!--扫描切面类-->
+    <context:component-scan base-package="com.huifer.aop.aspects.comment"/>
+<!--开启AOP自动代理-->
+    <aop:aspectj-autoproxy ></aop:aspectj-autoproxy>
+
 </beans>

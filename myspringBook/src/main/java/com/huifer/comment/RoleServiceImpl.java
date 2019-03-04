@@ -13,5 +13,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void saveRole() {
         System.out.println("save role");
+//        System.out.println(1 / 0);
     }
 }
