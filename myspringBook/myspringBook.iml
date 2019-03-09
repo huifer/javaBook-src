@@ -10,6 +10,9 @@
           <file>file://$MODULE_DIR$/src/main/resources/spring_comment_config.xml</file>
           <file>file://$MODULE_DIR$/src/main/resources/spring_config.xml</file>
         </fileset>
+        <fileset id="fileset3" name="Spring_db_config" removed="false">
+          <file>file://$MODULE_DIR$/src/main/resources/spring_db_config.xml</file>
+        </fileset>
       </configuration>
     </facet>
   </component>
@@ -42,5 +45,7 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:5.1.4.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: mysql:mysql-connector-java:8.0.15" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.6.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-dbcp:commons-dbcp:1.4" level="project" />
+    <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.4" level="project" />
   </component>
 </module>
