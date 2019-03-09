@@ -20,7 +20,7 @@ public class BookServiceImplTest {
 
     @Test
     public void loanBook() {
-        bookService.loanBook("张三", "李四", "java Book");
+        bookService.loanBook("张三", "wa", "java Book");
         List<Book> query = bookLibDao.query();
         System.out.println(query);
     }
