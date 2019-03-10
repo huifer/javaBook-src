@@ -19,7 +19,6 @@ public class BookLibDaoImpl implements BookLibDao {
 
     @Override
     public void update(String bname, String belone, String to) {
-        System.out.println(1 / 0);
         int update = jdbcTemplate.update("UPDATE book SET toname=? WHERE belone=? AND bname=?", to, belone, bname);
 
     }

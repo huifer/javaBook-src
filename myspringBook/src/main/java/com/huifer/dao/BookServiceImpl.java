@@ -11,6 +11,7 @@ import javax.annotation.Resource;
  * @date 2019-03-09
  */
 @Service(value = "bookService")
+//@Transactional 事务注解
 public class BookServiceImpl implements BookService {
     @Resource
     private BookLibDao bookLibDao;
