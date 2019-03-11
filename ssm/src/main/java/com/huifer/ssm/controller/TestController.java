@@ -24,8 +24,7 @@ public class TestController {
     private ItemService service;
 
     @GetMapping("queryItem")
-    @ResponseBody
-    public ResponseEntity<List<Item>> queryItem() {
+    public @ResponseBody ResponseEntity<List<Item>> queryItem() {
         List<Item> items = service.queryItemList();
 
         return ResponseEntity.ok().body(items);
