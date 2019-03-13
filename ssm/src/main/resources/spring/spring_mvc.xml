@@ -30,4 +30,12 @@
     </bean>
     <!--异常处理器-->
     <bean class="com.huifer.ssm.exception.MyExceptionResolver"></bean>
+    <!--文件解析-->
+    <!--org.springframework.web.servlet.DispatcherServlet   MultipartResolver 属性-->
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--最大文件上传大小 单位byte-->
+        <property name="maxUploadSize" value="6000000"/>
+
+    </bean>
 </beans>

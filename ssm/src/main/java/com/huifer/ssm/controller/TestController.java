@@ -6,13 +6,14 @@ import com.huifer.ssm.pojo.QueryModel;
 import com.huifer.ssm.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 描述:
@@ -78,6 +79,26 @@ public class TestController {
         }
     }
 
+    @PostMapping("file")
+    public void file(MultipartFile picFile) throws IOException {
+        if (picFile != null) {
+            // 保存到本地
+            String uploadFile = picFile.getOriginalFilename();
+            if (uploadFile != null && !"".contentEquals(uploadFile)) {
+                String ext = uploadFile.substring(uploadFile.lastIndexOf("."));
+                String bf = UUID.randomUUID().toString() + ext;
+                String baseDir = "E:\\work-java\\2019-java\\ssm\\upload\\";
+                File dirFile = new File(baseDir);
+                if (!dirFile.exists()) {
+                    dirFile.mkdir();
+                }
+                picFile.transferTo(new File(baseDir + bf));
+
+            }
+
+        }
+        return;
+    }
 
     @GetMapping("/str")
     public String s() {
