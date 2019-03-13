@@ -1,5 +1,6 @@
 package com.huifer.ssm.controller;
 
+import com.huifer.ssm.exception.MyException;
 import com.huifer.ssm.pojo.Item;
 import com.huifer.ssm.pojo.QueryModel;
 import com.huifer.ssm.service.ItemService;
@@ -58,7 +59,7 @@ public class TestController {
 
     @GetMapping("double")
     public ResponseEntity array(String[] id) {
-    //http://localhost:8082/item/double?id=1&id=2
+        //http://localhost:8082/item/double?id=1&id=2
         return ResponseEntity.ok(id);
     }
 
@@ -67,6 +68,17 @@ public class TestController {
 //        http://localhost:8082/item/date?d=2019-1-1
         return ResponseEntity.ok(d);
     }
+
+    @GetMapping("/excetion")
+    public ResponseEntity excetion(Integer id) throws MyException {
+        if (id > 1) {
+            throw new MyException("自定义异常");
+        } else {
+            return ResponseEntity.ok(id);
+        }
+    }
+
+
     @GetMapping("/str")
     public String s() {
         return "中文";

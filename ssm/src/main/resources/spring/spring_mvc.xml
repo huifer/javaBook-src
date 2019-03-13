@@ -28,4 +28,6 @@
             </set>
         </property>
     </bean>
+    <!--异常处理器-->
+    <bean class="com.huifer.ssm.exception.MyExceptionResolver"></bean>
 </beans>
