@@ -8,5 +8,24 @@
 
 
     <!-- 配置注解的适配器和映射器，同时还注入了很多其他的bean -->
-    <mvc:annotation-driven  />
+    <mvc:annotation-driven conversion-service="format">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+        </mvc:message-converters>
+
+
+    </mvc:annotation-driven>
+
+
+    <!--自定义转换-->
+    <bean id="format" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <!--注入自定义转换器-->
+                <bean class="com.huifer.ssm.controller.DateConverter"/>
+            </set>
+        </property>
+    </bean>
 </beans>
