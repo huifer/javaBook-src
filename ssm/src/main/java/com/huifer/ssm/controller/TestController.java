@@ -5,8 +5,10 @@ import com.huifer.ssm.pojo.Item;
 import com.huifer.ssm.pojo.QueryModel;
 import com.huifer.ssm.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -28,6 +30,13 @@ import java.util.UUID;
 public class TestController {
     @Autowired
     private ItemService service;
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    private  ApplicationContext applicationContext;
+
 
     @GetMapping("queryItem")
     public ResponseEntity<List<Item>> queryItem() {
