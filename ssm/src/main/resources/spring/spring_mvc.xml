@@ -38,4 +38,15 @@
         <property name="maxUploadSize" value="6000000"/>
 
     </bean>
+    <!--拦截器配置-->
+    <mvc:interceptors>
+        <bean class="com.huifer.ssm.interceptor.CrossInter"/>
+        <!--全局拦截器配置-->
+        <bean class="com.huifer.ssm.interceptor.MyHandlerInt"/>
+        <!--单一拦截器配置-->
+        <mvc:interceptor>
+            <mvc:mapping path="/test/**"/>
+            <bean class="com.huifer.ssm.interceptor.MyHandlerInt"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 </beans>

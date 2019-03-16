@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -99,6 +100,15 @@ public class TestController {
         }
         return;
     }
+
+    @GetMapping("/id/{id}")
+    public Map fid(@PathVariable Integer id) {
+        HashMap<Integer, Integer> o = new HashMap<>();
+        o.put(id, id);
+        return o;
+    }
+
+
 
     @GetMapping("/str")
     public String s() {
