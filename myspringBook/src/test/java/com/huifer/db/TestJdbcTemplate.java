@@ -24,6 +24,7 @@ import java.util.List;
 @ContextConfiguration(locations = {"classpath:spring_db_config.xml"})
 public class TestJdbcTemplate {
 
+
     @Test
     public void testInsert(){
 
