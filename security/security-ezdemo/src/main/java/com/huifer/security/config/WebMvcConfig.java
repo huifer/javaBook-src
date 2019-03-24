@@ -1,8 +1,8 @@
 package com.huifer.security.config;
 
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+        import org.springframework.context.annotation.Configuration;
+        import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+        import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 /**
  * 描述:

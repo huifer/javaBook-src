@@ -1,0 +1,12 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>403</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+请求异常信息：
+<th:block th:text="${#httpServletRequest.getAttribute('SPRING_SECURITY_403_EXCEPTION')}"></th:block>
+
+</body>
+</html>
