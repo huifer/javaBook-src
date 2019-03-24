@@ -71,7 +71,7 @@ public class CustomInvocationSecurityMetadataSourceService implements FilterInvo
                 }
             }
         }
-
+        System.out.println();
     }
 
     @Override
@@ -89,7 +89,6 @@ public class CustomInvocationSecurityMetadataSourceService implements FilterInvo
         Iterator<String> iterator = resourceMap.keySet().iterator();
         while (iterator.hasNext()) {
             String resURL = iterator.next();
-            // 优化请求路径后面带参数的部分
             RequestMatcher requestMatcher = new AntPathRequestMatcher(resURL);
             if (requestMatcher.matches(filterInvocation.getHttpRequest())) {
                 return resourceMap.get(resURL);
