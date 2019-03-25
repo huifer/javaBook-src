@@ -159,3 +159,99 @@ public class ThreadDemo001 {
 
 }
 ```
+### 其他操作
+#### 中断线程 
+- java.lang.Thread.interrupt()
+    - 当线程在阻塞状态中 sleep 或 join 方法,阻塞状态清除
+- java.lang.Thread.interrupted()
+    - 当前线程是否中断
+- java.lang.Thread.isInterrupted()
+    - 当前线程是否中断 
+        
+        
+```java
+public class ThreadInterrup {
+    public static void main(String[] args) throws InterruptedException {
+        Runnable r = () -> {
+            String name = Thread.currentThread().getName();
+            int count = 0;
+            while (!Thread.interrupted()) {
+                System.out.println(name + ":" + count++);
+            }
+        };
+
+        Thread t1 = new Thread(r,"thread-01");
+        Thread t2 = new Thread(r, "thread-02");
+        t1.start();
+        t2.start();
+        TimeUnit.SECONDS.sleep(1L);
+        // 把线程1打断
+        t1.interrupt();
+        TimeUnit.SECONDS.sleep(2L);
+        t2.interrupt();
+
+    }
+}
+
+```
+
+#### 等待线程
+- java.lang.Thread.join()等待直到线程死亡
+```java
+public class ThreadJoin {
+
+    private static Long res;
+
+    public static void main(String[] args) {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("1");
+            }
+        };
+
+
+        Thread t = new Thread(r);
+        t.start();
+        try {
+
+            t.join();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("stop");
+
+    }
+
+
+}
+
+```
+
+#### 线程睡眠
+- java.lang.Thread.sleep(long) 线程睡眠 毫秒
+```java
+public class ThreadSleep {
+    public static void main(String[] args) throws InterruptedException {
+        Runnable r = () -> {
+            String name = Thread.currentThread().getName();
+            int count = 0;
+            while (!Thread.interrupted()) {
+                System.out.println(name + ":" + count++);
+            }
+        };
+
+        Thread t1 = new Thread(r,"thread-01");
+        Thread t2 = new Thread(r, "thread-02");
+        t1.start();
+        t2.start();
+        try {
+            Thread.sleep(10);
+            t1.interrupt();
+            t2.interrupt();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }}
+```
