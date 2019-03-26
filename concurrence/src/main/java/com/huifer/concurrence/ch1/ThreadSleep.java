@@ -1,15 +1,12 @@
-package com.huifer.concurrence;
-
-import java.util.concurrent.TimeUnit;
+package com.huifer.concurrence.ch1;
 
 /**
  * 描述:
- * 线程中断
  *
  * @author huifer
  * @date 2019-03-25
  */
-public class ThreadInterrup {
+public class ThreadSleep {
     public static void main(String[] args) throws InterruptedException {
         Runnable r = () -> {
             String name = Thread.currentThread().getName();
@@ -23,11 +20,11 @@ public class ThreadInterrup {
         Thread t2 = new Thread(r, "thread-02");
         t1.start();
         t2.start();
-        TimeUnit.SECONDS.sleep(1L);
-        // 把线程1打断
-        t1.interrupt();
-        TimeUnit.SECONDS.sleep(2L);
-        t2.interrupt();
-
-    }
-}
+        try {
+            Thread.sleep(10);
+            t1.interrupt();
+            t2.interrupt();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }}

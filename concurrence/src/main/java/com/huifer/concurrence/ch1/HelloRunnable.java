@@ -1,4 +1,4 @@
-package com.huifer.concurrence;
+package com.huifer.concurrence.ch1;
 
 /**
  * <p>Title : HelloRunnable </p>

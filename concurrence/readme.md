@@ -255,3 +255,141 @@ public class ThreadSleep {
         }
     }}
 ```
+
+### 数据竞争
+> - 两条或两条以上的线程并发访问**同一个内存区域**,**至少有一条**执行**写操作**,线程没有协调对同一块内存区域的访问
+```java
+public class DataRace {
+
+    public static Integer i;
+
+    public static void main(String[] args) {
+        Runnable r = () -> {
+            if (i == null) {
+                i = 1;
+                System.out.println(Thread.currentThread().getName() + "i初始化");
+            } else {
+                System.out.println(Thread.currentThread().getName() + " i = " + i);
+            }
+        };
+
+            Thread t = new Thread(r, "thread-1");
+            t.start();
+            Thread t1 = new Thread(r, "thread-2");
+            t1.start();
+    }
+}
+```
+
+### 临界区
+> 有多个线程试图同时访问临界区，那么在有一个线程进入后其他所有试图访问此临界区的线程将被挂起，并一直持续到进入临界区的线程离开。临界区在被释放后，其他线程可以继续抢占，并以此达到用原子方式操作共享资源的目的。
+### jvm 中的同步临界区
+- 同步作为jvm的特性,功能在于保证两个或两个以上的线程**不会同时执行相同的临界区**,临界区必须**串行方式**访问
+- 线程在临界区的时候每一条线程对灵界去的访问都会互斥执行.线程锁: **互斥锁**
+### 同步关键字
+- synchronized
+```java
+public class SynchronizedDemo {
+
+    private static Integer mode = 1;
+    private static Integer result = 0;
+
+    public static void main(String[] args) {
+        Id id = new Id();
+        System.out.println(id.getCount());
+
+        Runnable r1 = () -> {
+            synchronized (mode) {
+                result = mode + 2;
+                System.out.println("当前reslut " + result);
+            }
+        };
+
+        Thread thread1 = new Thread(r1);
+        thread1.start();
+
+    }
+}
+
+class Id {
+
+    private static int count = 1;
+
+    public synchronized int getCount() {
+        return ++count;
+    }
+}
+
+```
+
+
+### 活跃性问题
+#### 死锁
+- 线程1等待线程2持有的资源,线程2等待线程1持有的资源, 资源互斥(每一个资源只有一线程可以操作),导致程序无法正常运行 
+```java
+public class DeadlockDemo {
+
+    private final Object lock1 = new Object();
+    private final Object lock2 = new Object();
+
+    public static void main(String[] args) {
+        DeadlockDemo deadlockDemo = new DeadlockDemo();
+        Runnable r1 = () -> {
+            while (true) {
+                deadlockDemo.insMethod1();
+                try {
+                    TimeUnit.SECONDS.sleep(1L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Runnable r2 = () -> {
+            while (true) {
+                deadlockDemo.insMethod2();
+                try {
+                    TimeUnit.SECONDS.sleep(1L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Thread t1 = new Thread(r1, "线程1");
+        Thread t2 = new Thread(r2, "线程2");
+        t1.start();
+        t2.start();
+        // 在这个案例中
+        // 线程1获取lock1
+        // lock1进入临界区 ,lock2 没有进入
+        // 线程2获取lock2
+        // lock2进入临界区 ,lock1没有进入
+        // JVM同步特性,线程1持有lock1锁 线程2持有lock2锁,线程1需要执行lock2的锁(线程2持有),线程2同理
+        // 运行结果交替输出 在方法1中，在方法2中
+
+    }
+
+    public void insMethod1() {
+        synchronized (lock1) {
+            synchronized (lock2) {
+                System.out.println("在方法1中");
+            }
+        }
+    }
+
+    public void insMethod2() {
+        synchronized (lock2) {
+            synchronized (lock1) {
+                System.out.println("在方法2中");
+            }
+        }
+    }
+}
+```
+- 死锁经常出现在: 多个方法间互相调用,形成环形调用
+
+#### 活锁
+- 线程持续重试一个失败的操作 ,导致程序无法正常运行
+#### 饿死
+- 线程一直被延迟访问所需要的依赖资源
