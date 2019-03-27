@@ -435,5 +435,197 @@ public class DeadlockDemo {
 
 #### 活锁
 - 线程持续重试一个失败的操作 ,导致程序无法正常运行
+- 不恰当的例子
+  过年，家里有2个孩子一个叫做张三，一个叫做李四，长辈给了张三一个苹果，张三不要给了李四，李四也不要又还给了张三，如此往复
+![](pic/活锁.png)
+- 代码实例  
+```java
+public class Apple {
+
+    /**
+     * 当前所有者
+     */
+    private People owner;
+
+    public Apple(People d) {
+        owner = d;
+    }
+
+    public People getOwner () {
+        return owner;
+    }
+
+    public synchronized void setOwner (People d) {
+        owner = d;
+    }
+}
+
+public class People {
+
+    private String name;
+
+    private boolean active;
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("\"name\":\"")
+                .append(name).append('\"');
+        sb.append(",\"active\":")
+                .append(active);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public People(String name, boolean active) {
+        this.name = name;
+        this.active = active;
+    }
+
+    public synchronized void doWork(Apple apple, People otherPeople) {
+        while (active) {
+            if (apple.getOwner() != this) {
+                try {
+                    wait(10);
+                } catch (InterruptedException e) {
+                }
+                continue;
+            }
+
+            if (otherPeople.isActive()) {
+                System.out.println(getName() + " 把苹果交给 ： " +
+                        otherPeople.getName());
+                apple.setOwner(otherPeople);
+                continue;
+            }
+
+            System.out.println(getName() + ": 吃苹果");
+            active = false;
+            apple.setOwner(otherPeople);
+        }
+
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+}
+
+
+public class LiveLock {
+
+    public static void main(String[] args) {
+        final People zhansan = new People("张三", true);
+        final People lisi = new People("李四", true);
+
+        Apple s = new Apple(zhansan);
+        System.out.println("最开始把苹果给张三");
+        System.out.println(s.getOwner());
+        new Thread(() -> {
+            zhansan.doWork(s, lisi);
+        }).start();
+
+        new Thread(() -> {
+            lisi.doWork(s, zhansan);
+        }).start();
+
+    }
+
+}
+
+```
+
+
+
 #### 饿死
 - 线程一直被延迟访问所需要的依赖资源
+
+```java
+public class StarveDemo {
+
+    private static Object sharedObj = new Object();
+
+    public static void main(String[] args) {
+
+        for (int i = 0; i < 5; i++) {
+            StarveThread fairness = new StarveThread("线程-" + i);
+            fairness.start();
+        }
+
+    }
+
+
+    private static class StarveThread extends Thread {
+
+        public StarveThread(String name) {
+            super(name);
+        }
+
+        @Override
+        public void run() {
+            int c = 0;
+            while (true) {
+                synchronized (sharedObj) {
+                    if (c == 10) {
+                        c = 0;
+                    }
+                    ++c;
+                    System.out.println(Thread.currentThread().getName() + "值:"+c);
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+
+#### 针对饿死的平均分配 Fairness
+```java
+public class FairnessDemo {
+    private static Object sharedObj = new Object();
+
+    public static void main (String[] args) {
+
+        for (int i = 0; i < 5; i++) {
+            Fairness fairness = new Fairness();
+            fairness.start();
+        }
+    }
+
+
+    private static class Fairness extends Thread {
+        @Override
+        public void run () {
+
+            int c = 0;
+            while (true) {
+                synchronized (sharedObj) {
+                    if (c == 10) {
+                        c = 0;
+                    }
+                    ++c;
+                    System.out.println(Thread.currentThread().getName() + " 当前C值 ：" + c);
+                    try {
+                        // 让线程互相平等的方式: 让锁等待操作
+                        sharedObj.wait(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+
+}
+```
