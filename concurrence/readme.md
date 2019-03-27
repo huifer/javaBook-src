@@ -258,27 +258,65 @@ public class ThreadSleep {
 
 ### 数据竞争
 > - 两条或两条以上的线程并发访问**同一个内存区域**,**至少有一条**执行**写操作**,线程没有协调对同一块内存区域的访问
+
 ```java
 public class DataRace {
 
-    public static Integer i;
+    // 输出运算流程：从0开始累加1
+    private static Integer calc = 0;
 
     public static void main(String[] args) {
         Runnable r = () -> {
-            if (i == null) {
-                i = 1;
-                System.out.println(Thread.currentThread().getName() + "i初始化");
-            } else {
-                System.out.println(Thread.currentThread().getName() + " i = " + i);
+            for (int i = 0; i < 5; i++) {
+                addOne();
             }
         };
-
-            Thread t = new Thread(r, "thread-1");
-            t.start();
-            Thread t1 = new Thread(r, "thread-2");
-            t1.start();
+        Thread t1 = new Thread(r, "线程01");
+        Thread t2 = new Thread(r, "线程02");
+        t1.start();
+        t2.start();
     }
+
+    private synchronized static void addOneSynchronized() {
+        int now = calc;
+        calc++;
+        System.out.println(Thread.currentThread().getName() + " - 操作前 " + now + " 操作后 " + calc);
+    }
+
+    private  static void addOne() {
+        int now = calc;
+        calc++;
+        System.out.println(Thread.currentThread().getName() + " - 操作前 " + now + " 操作后 " + calc);
+    }
+
 }
+```
+
+- addOneSynchronized 输出
+```text
+线程01 - 操作前 0 操作后 1
+线程01 - 操作前 1 操作后 2
+线程01 - 操作前 2 操作后 3
+线程01 - 操作前 3 操作后 4
+线程01 - 操作前 4 操作后 5
+线程02 - 操作前 5 操作后 6
+线程02 - 操作前 6 操作后 7
+线程02 - 操作前 7 操作后 8
+线程02 - 操作前 8 操作后 9
+线程02 - 操作前 9 操作后 10
+```
+- addOne 输出
+```text
+线程01 - 操作前 0 操作后 1
+线程01 - 操作前 2 操作后 3
+线程02 - 操作前 1 操作后 2
+线程02 - 操作前 4 操作后 5
+线程02 - 操作前 5 操作后 6
+线程01 - 操作前 3 操作后 4
+线程01 - 操作前 7 操作后 8
+线程01 - 操作前 8 操作后 9
+线程02 - 操作前 6 操作后 7
+线程02 - 操作前 9 操作后 10
 ```
 
 ### 临界区
@@ -286,6 +324,10 @@ public class DataRace {
 ### jvm 中的同步临界区
 - 同步作为jvm的特性,功能在于保证两个或两个以上的线程**不会同时执行相同的临界区**,临界区必须**串行方式**访问
 - 线程在临界区的时候每一条线程对灵界去的访问都会互斥执行.线程锁: **互斥锁**
+
+![](pic/线程同步锁.png)
+
+
 ### 同步关键字
 - synchronized
 ```java
@@ -325,7 +367,9 @@ class Id {
 
 ### 活跃性问题
 #### 死锁
-- 线程1等待线程2持有的资源,线程2等待线程1持有的资源, 资源互斥(每一个资源只有一线程可以操作),导致程序无法正常运行 
+- 线程1等待线程2持有的资源,线程2等待线程1持有的资源, 资源互斥(每一个资源只有一线程可以操作),导致程序无法正常运行
+![](pic/死锁.png)
+ 
 ```java
 public class DeadlockDemo {
 

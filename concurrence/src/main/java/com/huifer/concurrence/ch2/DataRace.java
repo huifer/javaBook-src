@@ -9,23 +9,31 @@ package com.huifer.concurrence.ch2;
  */
 public class DataRace {
 
-    public static Integer i;
+    // 输出运算流程：从0开始累加1
+    private static Integer calc = 0;
 
-    public  static void main(String[] args) {
+    public static void main(String[] args) {
         Runnable r = () -> {
-            if (i == null) {
-                i = 1;
-                System.out.println(Thread.currentThread().getName() + "i初始化");
-            } else {
-                System.out.println(Thread.currentThread().getName() + " i = " + i);
+            for (int i = 0; i < 5; i++) {
+                addOneSynchronized();
             }
         };
-
-            Thread t = new Thread(r, "thread-1");
-            t.start();
-            Thread t1 = new Thread(r, "thread-2");
-            t1.start();
+        Thread t1 = new Thread(r, "线程01");
+        Thread t2 = new Thread(r, "线程02");
+        t1.start();
+        t2.start();
     }
 
+    private synchronized static void addOneSynchronized() {
+        int now = calc;
+        calc++;
+        System.out.println(Thread.currentThread().getName() + " - 操作前 " + now + " 操作后 " + calc);
+    }
+
+    private  static void addOne() {
+        int now = calc;
+        calc++;
+        System.out.println(Thread.currentThread().getName() + " - 操作前 " + now + " 操作后 " + calc);
+    }
 
 }
