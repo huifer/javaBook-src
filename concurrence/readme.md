@@ -1,5 +1,5 @@
 # java 并发
-## Thread & Runnable
+## CH-1:Thread & Runnable
 - 继承**java.lang.Thread**类
 - 实现**java.lang.Runnable**接口
 
@@ -162,12 +162,14 @@ public class ThreadDemo001 {
 ### 其他操作
 #### 中断线程 
 - java.lang.Thread.interrupt()
+
     - 当线程在阻塞状态中 sleep 或 join 方法,阻塞状态清除
 - java.lang.Thread.interrupted()
+
     - 当前线程是否中断
 - java.lang.Thread.isInterrupted()
     - 当前线程是否中断 
-        
+      
         
 ```java
 public class ThreadInterrup {
@@ -256,7 +258,12 @@ public class ThreadSleep {
     }}
 ```
 
+------
+
+## CH-2 : 数据问题
+
 ### 数据竞争
+
 > - 两条或两条以上的线程并发访问**同一个内存区域**,**至少有一条**执行**写操作**,线程没有协调对同一块内存区域的访问
 
 ```java
@@ -369,7 +376,7 @@ class Id {
 #### 死锁
 - 线程1等待线程2持有的资源,线程2等待线程1持有的资源, 资源互斥(每一个资源只有一线程可以操作),导致程序无法正常运行
 ![](pic/死锁.png)
- 
+
 ```java
 public class DeadlockDemo {
 
@@ -629,3 +636,363 @@ public class FairnessDemo {
 
 }
 ```
+
+### 线程通讯
+##### 函数
+- wait
+- notify
+##### 案例
+- 线程1 初始化变量 ；线程2输出这个变量达到通讯
+
+```java
+public class EZdemo {
+
+    private static String message;
+
+    public static void main(String[] args) {
+        Thread thread1 = new Thread(() -> {
+            while (message == null) {
+                // 因为线程去启动顺序是不固定的所以需要等待复制成功
+                System.out.println("还没有值");
+            }
+            System.out.println("获取通讯变量" + message);
+        });
+        Thread thread2 = new Thread(() -> {
+            message = " 初始化变量";
+
+        });
+        thread1.start();
+        thread2.start();
+    }
+
+}
+```
+- 使用while会额外消费cpu资源 , "**Guarded Blocks**"，引出wait() notify()
+
+```java
+public class WaitDemo {
+
+    private static String message;
+
+    public static void main(String[] args) {
+        Object lock = new Object();
+
+        Thread thread1 = new Thread(() -> {
+            synchronized (lock) {
+
+                while (message == null) {
+                    // 因为线程去启动顺序是不固定的所以需要等待复制成功
+                    System.out.println("还没有值");
+                    try {
+                        lock.wait();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            System.out.println("获取通讯变量" + message);
+        });
+        Thread thread2 = new Thread(() -> {
+            synchronized (lock) {
+
+                message = " 初始化变量";
+                lock.notify();
+
+            }
+
+        });
+
+        thread1.start();
+        thread2.start();
+
+    }
+
+}
+
+```
+
+```java
+public class WaitNotifyDemo {
+
+    public static void main(String[] args) {
+        SharedObject shareObject = new SharedObject();
+        new Thread(() -> {
+            shareObject.setMessage("我再设置内容");
+        }).start();
+
+        new Thread(() -> {
+            String message = shareObject.getMessage();
+            System.out.println(message);
+        }).start();
+    }
+
+
+    private static class SharedObject {
+        private String message;
+
+        public synchronized void setMessage (String message) {
+            this.message = message;
+            notify();
+        }
+
+        public synchronized String getMessage () {
+            while (message == null) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return message;
+        }
+    }
+
+}
+```
+
+
+
+
+
+
+
+### volatile 关键字
+
+- 解决**可见性**问题
+
+- JSR-133文档
+
+    > ​	The write of the default value (zero, false or null) to each variable synchronizes-with to the
+    > first action in every thread.
+    > ​	Although it may seem a little strange to write a default value to a variable before the object
+    > containing the variable is allocated, conceptually every object is created at the start of the
+    > program with its default initialized values. Consequently, the default initialization of any
+    > object happens-before any other actions (other than default writes) of a program.
+
+- 个人理解：在初始化变量的时候(默认值的时候) 需要在线程中第一个操作。
+
+#### demo
+
+- 需求,线程1读取数据，线程2修改数据,持续输出修改值,以及当前值
+
+- 简单设计逻辑
+
+  这段代码出现的问题是仅有第一次修改后读取了数据,并没有持续读取count值
+
+  ```java
+  public class NotVolatileDemo {
+  
+      public static int count;
+  
+      public static void main(String[] args) {
+          Thread t1 = new Thread(() -> {
+              int tem = 0;
+              while (true) {
+                  if (tem != count) {
+                      tem = count;
+                      System.out.println("读取当前值 ：" + count);
+  
+                  }
+              }
+          });
+          Thread t2 = new Thread(() -> {
+              for (int i = 0; i < 10; i++) {
+                  count++;
+                  System.out.println("修改当前值 ：" + count);
+                  try {
+                      Thread.sleep(5);
+                  } catch (Exception e) {
+                      e.printStackTrace();
+                  }
+  
+              }
+              // 退出
+              System.exit(0);
+          });
+          t1.start();
+          
+          t2.start();
+      }
+  
+  }
+  ```
+
+- 具有volatile修饰来改进
+
+    ```java
+    public class VolatileDemo {
+    
+        public static volatile int count;
+    
+        public static void main(String[] args) {
+            Thread t1 = new Thread(() -> {
+                int tem = 0;
+                while (true) {
+                    if (tem != count) {
+                        tem = count;
+                        System.out.println("读取当前值 ：" + count);
+    
+                    }
+                }
+            });
+            Thread t2 = new Thread(() -> {
+                for (int i = 0; i < 10; i++) {
+                    count++;
+                    System.out.println("修改当前值 ：" + count);
+                    try {
+                        Thread.sleep(5);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+    
+                }
+                // 退出
+                System.exit(0);
+            });
+            t1.start();
+            t2.start();
+        }
+    
+    }
+    ```
+
+#### 总结
+
+1. 当变量被volatile修饰的时候，每一个线程都会访问主存中存该变量的拷贝，不会访问缓存中该变量的拷贝。
+2. 只有**可见性**导致的问题才使用 **volatile**关键字
+3. 为了数据安全还是需要**synchronized**来满足**互斥**
+
+
+
+### final关键字
+
+- 使用final 来确保**不可变性**
+- volatile修饰后不可以用final修饰
+
+
+
+
+
+### 生产者消费者模型
+
+- 生产者创造数据，消费者对数据进行修改，两者同时操作一个共享变量
+
+#### 案例1
+
+1. 假定消费者率先执行
+2. 消费者从共享数据中获取数据，当前数据还没有写入 writed = true ，消费者陷入等待状态
+3. 生产者启动，开始构建数据，当生产者生产完成数据后将writed = false ,通知消费者开始
+4. 消费者开始操作，消费者获取数据，修改变量 writed = true , 此时生产者在等待
+5. 如此往复步骤2，步骤3知道结束
+
+![](pic/生产者消费者模型01.png)
+
+- 共享数据类SharedObject
+
+  ```java
+  public class SharedObject {
+  
+      private char aChar;
+      private volatile boolean writed = true;
+  
+      public synchronized char getaChar() {
+          while (writed) {
+              try {
+                  wait();
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+          }
+          this.writed = true;
+          notify();
+          return this.aChar;
+      }
+  
+      public synchronized void setaChar(char aChar) {
+          while (!writed) {
+              try {
+                  wait();
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+          }
+          this.aChar = aChar;
+          this.writed = false;
+          notify();
+      }
+  }
+  ```
+
+  
+
+- 生产者类 Producer
+
+  ```java
+  public class Producer extends Thread {
+  
+      private final SharedObject sharedObject;
+  
+      public Producer(SharedObject sharedObject) {
+          this.sharedObject = sharedObject;
+      }
+  
+      @Override
+      public void run() {
+          for (char i = 'a'; i <= 'f'; i++) {
+  
+              synchronized (sharedObject) {
+  
+                  sharedObject.setaChar(i);
+                  System.out.println("生产数据字符  ：" + i);
+              }
+          }
+      }
+  }
+  ```
+
+  
+
+- 消费者类Consumer
+
+  ```java
+  public class Consumer extends Thread {
+  
+      private final SharedObject sharedObject;
+  
+      public Consumer(SharedObject sharedObject) {
+          this.sharedObject = sharedObject;
+      }
+  
+      @Override
+      public void run() {
+          char ch;
+          do {
+              synchronized (sharedObject) {
+  
+                  ch = sharedObject.getaChar();
+                  System.out.println("消费者取出数据 " + ch);
+              }
+          } while (ch != 'f');
+      }
+  }
+  ```
+
+- 执行类
+
+  ```java
+  public class Main {
+  
+      public static void main(String[] args) {
+          SharedObject sharedObject = new SharedObject();
+          new Producer(sharedObject).start();
+          new Consumer(sharedObject).start();
+      }
+  }
+  ```
+
+
+
+
+
+---
+
