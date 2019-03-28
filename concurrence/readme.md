@@ -996,3 +996,86 @@ public class WaitNotifyDemo {
 
 ---
 
+##  CH-3: 线程组
+
+### 定义
+
+[文档](<https://docs.oracle.com/javase/8/docs/api/>)
+
+> ​	A thread group represents a set of threads. In addition, a thread group can also include other thread groups. The thread groups form a tree in which every thread group except the initial thread group has a parent.
+>
+> ​	A thread is allowed to access information about its own thread group, but not to access information about its thread group's parent thread group or any other thread groups.
+
+- 线程组是多个线程的集合，线程组也可以包含其他线程组，线程组行车一个树，除出实现城外的每一个线程组都有一个父线程组
+- 一个线程可以访问自己线程组的信息，不能访问它的父线程组或其他线程组的信息
+- 线程组是非线程安全的
+
+---
+
+## CH-4:并发工具Executor
+
+1. java.util.concurrent.Executor
+2. java.util.concurrent.ExecutorService
+
+#### ExecutorService方法说明
+
+| 方法                                                         | 描述                                                         |
+| :----------------------------------------------------------- | ------------------------------------------------------------ |
+| java.util.concurrent.ExecutorService#awaitTermination        | 在一条关闭请求之后，不管任务是否全部完成，timeout超时，还是当前线程被中断的那一条县发生，都会持续阻塞。如果executor已经终止，返回true，若在终止前超时，返回false |
+| java.util.concurrent.ExecutorService#invokeAll(java.util.Collection<? extends java.util.concurrent.Callable<T>>) | 执行任务集合中每一个callable任务并当所有任务执行成功后（1.任务正常执行2.抛出异常），返回java.util.concurrent.Future 集合，这个Future集合都会持有任务的状态和结果，这个future集合和任务带迭起返回的任务序列具有相同顺序 |
+| java.util.concurrent.ExecutorService#invokeAny(java.util.Collection<? extends java.util.concurrent.Callable<T>>) | 执行给出的tasks，如果有任务成功执行就返回结果，只有成功执行或者异常的返回，没有完成执行的任务都会被取消，当任务处于等待却被中断时抛出异常 |
+| java.util.concurrent.ExecutorService#isShutdown              | 当executor终止时返回true反之返回false                        |
+| java.util.concurrent.ExecutorService#isTerminated            | 若紧接者终止之后所有的任务都完成了，返回true反之返回false    |
+| java.util.concurrent.ExecutorService#shutdown                | 有序关闭之前提交的任务，不再接收新的任务                     |
+| java.util.concurrent.ExecutorService#shutdownNow             | 尝试停止所有活跃的线程，挂机等待任务的线程，并且返回一组正在等待执行任务 |
+| java.util.concurrent.ExecutorService#submit(java.util.concurrent.Callable<T>) | 提交一个callable任务执行，同时返回一个代表任务等待结果的future |
+
+### Future方法说明
+
+| 方法                                                         | 描述                                                      |
+| ------------------------------------------------------------ | --------------------------------------------------------- |
+| java.util.concurrent.Future#cancel                           | 尝试取消此任务的执行，当任务取消时返回true，反之返回false |
+| java.util.concurrent.Future#get(long, java.util.concurrent.TimeUnit) | 最多等点timeout ，知道任务执行完成返回结果                |
+| java.util.concurrent.Future#isDone                           | 当此任务完成返回true，反之返回false                       |
+| java.util.concurrent.Future#isCancelled                      | 当此任务在正常完成之前被取消返回true，反之返回false       |
+
+### hello executor
+
+```java
+public class HelloExecutor {
+
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<?> hello_executor = executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("hello executor");
+            }
+        });
+        executorService.shutdown();
+    }
+
+}
+```
+
+
+
+### 线程池
+
+- 线程池时预先实例化的备用线程的集合
+
+### 线程数
+
+- 池中当前的线程实例化数量，任务提交到池中线程数增加
+
+### 核心池大小
+
+- 每一个池中最多可以为传入的任务创建多少线程
+
+### 队列
+
+- 当任务过多超过核心池大小，将任务放置到队列中
+
+
+
+![](pic/线程池.png)
