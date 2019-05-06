@@ -3,6 +3,7 @@ package com.huifer.data.tree;
 import java.util.LinkedList;
 import java.util.Queue;
 
+
 /**
  * <p>Title : TreeTools </p>
  * <p>Description : 树处理工具</p>
@@ -24,11 +25,51 @@ public class TreeTools {
         System.out.println(TreeTools.getTreeDepth(tree));
         System.out.println("前序遍历");
         preOrderTravel(tree);
+        System.out.println("中序遍历");
+        inorderTraversal(tree);
+        System.out.println("后序遍历");
+        postorderTraversal(tree);
         System.out.println("分层遍历");
         levelTravel(tree);
         System.out.println("K层节点数量");
         int numForKLevel = getNumForKLevel(tree, 2);
         System.out.println(numForKLevel);
+
+
+
+
+        TreeNode<String> T2 = new TreeNode<>("A");
+        T2.addLeft("B");
+        T2.leftChild.addLeft("D");
+        T2.leftChild.leftChild.addLeft("G");
+        T2.leftChild.leftChild.addRight("H");
+
+        T2.addRight("C");
+        T2.rightChild.addLeft("E");
+        T2.rightChild.addRight("F");
+        T2.rightChild.leftChild.addRight("I");
+        System.out.println("前序遍历");
+        preOrderTravel(T2);
+        System.out.println("中序遍历");
+        inorderTraversal(T2);
+        System.out.println("后序遍历");
+        postorderTraversal(T2);
+        System.out.println("=======================");
+        System.out.println("层次遍历");
+        levelTravel(T2);
+        System.out.println();
+        System.out.println("=======================");
+
+
+        TreeNode<String> t3= new TreeNode<>("A");
+        t3.addLeft("B");
+        t3.leftChild.addLeft("C");
+        t3.leftChild.addRight("D");
+        t3.addRight("E");
+        t3.rightChild.addLeft("F");
+        t3.rightChild.addRight("G");
+        levelTravel(t3);
+
     }
 
     /**
@@ -82,12 +123,38 @@ public class TreeTools {
     }
 
     /**
+     * 中序遍历，注: 中序遍历 后序遍历将print位置调整即可
+     */
+    public static <T> void inorderTraversal(TreeNode<T> root) {
+        if (root == null) {
+            return;
+        }
+        inorderTraversal(root.leftChild);
+        printNodeValue(root);
+        inorderTraversal(root.rightChild);
+    }
+
+    /**
+     * 后序遍历，注: 中序遍历 后序遍历将print位置调整即可
+     */
+    public static <T> void postorderTraversal (TreeNode<T> root) {
+        if (root == null) {
+            return;
+        }
+        postorderTraversal(root.leftChild);
+        postorderTraversal(root.rightChild);
+        printNodeValue(root);
+    }
+
+
+
+    /**
      * 分层遍历
      */
     public static <T> void levelTravel(TreeNode<T> root) {
         Queue<TreeNode<T>> queue = new LinkedList<>();
         queue.offer(root);
-        while (queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             TreeNode<T> tem = queue.poll();
             printNodeValue(tem);
             if (tem.leftChild != null) {
