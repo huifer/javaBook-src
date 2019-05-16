@@ -1,5 +1,6 @@
 package com.huifer.design.singleton;
 
+import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,26 +14,25 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RegisterMap {
 
     private static final Object lock = new Object();
-    private static Map<String, RegisterMap> register = new ConcurrentHashMap<>();
+    private static volatile Map<String, RegisterMap> register = new ConcurrentHashMap<>();
 
     private RegisterMap() {
     }
 
-//    public static synchronized RegisterMap getInstance(String name)throws Exception{
-    //        // 异常： 获取到的实例可能存在Null
-//        if (register.containsKey(name)) {
-//            return register.get(name);
-//        } else {
-//                Class<?> aClass = Class.forName(name);
-//                Constructor<?> constructor = aClass.getDeclaredConstructor(null);
-//                constructor.setAccessible(true);
-//                return register.put(name, (RegisterMap) constructor.newInstance());
-//        }
-//    }
+    public static synchronized RegisterMap getInstance(String name) throws Exception {
+        if (register.containsKey(name)) {
+            return register.get(name);
+        } else {
+            Class<?> aClass = Class.forName(name);
+            Constructor<?> constructor = aClass.getDeclaredConstructor(null);
+            constructor.setAccessible(true);
+            register.put(name, (RegisterMap) constructor.newInstance());
+            return register.get(name);
+        }
+    }
 
-//
+//  // 双重锁
 //    public static RegisterMap getInstance(String name) {
-//        // 异常： 获取到的实例可能存在Null
 //        if (register.get(name) == null) {
 //            synchronized (RegisterMap.class) {
 //                if (register.get(name) == null) {
@@ -40,8 +40,10 @@ public class RegisterMap {
 //                        Class<?> aClass = Class.forName(name);
 //                        Constructor<?> constructor = aClass.getDeclaredConstructor(null);
 //                        constructor.setAccessible(true);
-//                        return register.put(name, (RegisterMap) constructor.newInstance());
+//                        register.put(name, (RegisterMap) constructor.newInstance());
+//                        return register.get(name);
 //                    } catch (Exception e) {
+//
 //                        e.printStackTrace();
 //                        return null;
 //                    }
@@ -53,19 +55,19 @@ public class RegisterMap {
 //    }
 
     //     使用HashMap
-    public static synchronized RegisterMap getInstance(String name) {
-        if (name == null) {
-            name = RegisterMap.class.getName();
-        }
-        if (register.get(name) == null) {
-            try {
-                register.put(name, new RegisterMap());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return register.get(name);
-    }
+//    public static synchronized RegisterMap getInstance(String name) {
+//        if (name == null) {
+//            name = RegisterMap.class.getName();
+//        }
+//        if (register.get(name) == null) {
+//            try {
+//                register.put(name, new RegisterMap());
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return register.get(name);
+//    }
 
 
 }
