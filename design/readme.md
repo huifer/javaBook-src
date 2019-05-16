@@ -1,4 +1,7 @@
+[TOC]
+
 # 设计模式仓库
+
 - 代理模式
 - 适配模式
 - 装饰模式
@@ -596,13 +599,149 @@ public class SerializableSign implements Serializable {
 - 在整个系统运行过程中只有一个实例，有且只有一个。
 - 保证单例的方案
   - 饿汉式
+    - 在类加载的时候就初始化，对象是单例的
+    - 优点：没有锁，执行效率高，线程绝对安全
+    - 缺点：始终占据一部分内存空间
   - 懒汉式（线程安全问题的解决），spring 种的延迟加载
+    - 默认不实例化，在使用过程中产生实例，通过方法调用来创建。存在线程安全问题，具体操作请看上述-[懒汉式](### 懒汉式)
+    
+      
   - 注册式
   - 枚举式
 
 
 
+
+
 ## 原型模式
+
+> 原型模式是创建型模式的一种，其特点在于通过“复制”一个已经存在的实例来返回新的实例,而不是新建实例。被复制的实例就是我们所称的“原型”，这个原型是可定制的。
+> 原型模式多用于创建复杂的或者耗时的实例，因为这种情况下，复制一个已经存在的实例使程序运行更高效；或者创建值相等，只是命名不一样的同类数据。
+
+#### JDK 实现
+
+- JDK 官方提供了一种原型模式 Cloneable
+
+```java
+public class Prototype implements Cloneable {
+
+    public String name;
+    public Tag tag;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+}
+
+public class Tag {
+
+    public String f;
+
+    public Tag(String f) {
+        this.f = f;
+    }
+}
+
+```
+
+- 测试用例
+
+  ```java
+  public class PrototypeTest {
+  
+      public static void main(String[] args) throws CloneNotSupportedException {
+          Prototype prototype = new Prototype();
+          prototype.name = "张三";
+          prototype.tag = new Tag("123");
+  
+          Prototype clone = (Prototype) prototype.clone();
+  
+          clone.tag.f = "asasas";
+          System.out.println(clone.tag.f);
+          System.out.println(prototype.tag.f);
+  
+          System.out.println(clone.tag);
+          System.out.println(prototype.tag);
+  
+      }
+  
+  }
+  ```
+
+- 运行结果
+
+  ```
+  asasas
+  asasas
+  com.huifer.design.prototype.Tag@330bedb4
+  com.huifer.design.prototype.Tag@330bedb4
+  ```
+
+- 在这个测试用例种修改了clone 后的属性原来的实例属性也被同时修改，这是一个需要解决的问题。**此处出现了地址引用同一个地址，这是一种浅拷贝**
+
+  - 使用**序列化来辅助深拷贝**
+  - **自定义的属性也需要序列化**！！！
+
+  ```java
+  public Object deepClone() {
+      try {
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          ObjectOutputStream oos = new ObjectOutputStream(baos);
+          oos.writeObject(this);
+  
+          ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
+          ObjectInputStream ois = new ObjectInputStream(bis);
+  
+          Prototype copyObject = (Prototype) ois.readObject();
+          return copyObject;
+      } catch (Exception e) {
+          e.printStackTrace();
+          return null;
+      }
+  }
+  ```
+
+  测试用例
+
+  ```java
+  public class PrototypeTest {
+  
+      public static void main(String[] args) throws Exception {
+          Prototype prototype = new Prototype();
+          prototype.name = "张三";
+          prototype.tag = new Tag("123");
+  
+          Prototype clone = (Prototype) prototype.clone();
+  
+          clone.tag.f = "asasas";
+          System.out.println(clone.tag.f);
+          System.out.println(prototype.tag.f);
+  
+          System.out.println(clone.tag);
+          System.out.println(prototype.tag);
+  
+          System.out.println(prototype.name == clone.name);
+          System.out.println(prototype.tag == clone.tag);
+      }
+  
+  }
+  ```
+
+  运行结果
+
+  ```
+  asasas
+  123
+  com.huifer.design.prototype.Tag@2f4d3709
+  com.huifer.design.prototype.Tag@5e2de80c
+  false
+  false
+  ```
+
+  - 从结果上看可以说这两个实例是独立的。
+
+
 
 ### 总结
 
