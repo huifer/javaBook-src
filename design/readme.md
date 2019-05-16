@@ -291,7 +291,7 @@ private static void hungryTest() throws InterruptedException {
 
 
 
-### 懒汉式
+###  <a name="lanhan">懒汉式</a>  
 - 默认加载不进行实例化，在需要使用的时候才会进行实例化
 
     
@@ -603,9 +603,8 @@ public class SerializableSign implements Serializable {
     - 优点：没有锁，执行效率高，线程绝对安全
     - 缺点：始终占据一部分内存空间
   - 懒汉式（线程安全问题的解决），spring 种的延迟加载
-    - 默认不实例化，在使用过程中产生实例，通过方法调用来创建。存在线程安全问题，具体操作请看上述-[懒汉式](### 懒汉式)
+    - 默认不实例化，在使用过程中产生实例，通过方法调用来创建。存在线程安全问题，具体操作请看上述-[懒汉式](#lanhan)
     
-      
   - 注册式
   - 枚举式
 
