@@ -315,7 +315,7 @@ private static void hungryTest() throws InterruptedException {
     
     ```
 
-    懒汉式的第一种测试
+    懒汉式
 
     ```java
         private static void lazyTest1()  {
@@ -411,6 +411,77 @@ private static void hungryTest() throws InterruptedException {
         }
     }
     ```
+    
+    在这个基础上依然存在一个问题 ， 强制访问私有构造方法来创建实例。 当强制生产两个实例时需要抛出异常
+    
+    ```java
+    public class Lazy4 {
+    
+    
+        private static boolean initialized = false;
+    
+        private Lazy4() {
+            synchronized (Lazy4.class) {
+                if (initialized == false) {
+                    initialized = !initialized;
+                } else {
+                    throw new RuntimeException("单例初始化异常 ， 私有构造方法被强制使用");
+                }
+            }
+        }
+    
+        public static final Lazy4 getInstance() {
+            return lazyHolder.LAZY_3;
+        }
+    
+    
+        private static class lazyHolder {
+    
+            private static final Lazy4 LAZY_3 = new Lazy4();
+        }
+    }
+    ```
+    
+    ```java
+    private static void lazy4Test() {
+        try {
+    
+            Class<Lazy4> lazy4Class = Lazy4.class;
+            // 获取私有构造方法 com.huifer.design.singleton.Lazy4.Lazy4
+            Constructor<Lazy4> constructor = lazy4Class.getDeclaredConstructor(null);
+            // 强制生产
+            constructor.setAccessible(true);
+            // 构造2次
+            Lazy4 lazy4_1 = constructor.newInstance();
+            Lazy4 lazy4_2 = constructor.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+    
+        }
+    
+    }
+    ```
+    
+    测试结果存在异常 ，这个异常符合我们的预设
+    
+    ```
+    java.lang.reflect.InvocationTargetException
+    	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+    	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+    	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+    	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+    	at com.huifer.design.singleton.Test.lazy4Test(Test.java:202)
+    	at com.huifer.design.singleton.Test.main(Test.java:28)
+    Caused by: java.lang.RuntimeException: 单例初始化异常 ， 私有构造方法被强制使用
+    	at com.huifer.design.singleton.Lazy4.<init>(Lazy4.java:20)
+    	... 6 more
+    ```
+    
+    
+
+
+
+
 
 ### 注册式
 
@@ -483,6 +554,8 @@ public class RegisterMap {
   ```
 
   
+
+
 
 
 
@@ -603,7 +676,9 @@ public class SerializableSign implements Serializable {
     - 优点：没有锁，执行效率高，线程绝对安全
     - 缺点：始终占据一部分内存空间
   - 懒汉式（线程安全问题的解决），spring 种的延迟加载
-    - 默认不实例化，在使用过程中产生实例，通过方法调用来创建。存在线程安全问题，具体操作请看上述-[懒汉式](#lanhan)
+    - 默认不实例化，在使用过程中产生实例，通过方法调用来创建。存在线程安全问题，具体操作请看上述-[懒汉式](#lanhan) 
+    - 静态内部类的性能最优
+    - 优点：内存空间利用高
     
   - 注册式
   - 枚举式

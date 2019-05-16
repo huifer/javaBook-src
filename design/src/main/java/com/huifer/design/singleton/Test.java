@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -15,7 +16,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Test {
 
-    public static final int count = 10;
+    public static final int count = 10000;
 
 
     public static void main(String[] args) throws Exception {
@@ -24,12 +25,14 @@ public class Test {
 //        lazyTest1();
 //        lazyTest2();
 //        lazyTest3();
+//        lazy4Test();
 
         registerTest();
 
 //        enumTest();
 //        serializableTest();
     }
+
 
     /**
      * 饿汉式线程安全测试
@@ -79,15 +82,16 @@ public class Test {
             new Thread(() -> {
 
                 try {
+                    // 当count =0 时 释放所有的共享锁， 紧接着开始调用getInstance()
                     latch.await();
                     Lazy2 instance = Lazy2.getInstance();
                     System.out.println(System.currentTimeMillis() + " : " + instance);
                 } catch (Exception e) {
 
                 }
-            }).start();
+            }).start(); // 线程启动
 
-            latch.countDown();
+            latch.countDown(); // count --
         }
     }
 
@@ -111,14 +115,15 @@ public class Test {
     }
 
     private static void registerTest() {
+        long l = System.currentTimeMillis();
         CountDownLatch latch = new CountDownLatch(count);
         for (int i = 0; i < count; i++) {
             new Thread(() -> {
 
                 try {
                     latch.await();
-                    RegisterMap registerMap = RegisterMap.getInstance("registerMap");
-
+                    RegisterMap registerMap = RegisterMap
+                            .getInstance("com.huifer.design.singleton.RegisterMap");
                     System.out.println(System.currentTimeMillis() + " : " + registerMap);
                 } catch (Exception e) {
 
@@ -127,6 +132,9 @@ public class Test {
 
             latch.countDown();
         }
+
+        long l1 = System.currentTimeMillis();
+        System.out.println(l1 - l);
 
     }
 
@@ -180,6 +188,26 @@ public class Test {
 
         }
 
+
+    }
+
+
+    private static void lazy4Test() {
+        try {
+
+            Class<Lazy4> lazy4Class = Lazy4.class;
+
+            // 获取私有构造方法 com.huifer.design.singleton.Lazy4.Lazy4
+            Constructor<Lazy4> constructor = lazy4Class.getDeclaredConstructor(null);
+            // 强制生产
+            constructor.setAccessible(true);
+            // 构造2次
+            Lazy4 lazy4_1 = constructor.newInstance();
+            Lazy4 lazy4_2 = constructor.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
 
     }
 
