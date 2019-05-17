@@ -17,15 +17,16 @@ import java.lang.reflect.Proxy;
  */
 public class MyProxyUtil {
 
+    public static void main(String[] args) {
+//        getBaseServiceWithCgLib(new BaseServiceImpl());
+        BaseService baseServiceWithJdk = getBaseServiceWithJdk(new BaseServiceImpl());
+        baseServiceWithJdk.doSome();
+    }
 
     /**
      * jdk 动态代理
-     *
-     * @param baseService
-     * @return
      */
     public static BaseService getBaseServiceWithJdk(BaseService baseService) {
-
 
         Object o = Proxy.newProxyInstance(
                 // 目标对象的加载器
@@ -35,7 +36,8 @@ public class MyProxyUtil {
                 // 代理对象执行处理器
                 new InvocationHandler() {
                     @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    public Object invoke(Object proxy, Method method, Object[] args)
+                            throws Throwable {
                         // do outher
                         System.out.println("jdk代理");
                         // method.invoke(baseService, args) 一定不能忘记 ， 忘记了目标方法就不执行了
@@ -47,9 +49,6 @@ public class MyProxyUtil {
 
     /**
      * CgLib 动态代理
-     *
-     * @param baseService
-     * @return
      */
     public static BaseService getBaseServiceWithCgLib(BaseService baseService) {
 
@@ -68,7 +67,8 @@ public class MyProxyUtil {
              * @throws Throwable
              */
             @Override
-            public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+            public Object intercept(Object o, Method method, Object[] objects,
+                    MethodProxy methodProxy) throws Throwable {
                 System.out.println("cglib代理");
                 return methodProxy.invokeSuper(o, objects);
             }

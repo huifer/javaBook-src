@@ -2,7 +2,434 @@
 
 # 设计模式仓库
 
-- 代理模式
+## 代理模式
+
+### 静态代理
+
+- 代理对象和目标对象实现相同接口
+- 优点
+  - 在不改变目标对象的前提下拓展目标对象
+  - 保护具体业务逻辑，不对外暴露
+- 缺点
+  - 额外代理类数量多
+
+#### 代码
+
+- 以找工作为例，在智联上找工作
+
+    ```java
+    public class Person {
+
+        public void findWork() {
+            System.out.println("找工作");
+        }
+
+    }
+
+    public class ZhiLian {
+
+        private Person p;
+
+        public ZhiLian(Person person) {
+            this.p = person;
+        }
+
+        public void findWork() {
+            // 智联帮你找工作
+            System.out.println("智联正在帮你寻找工作");
+            this.p.findWork();
+            System.out.println("帮你找到工作了");
+        }
+
+    }
+    
+    public class StataicProxyTest {
+    
+        public static void main(String[] args) {
+            Person p = new Person();
+            ZhiLian zhiLian = new ZhiLian(p);
+            zhiLian.findWork();
+        }
+    
+    }
+    ```
+    
+    - 运行结果
+    
+      ```
+      智联正在帮你寻找工作
+      找工作
+      帮你找到工作了
+      ```
+    
+    - 思考：当找到了工作以后，找房子，也将成为一个问题 需要去解决，你可能会选择一个租房公司来帮你找房子...... 难么就会需要另一个类 租房类。当需求越来越多，这些代理类也会越来越多
+
+
+​      
+
+
+
+
+
+### 动态代理
+
+#### JDK 动态代理
+
+- 优点
+  - 解决静态代理中冗余代理的问题
+- 缺点
+  - JDK动态代理基于接口进行开发，必须要有一个接口
+
+
+
+- 代码
+
+  ```java
+  public class PersonJdk {
+  
+      public void findWork() {
+          System.out.println("找工作");
+      }
+  
+  }
+  public class ZhiLianJdk {
+  
+      /**
+       * 被代理对象的临时保存结点
+       */
+      private PersonJdk target;
+  
+      public Object getInstance(PersonJdk personJdk) {
+          this.target = personJdk;
+          Class clazz;
+  
+          clazz = personJdk.getClass();
+  
+          // 重构一个新的对象
+          return  Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
+                  new InvocationHandler() {
+                      @Override
+                      public Object invoke(Object proxy, Method method, Object[] args)
+                              throws Throwable {
+                          System.out.println("jdk 代理的智联");
+  
+                          Object invoke = method.invoke(target, args);
+                          System.out.println("工作找到了");
+                          return null;
+                      }
+                  });
+  
+      }
+  }
+  
+  ```
+
+  - 测试
+
+    ```java
+    public class JdkProxy {
+    
+        public static void main(String[] args) {
+            PersonJdk pjd = new PersonJdk();
+            Object obj = new ZhiLianJdk().getInstance(pjd);
+    
+            System.out.println(obj);
+    
+        }
+    
+    }
+    ```
+
+    测试结果如下
+
+    ```
+    jdk 代理的智联
+    工作找到了
+    null
+    ```
+
+  - 思考：我拿到的是一个obj 而不是PersonJdk 这个类 真正执行的方法应该时PersonJdk.findwok 。对测试类进行修改
+
+    ```java
+    public class JdkProxy {
+    
+        public static void main(String[] args) {
+            PersonJdk pjd = new PersonJdk();
+            Object obj = new ZhiLianJdk().getInstance(pjd);
+    
+            PersonJdk p = (PersonJdk) obj;
+            p.findWork();
+    
+    //        System.out.println(obj);
+    
+        }
+    
+    }
+    ```
+
+  - 此时会抛出如下异常
+
+    ```
+    Exception in thread "main" java.lang.ClassCastException: com.sun.proxy.$Proxy0 cannot be cast to com.huifer.design.proxy.jdk.PersonJdk
+    	at com.huifer.design.proxy.jdk.JdkProxyTest.main(JdkProxy.java:16)
+    ```
+
+  - 为什么出现了这个问题？
+
+    - jdk代理模式的实现 被代理对象必须实现一个接口
+    - ![1558057278605](assets/1558057278605.png)
+
+  - 解决方案
+
+    - 增加一个接口
+
+      ```java
+      public interface ZhiYuan {
+      
+          /**
+           * 找工作
+           */
+          void findWork();
+      
+      }
+      ```
+
+      ```java
+      public class PersonJdk implements ZhiYuan {
+      
+          @Override
+          public void findWork() {
+              System.out.println("找工作");
+          }
+      
+      }
+      ```
+
+      ```java
+      public class ZhiLianJdk {
+      
+          /**
+           * 被代理对象的临时保存结点 从personjdk 提升到一个接口
+           */
+          private ZhiYuan target;
+      
+          public Object getInstance(ZhiYuan personJdk) {
+              this.target = personJdk;
+              Class clazz;
+      
+              clazz = personJdk.getClass();
+      
+              // 重构一个新的对象
+              return  Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
+                      new InvocationHandler() {
+                          @Override
+                          public Object invoke(Object proxy, Method method, Object[] args)
+                                  throws Throwable {
+                              System.out.println("jdk 代理的智联");
+      
+                              Object invoke = method.invoke(target, args);
+                              System.out.println("工作找到了");
+                              return invoke;
+                          }
+                      });
+      
+          }
+      }
+      ```
+
+      ```java
+      public class JdkProxy {
+      
+          public static void main(String[] args) {
+              PersonJdk pjd = new PersonJdk();
+              Object obj = new ZhiLianJdk().getInstance(pjd);
+              // 注意 JDK 代理实现的是接口 并不是实现了接口的类 (PersonJdk)
+              ZhiYuan p = (ZhiYuan) obj;
+              p.findWork();
+      
+      //        System.out.println(obj);
+      
+          }
+      
+      }
+      ```
+
+      运行结果
+
+      ```
+      jdk 代理的智联
+      找工作
+      工作找到了
+      ```
+
+  - 新的需求：职员想要找个房子居住。解：这个就只需要完成一个新的代理类即可
+
+    ```java
+    public interface ZhiYuan {
+    
+        /**
+         * 找工作
+         */
+        void findWork();
+    
+        /**
+         * 找房子
+         */
+        void findHouse();
+    
+    }
+    ```
+
+    ```java
+    public class Jdk58 {
+    
+        private ZhiYuan target;
+    
+    
+        public Object getInstance(ZhiYuan z) {
+            this.target = z;
+    
+            Class clazz = null;
+            clazz = z.getClass();
+            Object o = Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
+                    new InvocationHandler() {
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args)
+                                throws Throwable {
+                            System.out.println("58同城为你服务");
+    
+                            Object invoke = method.invoke(target, args);
+    
+                            return invoke;
+                        }
+    
+                    });
+            return o;
+    
+        }
+    
+    }
+    ```
+
+    ```java
+    public class JdkProxy {
+    
+        public static void main(String[] args) {
+            PersonJdk pjd = new PersonJdk();
+            Object obj = new ZhiLianJdk().getInstance(pjd);
+            // 注意 JDK 代理实现的是接口 并不是实现了接口的类 (PersonJdk)
+            ZhiYuan p = (ZhiYuan) obj;
+            p.findWork();
+    
+    //        System.out.println(obj);
+            System.out.println("===========");
+            ZhiYuan instance = (ZhiYuan) new Jdk58().getInstance(pjd);
+            instance.findHouse();
+    
+    
+        }
+    
+    }
+    ```
+
+    运行结果
+
+    ```
+    jdk 代理的智联
+    找工作
+    工作找到了
+    ===========
+    58同城为你服务
+    找房子
+    ```
+
+- 深究
+
+  - 运行流程
+    1. 获取被代理对象的引用，通过jdk Proxy 创建新的类还需要，被代理对象的所有接口
+    2. jdk Proxy 创建新的类 ， 同时实现所有接口
+    3. 在 InvocationHandler 添加自己的处理逻辑
+    4. 编译成class 文件，在由JVM 进行调用
+
+
+
+#### cglib动态代理
+
+- 优点
+
+  - 没有接口也能实现动态代理，采用字节码增强。
+
+- 代码
+
+  ```java
+  public class CGPerson {
+      public void findWork() {
+          System.out.println("找工作");
+      }
+  }
+  
+  public class CGLIBZhiLian {
+  
+      public Object getInstance(Class<?> clazz) throws Exception {
+          Enhancer enhancer = new Enhancer();
+          enhancer.setSuperclass(clazz);
+  
+          enhancer.setCallback(new MethodInterceptor() {
+              @Override
+              public Object intercept(Object o, Method method, Object[] args,
+                      MethodProxy methodProxy) throws Throwable {
+                  System.out.println("CGLIB 代理智联");
+                  Object o1 = methodProxy.invokeSuper(o, args);
+                  return o1;
+              }
+          });
+  
+          return enhancer.create();
+  
+      }
+  }
+  
+  
+  ```
+
+  ```java
+  public class CglibProxyTest {
+  
+      public static void main(String[] args) throws Exception {
+  
+  
+          CGPerson instance = (CGPerson) new CGLIBZhiLian().getInstance(CGPerson.class);
+          instance.findWork();
+  
+      }
+  
+  }
+  ```
+
+  运行结果
+
+  ```
+  CGLIB 代理智联
+  找工作
+  ```
+
+  
+
+
+
+
+
+
+
+### 总结
+
+- 静态代理：必须已知所有内容，运行前就知道。
+- 动态代理：对代理内容未知，运行时才知道。
+
+
+
+
+
 - 适配模式
 - 装饰模式
 ## 工厂模式
