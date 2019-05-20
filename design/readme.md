@@ -1395,7 +1395,7 @@ public class SerializableSign implements Serializable {
 > 原型模式是创建型模式的一种，其特点在于通过“复制”一个已经存在的实例来返回新的实例,而不是新建实例。被复制的实例就是我们所称的“原型”，这个原型是可定制的。
 > 原型模式多用于创建复杂的或者耗时的实例，因为这种情况下，复制一个已经存在的实例使程序运行更高效；或者创建值相等，只是命名不一样的同类数据。
 
-#### JDK 实现
+### JDK 实现
 
 - JDK 官方提供了一种原型模式 Cloneable
 
@@ -1523,3 +1523,300 @@ public class Tag {
 ### 总结
 
 - 在原始基础上创建一个新的，两者的实例不相同但是数据内容相同
+
+
+
+
+
+## 策略模式
+
+### 定义
+
+> 策略模式作为一种软件设计模式，指对象有某个行为，但是在不同的场景中，该行为有不同的实现算法。比如每个人都要“交个人所得税”，但是“在美国交个人所得税”和“在中国交个人所得税”就有不同的算税方法。
+
+常用场景
+
+- 数值比较
+- 支付
+- 一个算法
+- 一个流程
+
+### 代码讲解
+
+#### 比较器
+
+- 人有高矮胖瘦，想要对次进行排序那么就需要比较器，java 中比较器使用 Collections.sort(java.util.Comparator)  或者 java.lang.Comparable
+
+- Comparable
+
+  ```java
+  public class People implements Comparable<People> {
+  
+      public double height;
+      public double weight;
+      public People() {
+      }
+  
+      public People(double height, double weight) {
+          this.height = height;
+          this.weight = weight;
+      }
+  
+      @Override
+      public int compareTo(People o) {
+          return (int) (this.height - o.height);
+      }
+  
+      @Override
+      public String toString() {
+          final StringBuilder sb = new StringBuilder("{");
+          sb.append("\"height\":")
+                  .append(height);
+          sb.append(",\"weight\":")
+                  .append(weight);
+          sb.append('}');
+          return sb.toString();
+      }
+  }
+  ```
+
+  ```java
+  public class MyComparator {
+  
+      public static void main(String[] args) {
+          // 人有高矮胖瘦
+          List plist = new ArrayList<>();
+          plist.add(new People(3, 3));
+          plist.add(new People(1, 1));
+          plist.add(new People(4, 4));
+          plist.add(new People(2, 2));
+  
+          Collections.sort(plist);
+          System.out.println(plist);
+  
+      }
+  }
+  ```
+
+  - 问题
+
+    1. 排序规则只有在实体类中存在，换一个排序需要重新修改实体类。
+    2. 该方案必须实现Comparable 如果没有实现怎么办？
+    3. 额外增加一个排序规则怎么办？
+
+  - 综上所述使用Comparable 的耦合度比较高，不易扩展
+
+    
+
+- Comparator  
+
+  - 使用 java.util.Comparator 
+
+  ```java
+  public class People {
+  
+      public double height;
+      public double weight;
+  
+      public People(double height, double weight) {
+          this.height = height;
+          this.weight = weight;
+      }
+  }
+  ```
+
+  ```java
+  public class MyComparatorTest {
+  
+      public static void main(String[] args) {
+          // 人有高矮胖瘦
+          peopleComparable();
+  
+          List<People> plist = new ArrayList<>();
+          plist.add(new People(3, 3));
+          plist.add(new People(1, 1));
+          plist.add(new People(4, 4));
+          plist.add(new People(2, 2));
+  		// 按照weight 排序
+          plist.sort(sortWeight());
+  		// 按照height 排序
+          plist.sort(sortHeight());
+  
+      }
+  
+      private static Comparator<People> sortWeight() {
+          return new Comparator<People>() {
+              @Override
+              public int compare(People o1, People o2) {
+                  return (int) (o1.weight - o2.weight);
+              }
+          };
+      }
+  
+      private static Comparator<People> sortHeight() {
+          return new Comparator<People>() {
+              @Override
+              public int compare(People o1, People o2) {
+                  return (int) (o1.height - o2.height);
+              }
+          };
+      }
+  
+  }
+  ```
+
+  - 将排序规则提出，作为一个新的方法进行解耦。数据与操作分离
+
+
+
+
+
+
+
+#### 支付
+
+- 以支付场景为例，支付时可以选择多个支付形式。
+
+  ```java
+  // 订单
+  public class Order {
+  
+      private String uid;
+      private String oderId;
+      private double amount;
+  
+      public PayState pay(Payment payment) {
+          return payment.pay(this.uid, this.amount);
+      }
+  
+      public Order(String uid, String oderId, double amount) {
+          this.uid = uid;
+          this.oderId = oderId;
+          this.amount = amount;
+      }
+  }
+  
+  // 支付信息
+  public class PayState {
+  
+      private int code;
+      private Object data;
+      private String msg;
+  }
+  
+  // 支付方式
+  public interface Payment {
+  
+      ZFB zfb = new ZFB();
+      VX VX = new VX();
+  
+      /**
+       * 支付
+       */
+      PayState pay(String uid, double amount);
+  }
+  // 微信支付
+  public class VX implements Payment {
+  
+      @Override
+      public PayState pay(String uid, double amount) {
+          double random = Math.random();
+          System.out.println("欢迎微信支付");
+          if (random > 0.5) {
+              return new PayState(200, "微信，支付成功", "ok");
+          } else {
+              return new PayState(404, "微信，支付失败", "bad");
+  
+          }
+      }
+  }
+  // 支付宝支付
+  public class ZFB implements Payment {
+  
+      @Override
+      public PayState pay(String uid, double amount) {
+          double random = Math.random();
+          System.out.println("欢迎支付宝支付");
+  
+          if (random > 0.5) {
+              return new PayState(200, "支付宝，支付成功", "ok");
+          } else {
+              return new PayState(404, "支付宝，支付失败", "bad");
+  
+          }
+      }
+  }
+  // 测试类
+  public class PayTest {
+  
+      public static void main(String[] args) {
+          // 订单创建
+          Order order = new Order("张三的id", "1", 100);
+          // 选择支付系统        // 支付宝 、 微信
+          // 此时用户只需要选择一个支付方式即可
+          System.out.println(order.pay(Payment.VX));
+          System.out.println(order.pay(Payment.zfb));
+  
+      }
+  
+  }
+  
+  ```
+
+- 这样可以简单实现一个支付形式，但是每当开发者增加一个支付方式 ，在Payment 中也需要同步增加。违背**开闭原则**。尽可能减少接口的修改，将支付方式使用枚举进行保存。
+
+  ```java
+  public enum PayType {
+      /**
+       * 支付宝
+       */
+      ZFB(new ZFB()),
+      /**
+       * 微信
+       */
+      VX(new VX()),
+  
+      ;
+  
+      private Payment payment;
+  
+  
+      PayType(Payment pay) {
+          this.payment = pay;
+      }
+  
+      /**
+       * 获取支付形式
+       * @return
+       */
+      public Payment get() {
+          return this.payment;
+      }
+  }
+  ```
+
+  ```java
+  public class Order {
+  
+      private String uid;
+      private String oderId;
+      private double amount;
+  
+      public Order(String uid, String oderId, double amount) {
+          this.uid = uid;
+          this.oderId = oderId;
+          this.amount = amount;
+      }
+  
+      public PayState pay(PayType payType) {
+          // 从原始调用接口改为从枚举中获取在执行
+          return payType.get().pay(this.uid, this.amount);
+      }
+  }
+  ```
+
+- 后续拓展新的开发内容维护  payType即可
+
+### 总结
+
+1. 执行过程固定，执行过程不可见，仅提供选择
