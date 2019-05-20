@@ -343,13 +343,7 @@
     找房子
     ```
 
-- 深究
 
-  - 运行流程
-    1. 获取被代理对象的引用，通过jdk Proxy 创建新的类还需要，被代理对象的所有接口
-    2. jdk Proxy 创建新的类 ， 同时实现所有接口
-    3. 在 InvocationHandler 添加自己的处理逻辑
-    4. 编译成class 文件，在由JVM 进行调用
 
 
 
@@ -414,6 +408,288 @@
   ```
 
   
+
+
+
+### 深究
+
+#### 运行流程(字节码增强)
+
+1. 获取被代理对象的引用，通过jdk Proxy 创建新的类还需要，被代理对象的所有接口
+2. jdk Proxy 创建新的类 ， 同时实现所有接口
+3. 在 InvocationHandler 添加自己的处理逻辑
+4. 编译成class文件，在由JVM 进行调用
+
+#### 代理后的编码
+
+- 代理对象并不是我们编写好的具体一个java文件，它是通过字节码增强技术创建，研究其代码我们需要将在内存中的类保存的本地。以JDK代理为例进行描述。
+
+- 这是一个经过动态代理的类p
+
+    ```java
+    public class JdkProxyTest {
+
+        public static void main(String[] args) {
+            PersonJdk pjd = new PersonJdk();
+            Object obj = new ZhiLianJdk().getInstance(pjd);
+            ZhiYuan p = (ZhiYuan) obj;
+            p.findWork();
+            System.out.println(p.getClass());
+        }
+    }
+    ```
+    
+    运行结果`class com.sun.proxy.$Proxy0`
+
+- 将该类持久化到本地磁盘。核心代码如下
+
+  ```java
+   public static void main(String[] args) {
+          PersonJdk pjd = new PersonJdk();
+          Object obj = new ZhiLianJdk().getInstance(pjd);
+          ZhiYuan p = (ZhiYuan) obj;
+          p.findWork();
+          System.out.println(p.getClass());
+  
+          try {
+   			// 需要提前知道代理类的名字 
+              byte[] proxyClass = ProxyGenerator
+                      .generateProxyClass("$Proxy0", new Class[]{Person.class});
+              FileOutputStream fos = new FileOutputStream(
+                      "E:\\mck\\javaBook-src\\design\\src\\main\\resources\\proxy.class");
+  
+              fos.write(proxyClass);
+              fos.close();
+  
+          } catch (Exception e) {
+              e.printStackTrace();
+  
+          }
+      }
+  ```
+
+- 代理类查看
+
+  ```java
+  //
+  // Source code recreated from a .class file by IntelliJ IDEA
+  // (powered by Fernflower decompiler)
+  //
+  
+  import com.huifer.design.proxy.staticproxy.Person;
+  import java.lang.reflect.InvocationHandler;
+  import java.lang.reflect.Method;
+  import java.lang.reflect.Proxy;
+  import java.lang.reflect.UndeclaredThrowableException;
+  
+  public final class $Proxy0 extends Proxy implements Person {
+      private static Method m1;
+      private static Method m8;
+      private static Method m2;
+      private static Method m3;
+      private static Method m6;
+      private static Method m5;
+      private static Method m7;
+      private static Method m9;
+      private static Method m0;
+      private static Method m4;
+  
+      public $Proxy0(InvocationHandler var1) throws  {
+          super(var1);
+      }
+  
+      public final boolean equals(Object var1) throws  {
+          try {
+              return (Boolean)super.h.invoke(this, m1, new Object[]{var1});
+          } catch (RuntimeException | Error var3) {
+              throw var3;
+          } catch (Throwable var4) {
+              throw new UndeclaredThrowableException(var4);
+          }
+      }
+  
+      public final void notify() throws  {
+          try {
+              super.h.invoke(this, m8, (Object[])null);
+          } catch (RuntimeException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      public final String toString() throws  {
+          try {
+              return (String)super.h.invoke(this, m2, (Object[])null);
+          } catch (RuntimeException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      public final void findWork() throws  {
+          try {
+              super.h.invoke(this, m3, (Object[])null);
+          } catch (RuntimeException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      public final void wait(long var1) throws InterruptedException {
+          try {
+              super.h.invoke(this, m6, new Object[]{var1});
+          } catch (RuntimeException | InterruptedException | Error var4) {
+              throw var4;
+          } catch (Throwable var5) {
+              throw new UndeclaredThrowableException(var5);
+          }
+      }
+  
+      public final void wait(long var1, int var3) throws InterruptedException {
+          try {
+              super.h.invoke(this, m5, new Object[]{var1, var3});
+          } catch (RuntimeException | InterruptedException | Error var5) {
+              throw var5;
+          } catch (Throwable var6) {
+              throw new UndeclaredThrowableException(var6);
+          }
+      }
+  
+      public final Class getClass() throws  {
+          try {
+              return (Class)super.h.invoke(this, m7, (Object[])null);
+          } catch (RuntimeException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      public final void notifyAll() throws  {
+          try {
+              super.h.invoke(this, m9, (Object[])null);
+          } catch (RuntimeException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      public final int hashCode() throws  {
+          try {
+              return (Integer)super.h.invoke(this, m0, (Object[])null);
+          } catch (RuntimeException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      public final void wait() throws InterruptedException {
+          try {
+              super.h.invoke(this, m4, (Object[])null);
+          } catch (RuntimeException | InterruptedException | Error var2) {
+              throw var2;
+          } catch (Throwable var3) {
+              throw new UndeclaredThrowableException(var3);
+          }
+      }
+  
+      static {
+          try {
+              m1 = Class.forName("java.lang.Object").getMethod("equals", Class.forName("java.lang.Object"));
+              m8 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("notify");
+              m2 = Class.forName("java.lang.Object").getMethod("toString");
+              m3 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("findWork");
+              m6 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("wait", Long.TYPE);
+              m5 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("wait", Long.TYPE, Integer.TYPE);
+              m7 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("getClass");
+              m9 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("notifyAll");
+              m0 = Class.forName("java.lang.Object").getMethod("hashCode");
+              m4 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("wait");
+          } catch (NoSuchMethodException var2) {
+              throw new NoSuchMethodError(var2.getMessage());
+          } catch (ClassNotFoundException var3) {
+              throw new NoClassDefFoundError(var3.getMessage());
+          }
+      }
+  }
+  ```
+
+  1. final class 不可被修改的类
+  2. implements Person 继承person 继承一个接口
+  3. m1,m2,m3... 就是接口方法的实现
+
+  我们实现的方法是findWork`m3 = Class.forName("com.huifer.design.proxy.staticproxy.Person").getMethod("findWork");`
+
+  ``` java
+  public final void findWork() throws  {
+      try {
+          super.h.invoke(this, m3, (Object[])null);
+      } catch (RuntimeException | Error var2) {
+          throw var2;
+      } catch (Throwable var3) {
+          throw new UndeclaredThrowableException(var3);
+      }
+  }
+  ```
+
+  - super.h.invoke()是什么？
+
+    `public final class $Proxy0 extends Proxy implements Person {}`
+
+    h 从Proxy中继承过来
+
+    ```java
+    public class Proxy implements java.io.Serializable {
+    // ...省略其他内容
+        protected InvocationHandler h;
+       // ... 省略其他内容
+        }
+    ```
+
+    - InvocationHandler 是我们自己写的一个方法，代码如下，重写的InvocationHandler就是 Proxy 中的 h
+
+      ```java
+      public class ZhiLianJdk {
+      
+          /**
+           * 被代理对象的临时保存结点
+           */
+          private ZhiYuan target;
+      
+          public Object getInstance(ZhiYuan personJdk) {
+              this.target = personJdk;
+              Class clazz;
+      
+              clazz = personJdk.getClass();
+      
+              // 重构一个新的对象
+              return  Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
+                      new InvocationHandler() {
+                          @Override
+                          public Object invoke(Object proxy, Method method, Object[] args)
+                                  throws Throwable {
+                              System.out.println("jdk 代理的智联");
+      
+                              Object invoke = method.invoke(target, args);
+                              System.out.println("工作找到了");
+                              return invoke;
+                          }
+                      });
+      
+          }
+      }
+      ```
+
+  - super.h.invoke()就是 Proxy.newProxyInstance 中的InvocationHandler.invoke
+
+
+
+
 
 
 
