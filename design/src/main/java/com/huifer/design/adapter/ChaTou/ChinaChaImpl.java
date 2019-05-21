@@ -1,4 +1,4 @@
-package com.huifer.design.adapter;
+package com.huifer.design.adapter.ChaTou;
 
 /**
  * 描述:

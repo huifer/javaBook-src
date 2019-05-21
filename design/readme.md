@@ -2116,3 +2116,108 @@ public class YW implements Dev {
 
 1. 委派模式时将各个功能分发给不同的人完成,注重的时结果
 2. 委派模式内部的复用率相对较高
+
+
+
+## 适配器模式
+
+### 定义
+
+> 将一个类的接口转接成用户所期待的。一个适配使得因接口不兼容而不能在一起工作的类能在一起工作，做法是将类自己的接口包裹在一个已存在的类中。
+
+### 代码讲解
+
+- 现在我们在网上能够看到各种类型的登陆方式,比如:QQ登陆\微信登陆\手机登录.但是原始开发系统时使用的方式为 本地数据库 记录的方式来登陆,为此进行拓展,我们需要适配器
+
+- 定义一个旧的登陆方式 账号密码形式
+
+  ```java
+  public class Menber {
+  
+      private String name;
+      private String pwd;
+      }
+  public class ResultMsg {
+  
+      private int code;
+      private Object data;
+      private String id;
+  }
+  public class LoginService {
+  
+      public static List<Menber> menberList = new ArrayList<>();
+  
+      public ResultMsg regist(String name, String pwd) {
+          Menber menber = new Menber(name, pwd);
+          menberList.add(menber);
+          return new ResultMsg(200, menber, name);
+      }
+  
+      public ResultMsg login(String name, String pwd) {
+  
+          Menber m = new Menber(name, pwd);
+          if (menberList.contains(m)) {
+              return new ResultMsg(200, "登陆成功", name);
+          } else {
+              return new ResultMsg(400, "登陆失败", name);
+          }
+      }
+  
+  }
+  	
+  
+  public class LoginTest {
+  
+      public static void main(String[] args) {
+          LoginService loginService = new LoginService();
+          ResultMsg registA = loginService.regist("a", "1");
+          System.out.println(registA);
+          ResultMsg loginA = loginService.login("a", "1");
+          System.out.println(loginA);
+  
+      }
+  
+  }
+  ```
+
+- 定义一个新的登陆模块需要完成如下内容
+
+  1. 注册
+  2. 登陆
+
+  ```java
+  public class NewLoginService extends LoginService {
+  
+      public ResultMsg loginForQQ(String qqNumb) {
+          ResultMsg msg = super.regist(qqNumb, "qq默认密码");
+          ResultMsg login = super.login(qqNumb, "qq默认密码");
+          return login;
+      }
+  
+  }
+  
+  
+  public class LoginTest {
+  
+      public static void main(String[] args) {
+          LoginService loginService = new LoginService();
+          ResultMsg registA = loginService.regist("a", "1");
+          System.out.println(registA);
+          ResultMsg loginA = loginService.login("a", "1");
+          System.out.println(loginA);
+  
+          NewLoginService newLoginService = new NewLoginService();
+          ResultMsg resultMsg = newLoginService.loginForQQ("QQ登陆测试");
+          System.out.println(resultMsg);
+  
+          System.out.println(LoginService.menberList);
+  
+      }
+  
+  }
+  
+  ```
+
+  ### 总结
+
+  1. 不改变原始的登陆模块 , 新模块向下兼容
