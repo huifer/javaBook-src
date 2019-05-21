@@ -1,8 +1,9 @@
 package com.huifer.design.decorate;
 
+import com.huifer.design.decorate.phone.HuaWei;
+import com.huifer.design.decorate.phone.HuaWeiDec;
+import com.huifer.design.decorate.phone.MatePhone;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class MatePhoneTest {
     @Test

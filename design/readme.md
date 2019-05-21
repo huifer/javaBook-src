@@ -2221,3 +2221,85 @@ public class YW implements Dev {
   ### 总结
 
   1. 不改变原始的登陆模块 , 新模块向下兼容
+
+
+
+## 装饰者模式
+
+### 定义
+
+> 修饰模式，是面向对象编程领域中，一种动态地往一个类中添加新的行为的设计模式。就功能而言，修饰模式相比生成子类更为灵活，这样可以给某个对象而不是整个类添加一些功能
+
+### 代码讲解
+
+- 登陆模块为例
+
+  ```java
+  public interface LoginInterface {
+  
+      ResultMsg regist(String name, String pwd);
+  
+      ResultMsg login(String name, String pwd);
+  }
+  public class LoginService implements LoginInterface {
+  
+  
+      public static List<Menber> menberList = new ArrayList<>();
+  
+      @Override
+      public ResultMsg regist(String name, String pwd) {
+          Menber menber = new Menber(name, pwd);
+          menberList.add(menber);
+          return new ResultMsg(200, menber, name);
+      }
+  
+      @Override
+      public ResultMsg login(String name, String pwd) {
+  
+          Menber m = new Menber(name, pwd);
+          if (menberList.contains(m)) {
+              return new ResultMsg(200, "登陆成功", name);
+          } else {
+              return new ResultMsg(400, "登陆失败", name);
+          }
+      }
+  
+  
+  }
+  
+  ```
+
+- 在基础登陆模块上增加 QQ登陆
+
+  ```java
+  public interface NewLoginInterface {
+  
+  
+       ResultMsg loginForQQ(String qqNumb);
+  }
+  
+  public class NewLoginService implements NewLoginInterface {
+  	// 依旧使用原来的接口来进行注册 登陆操作
+      public LoginInterface loginInterface;
+  
+      public NewLoginService(LoginInterface loginInterface) {
+          this.loginInterface = loginInterface;
+      }
+  
+  
+      @Override
+      public ResultMsg loginForQQ(String qqNumb) {
+          ResultMsg msg = this.loginInterface.regist(qqNumb, "qq默认密码");
+  
+          ResultMsg login = this.loginInterface.login(qqNumb, "qq默认密码");
+  
+          return login;
+      }
+  }
+  ```
+
+- 这种以接口形式进行开发的耦合度相对较低
+
+
+
+## 观察者模式
