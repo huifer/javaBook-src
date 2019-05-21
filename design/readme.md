@@ -1820,3 +1820,299 @@ public class Tag {
 ### 总结
 
 1. 执行过程固定，执行过程不可见，仅提供选择
+2. 可以省略一些switch ， if else 
+
+
+
+
+
+## 模板模式（模板方法）
+
+### 定义
+
+> 模板方法模式定义了一个算法的步骤，并允许子类别为一个或多个步骤提供其实践方式。让子类别在不改变算法架构的情况下，重新定义算法中的某些步骤。
+
+
+
+### 代码讲解
+
+- 我们经常会使用JDBC来进行数据库的操作，在这个JDBC操作数据库的过程中有很多内容是重复进行的，而我们进行操作的更多的是SQL部分，我们将JDBC操作定义如下几个部分
+
+  1. 创建datasource
+  2. 从datasource中获取连接Connection
+  3. 使用conn来进行预编译PreparedStatement
+  4. 执行查询获得结果 ResultSet
+  5. 解析结果
+  6. 关闭资源
+
+  - 我们每次进行操作的有 第4、5步
+
+```java
+public class JdbcTemplate {
+
+    private DataSource dataSource;
+
+    public JdbcTemplate(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    private List<Object> parseResultSet(ResultSet rs, RowMapper<?> rowMapper) throws Exception {
+        List<Object> result = new ArrayList<>();
+        int rowNum = 1;
+        while (rs.next()) {
+            result.add(rowMapper.mapRow(rs, rowNum++));
+
+        }
+        return result;
+
+    }
+
+    public List<Object> executeQuery(String sql, RowMapper<?> rowMapper, Object[] value) {
+        try {
+
+            // 1.获取连接
+            Connection conn = this.getConn();
+            // 2.创建sql
+            PreparedStatement pstm = this.createpstm(sql, conn);
+            // 3.执行查询 获得结果
+            ResultSet rst = this.executeQuery(pstm, value);
+            // 4.解析结果
+            List<Object> resList = this.parseResultSet(rst, rowMapper);
+
+            // 5.关闭
+            resultsetClose(rst);
+            pstmClose(pstm);
+            connClose(conn);
+            return resList;
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+    private void connClose(Connection conn) throws SQLException {
+        conn.close();
+    }
+
+    private void pstmClose(PreparedStatement pstm) throws SQLException {
+        pstm.close();
+    }
+
+    private void resultsetClose(ResultSet rst) throws SQLException {
+        rst.close();
+    }
+
+    private ResultSet executeQuery(PreparedStatement pstm, Object[] value) throws SQLException {
+        for (int i = 0; i < value.length; i++) {
+            pstm.setObject(i, value[i]);
+        }
+        return pstm.executeQuery();
+    }
+
+    private PreparedStatement createpstm(String sql, Connection conn) throws SQLException {
+        return conn.prepareStatement(sql);
+    }
+
+    private Connection getConn() throws SQLException {
+        return dataSource.getConnection();
+    }
+
+
+}
+```
+
+```java
+public interface RowMapper<T> {
+
+    T mapRow(ResultSet rs, int rowNum) throws Exception;
+
+
+}
+```
+
+```java
+public class Menber {
+
+    private  String name;
+    private  String pwd;
+
+   //... getset 构造方法省略
+}
+```
+
+```java
+public class MenberDao {
+
+    private JdbcTemplate jdbcTemplate = new JdbcTemplate(getDatasource());
+
+    private static final String driverClassName = "com.mysql.cj.jdbc.Driver";
+    private static final String url = "jdbc:mysql://localhost:3306/test?serverTimezone=UTC&rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8";
+    private static final String dbUsername = "root";
+    private static final String dbPassword = "root";
+
+    public static void main(String[] args)throws Exception {
+
+        MenberDao menberDao = new MenberDao();
+        List<Object> query = menberDao.query();
+        System.out.println();
+    }
+
+    private static DataSource getDatasource() {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(driverClassName);
+        dataSource.setUrl(url);
+        dataSource.setUsername(dbUsername);
+        dataSource.setPassword(dbPassword);
+        return dataSource;
+    }
+
+
+    public List<Object> query() throws Exception {
+        String sql = "select * from t_menber";
+        return jdbcTemplate.executeQuery(sql, new RowMapper<Menber>() {
+            @Override
+            public Menber mapRow(ResultSet rs, int rowNum) throws Exception {
+                Menber menber = new Menber();
+                menber.setName(rs.getString("name"));
+                menber.setPwd(rs.getString("pwd"));
+                return menber;
+            }
+        }, new Object[]{});
+    }
+
+}
+```
+
+- `JdbcTemplate#executeQuery(java.lang.String, com.huifer.design.template.RowMapper<?>, java.lang.Object[])` 这个方法中注意, 使用接口 RowMapper 来实现用户的自定义，用户需要自己实现数据处理操作。
+
+
+
+
+
+### 总结
+
+1. 模板模式固定了一套流程，我们可以修改其中的一部分流程来达到自定义的效果
+
+
+
+## 委派模式
+
+### 定义
+
+> 在委派模式（Delegate）中，有两个或多个对象参与处理同一个请求，接受请求的对象将请求委派给其他对象来处理。
+
+
+
+### 代码讲解
+
+- 在一个开发项目中有下图所示的一个结构，项目经理就是委派任务的人，将任务分发给前端工程师、后端工程师、运维工程师。在委派任务时需要根据不同的任务发给不同的工程师。
+
+```mermaid
+graph TD;
+	项目经理 --> 前端工程师
+	项目经理 --> 后端工程师
+	项目经理 --> 运维工程师
+	
+	
+
+```
+
+
+
+```java
+public interface Dev {
+
+    /**
+     * 工作
+     */
+    void work(String s);
+
+}
+
+public class HD implements Dev {
+
+    @Override
+    public void work(String s) {
+        System.out.println("后端工程师开始工作");
+        System.out.println("后端任务 ： " + s);
+    }
+}
+
+public class QD implements Dev {
+
+    @Override
+    public void work(String s) {
+        System.out.println("前端工程师开始工作");
+        System.out.println("前端任务 ： " + s);
+    }
+}
+
+public class YW implements Dev {
+
+    @Override
+    public void work(String s) {
+        System.out.println("运维工程师开始工作");
+        System.out.println("运维任务 ： " + s);
+    }
+}
+
+```
+
+- 负责人
+
+  ```java
+  public class XMFZR {
+  
+  
+      private HashMap<String, Dev> map = new HashMap<>();
+  
+      public XMFZR() {
+          map.put("前端", new QD());
+          map.put("后端", new HD());
+          map.put("运维", new YW());
+      }
+  
+      public static void main(String[] args) {
+  // 1. 确认一个任务
+          String s = "这是一个随机任务";
+  
+          XMFZR xmfzr = new XMFZR();
+  // 2. 模拟委派的过程
+          double random = Math.random();
+          if (random < 0.3) {
+              Dev qd = xmfzr.getMap().get("前端");
+              qd.work(s);
+          } else if (random > 0.3 & random < 0.6) {
+              Dev hd = xmfzr.getMap().get("后端");
+              hd.work(s);
+          } else {
+              Dev yw = xmfzr.getMap().get("运维");
+              yw.work(s);
+          }
+  
+  
+      }
+  
+      public HashMap<String, Dev> getMap() {
+          return map;
+      }
+  
+  }
+  ```
+
+  现目负责人 将具体任务根据不同要求委派给部不同的工作人员,让他们去完成具体的任务
+
+
+
+
+
+
+- [spring-mvc 中的DispatcherServlet ](https://github.com/huifer/java-ebook/blob/master/ch-2/springMvc.md#spring-mvc%E5%A4%A7%E8%87%B4%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E7%BF%BB%E9%98%85)也是一种委派模式.详细请查看文章.
+
+
+
+### 总结
+
+1. 委派模式时将各个功能分发给不同的人完成,注重的时结果
+2. 委派模式内部的复用率相对较高
