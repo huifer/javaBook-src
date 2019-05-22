@@ -2303,3 +2303,150 @@ public class YW implements Dev {
 
 
 ## 观察者模式
+
+### 定义
+
+> 观察者模式是软件设计模式的一种。在此种模式中，一个目标对象管理所有相依于它的观察者对象，并且在它本身的状态改变时主动发出通知。这通常透过呼叫各观察者所提供的方法来实现。此种模式通常被用来实时事件处理系统
+
+
+
+### 代码讲解
+
+- 警察抓小偷,一个小偷被多个警察监控.观察者模式研究的时 多个警察这个角色
+
+- 小偷
+
+  ```java
+  public class Subject extends EventLisenter {
+  
+  
+      public void move() {
+          System.out.println("小偷移动");
+          trigger(SubjectEventType.ON_MOVE);
+      }
+  
+  }
+  
+  ```
+
+- 警察
+
+  ```java
+  public class Observer {
+  
+      public void advice(Event event) {
+  
+          System.out.println("向总部报告");
+          System.out.println(event);
+  
+      }
+  
+  }
+  
+  ```
+
+- 报告清单
+
+  ```java
+  public class Event {
+  
+      /**
+       * 发生事情的单位 (小偷  Subject)
+       */
+      private Object resource;
+      /**
+       * 通知目标单位 (警局)
+       */
+      private Object target;
+      /**
+       * 回调方法
+       */
+      private Method callback;
+      /**
+       * 触发方法
+       */
+      private String trigger;
+      /**
+       * 触发时间
+       */
+      private Date date;
+      
+      }
+  ```
+
+- 监听动作枚举
+
+  ```java
+  public enum SubjectEventType {
+      ON_MOVE,
+  }
+  ```
+
+- 监听类
+
+  ```java
+  public class EventLisenter {
+  
+      protected Map<Enum, Event> eventMap = new HashMap<>();
+  
+      public void moveLisenter(Enum eventType, Object target, Method callback) {
+          eventMap.put(eventType, new Event(target, callback));
+      }
+  
+      private void trigger(Event event) {
+          event.setResource(this);
+          event.setDate(new Date());
+          try {
+  
+              // 反射调用具体方法
+              event.getCallback().invoke(
+                      event.getTarget(), event
+              );
+          } catch (Exception e) {
+              e.printStackTrace();
+  
+          }
+      }
+  
+      protected void trigger(Enum call) {
+          if (!eventMap.containsKey(call)) {
+              return;
+          } else {
+  
+              Event event = eventMap.get(call);
+              event.setTrigger(call.toString());
+  
+              trigger(
+                      event
+              );
+          }
+      }
+  
+  
+  }
+  ```
+
+- 测试
+
+  ```java
+  public class Testing {
+  
+      public static void main(String[] args) throws Exception {
+          Observer observer = new Observer();
+          Subject subject = new Subject();
+          // 观察者的具体方法
+          Method advice = Observer.class.getMethod("advice", Event.class);
+  
+          // 监控小偷的行为
+          subject.moveLisenter(
+                  SubjectEventType.ON_MOVE, observer, advice
+          );
+          subject.move();
+  
+  
+      }
+  
+  }
+  ```
+
+- 将小偷的行为列出作为被监控的选项,通过反射方式来调用 发报告的这个操作.
