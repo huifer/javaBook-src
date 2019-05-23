@@ -495,3 +495,16 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
+/microservice-core/mvc/target/
+data_status/src/main/resources/
+data_status/src/test/
+design/target/generated-sources/
+design/target/generated-test-sources/
+microservice-core/mvc/src/main/resources/static/
+microservice-core/mvc/src/test/
+microservice-core/mvc/target/generated-sources/
+microservice-core/spring-application/src/main/resources/static/
+microservice-core/spring-application/src/main/resources/templates/
+microservice-core/spring-application/src/test/
+microservice-core/spring-application/target/generated-sources/
+/microservice-core/spring-application/target/
