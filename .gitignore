@@ -508,3 +508,5 @@ microservice-core/spring-application/src/main/resources/templates/
 microservice-core/spring-application/src/test/
 microservice-core/spring-application/target/generated-sources/
 /microservice-core/spring-application/target/
+/microservice-core/rest/target/
+/design/target/

@@ -6,6 +6,7 @@
   <modules>
     <module>spring-application</module>
     <module>mvc</module>
+    <module>rest</module>
   </modules>
   <parent>
     <groupId>org.springframework.boot</groupId>
