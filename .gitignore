@@ -510,3 +510,4 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/spring-application/target/
 /microservice-core/rest/target/
 /design/target/
+/jdk/target/
