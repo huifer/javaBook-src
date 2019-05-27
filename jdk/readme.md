@@ -751,6 +751,166 @@ public enum State {
 
 
 
+## 串行&并行
+
+### 串行
+
+- 模拟一个spring项目加载配置文件
+
+  ```java
+  public class SpringLoad {
+  
+      public static void main(String[] args) {
+          SpringLoad springLoad = new SpringLoad();
+          springLoad.load();
+      }
+  
+      private void load() {
+          long startTime = System.currentTimeMillis();
+          loadProject();
+          long endTime = System.currentTimeMillis();
+          System.out.printf("加载总共耗时:%d 毫秒\n", endTime - startTime);
+      }
+  
+  
+      private void loadProject() {
+          loadSpringMvc();
+          loadMyBatis();
+          loadSpring();
+      }
+  
+  
+      private void loadSpringMvc() {
+          loadXML("spring-mvc.xml", 1);
+      }
+  
+  
+      private void loadMyBatis() {
+          loadXML("mybatis.xml", 2);
+      }
+  
+      private void loadSpring() {
+          loadXML("spring.xml", 3);
+      }
+  
+  
+      /***
+       * 加载文件
+       * @param xml
+       * @param loadSec
+       */
+      private void loadXML(String xml, int loadSec) {
+          try {
+              long startTime = System.currentTimeMillis();
+              long milliseconds = TimeUnit.SECONDS.toMillis(loadSec);
+              Thread.sleep(milliseconds);
+              long endTime = System.currentTimeMillis();
+  
+              System.out.printf("[线程 : %s] 加载%s 耗时: %d 毫秒\n",
+                      Thread.currentThread().getName(),
+                      xml,
+                      endTime - startTime
+              );
+          } catch (Exception e) {
+              e.printStackTrace();
+  
+          }
+      }
+  
+  }
+  ```
+
+```
+[线程 : main] 加载spring-mvc.xml 耗时: 1001 毫秒
+[线程 : main] 加载mybatis.xml 耗时: 2000 毫秒
+[线程 : main] 加载spring.xml 耗时: 3000 毫秒
+加载总共耗时:6017 毫秒	
+```
+
+可以发现串行消费时间 = 各个方法的总和
+
+
+
+### 并行 
+
+```java
+public class SpringLoad2  {
+
+    public static void main(String[] args) {
+        SpringLoad2 springLoad2 = new SpringLoad2();
+        springLoad2.loadProject();
+    }
+
+    public void loadProject() {
+        try {
+            long start = System.currentTimeMillis();
+            ExecutorService service = Executors.newFixedThreadPool(3);
+            CompletionService completionService = new ExecutorCompletionService(service);
+
+            completionService.submit(this::loadSpringMvc, null);
+            completionService.submit(this::loadMyBatis, null);
+            completionService.submit(this::loadSpring, null);
+
+
+            int count = 0;
+            while (count < 3) {
+                if (completionService.poll() != null) {
+                    count++;
+                }
+            }
+
+            service.shutdown();
+            System.out.println(System.currentTimeMillis() - start);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+
+
+    private void loadSpringMvc() {
+        loadXML("spring-mvc.xml", 1);
+    }
+
+
+    private void loadMyBatis() {
+        loadXML("mybatis.xml", 2);
+    }
+
+    private void loadSpring() {
+        loadXML("spring.xml", 3);
+    }
+
+
+    /***
+     * 加载文件
+     * @param xml
+     * @param loadSec
+     */
+    private void loadXML(String xml, int loadSec) {
+        try {
+            long startTime = System.currentTimeMillis();
+            long milliseconds = TimeUnit.SECONDS.toMillis(loadSec);
+            Thread.sleep(milliseconds);
+            long endTime = System.currentTimeMillis();
+
+            System.out.printf("[线程 : %s] 加载%s 耗时: %d 毫秒\n",
+                    Thread.currentThread().getName(),
+                    xml,
+                    endTime - startTime
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+
+}
+```
+
+- 最长的消耗时间为运行总时长
+
 
 
 ## 反射是什么
