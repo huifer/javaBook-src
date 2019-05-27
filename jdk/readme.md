@@ -352,3 +352,467 @@ public class Run {
         return null;
     }
     ```
+
+### 存储
+
+- HashMap允许key 和 value 为Null
+
+- HashTable不允许key 和 value 为Null
+
+### 线程安全 
+
+- HashMap 线程不安全
+- HashTable 线程安全
+
+
+
+## ArrayList & LinkedList 的区别
+
+### 数据结构
+
+- ArrayList
+
+  `transient Object[] elementData;` 数组
+
+- LinkedList
+
+  - ```JAVA
+    transient Node<E> first;
+    transient Node<E> last;
+    
+        private static class Node<E> {
+            E item;
+            Node<E> next;
+            Node<E> prev;
+    
+            Node(Node<E> prev, E element, Node<E> next) {
+                this.item = element;
+                this.next = next;
+                this.prev = prev;
+            }
+        }
+    ```
+
+    双向链表
+
+### 访问数据
+
+- ArrayList 索引访问
+
+  - ```java
+    public E get(int index) {
+        rangeCheck(index);
+    
+        return elementData(index);
+    }
+        E elementData(int index) {
+            return (E) elementData[index];
+        }
+    ```
+
+- LinkedList遍历访问
+
+  - ```java
+    public E get(int index) {
+        checkElementIndex(index);
+        return node(index).item;
+    }
+        Node<E> node(int index) {
+            // assert isElementIndex(index);
+    
+            if (index < (size >> 1)) {
+                Node<E> x = first;
+                for (int i = 0; i < index; i++)
+                    x = x.next;
+                return x;
+            } else {
+                Node<E> x = last;
+                for (int i = size - 1; i > index; i--)
+                    x = x.prev;
+                return x;
+            }
+        }
+    ```
+
+### 删除数据
+
+- ArrayList
+
+  - 遍历直到是删除元素进行删除
+
+    ```java
+    public E remove(int index) {
+        rangeCheck(index);
+    
+        modCount++;
+        E oldValue = elementData(index);
+    
+        int numMoved = size - index - 1;
+        if (numMoved > 0)
+            System.arraycopy(elementData, index+1, elementData, index,
+                             numMoved);
+        elementData[--size] = null; // clear to let GC do its work
+    
+        return oldValue;
+    }
+    ```
+
+- LinkedList
+
+  - 修改节点即可
+
+    ```java
+    public E remove(int index) {
+        checkElementIndex(index);
+        return unlink(node(index));
+    }
+        E unlink(Node<E> x) {
+            // assert x != null;
+            final E element = x.item;
+            final Node<E> next = x.next;
+            final Node<E> prev = x.prev;
+    
+            if (prev == null) {
+                first = next;
+            } else {
+                prev.next = next;
+                x.prev = null;
+            }
+    
+            if (next == null) {
+                last = prev;
+            } else {
+                next.prev = prev;
+                x.next = null;
+            }
+    
+            x.item = null;
+            size--;
+            modCount++;
+            return element;
+        }
+    ```
+
+## ArrayList 和Vector 区别
+
+### 线程安全
+
+- ArrayList 线程不安全	
+
+  ```java
+  public boolean add(E e) {
+      ensureCapacityInternal(size + 1);  // Increments modCount!!
+      elementData[size++] = e;
+      return true;
+  }
+  ```
+
+- Vector线程安全 `synchronized`关键字
+
+  ```java
+  public synchronized boolean add(E e) {
+      modCount++;
+      ensureCapacityHelper(elementCount + 1);
+      elementData[elementCount++] = e;
+      return true;
+  }
+  ```
+
+### 扩容
+
+- ArrayList扩大50%
+
+  ```java
+  int newCapacity = oldCapacity + (oldCapacity >> 1);
+  ```
+
+- Vector扩大100%
+
+  ```java
+  int newCapacity = oldCapacity + ((capacityIncrement > 0) ?
+                                   capacityIncrement : oldCapacity);
+  ```
+
+
+
+## Queue 中poll() 和 remove() 
+
+
+
+```java
+    /**
+     * Retrieves and removes the head of this queue.  This method differs
+     * from {@link #poll poll} only in that it throws an exception if this
+     * queue is empty.
+     *
+     * @return the head of this queue
+     * @throws NoSuchElementException if this queue is empty
+     */
+    E remove();
+
+    /**
+     * Retrieves and removes the head of this queue,
+     * or returns {@code null} if this queue is empty.
+     *
+     * @return the head of this queue, or {@code null} if this queue is empty
+     */
+    E poll();
+```
+
+### 相同点
+
+1. 从queue中删除第一个元素，返回第一个元素
+
+### 不同点
+
+1. 异常抛出
+
+   `remove()` 如果元素没有抛出`NoSuchElementException`
+
+   `poll()`则返回null
+
+
+
+
+
+## 集合如何设置不可修改
+
+- `java.util.Collections#unmodifiableCollection`
+
+```jaa
+public class UnchangeableGather {
+
+    public static void main(String[] args) {
+        List<Integer> integers = new ArrayList<Integer>();
+        integers.add(1);
+        Collection<Integer> integers1 = Collections.unmodifiableCollection(integers);
+        integers1.add(1);
+        System.out.println(integers.size());
+    }
+
+}
+```
+
+
+
+## 并发与并行的区别
+
+- 并行
+  - 多个处理器同时处理多个任务
+- 并发
+  - 多个任务在同一个cpu核上按照时间片轮流执行
+
+
+
+## 线程创建方式
+
+1. 继承`Thread` 重写 `run`
+2. 实现`Runnable` 接口
+3. 实现 `Callable`接口
+
+
+
+## 线程状态
+
+`java.lang.Thread.State`
+
+```java
+public enum State {
+	// 未启动
+    NEW,
+	// 执行中
+    RUNNABLE,
+	// 阻塞中
+    BLOCKED,
+	// 持久等待
+    WAITING,
+	// 等待到指定时间重写唤醒
+    TIMED_WAITING,
+	// 执行完成
+    TERMINATED;
+}
+```
+
+
+
+## sleep() 和 wait() 区别
+
+1. 类
+   1. `java.lang.Thread#sleep(long)`
+   2. `java.lang.Object#wait()`
+2. 锁的释放
+   1. sleep不释放
+   2. wait释放
+
+## run() 和 start() 区别
+
+1. 调用次数
+   1. `run()`没有限制
+   2. `start()`只能调用一次
+2. 对应操作项
+   1. `run()`对应线程运行时的代码
+   2. `start()`对应线程
+
+
+
+## notify() 和 notifyAll()区别
+
+- `notify()`只会唤醒一个线程
+- `notifyAll()`唤醒所有线程
+
+
+
+
+
+## 线程池创建
+位于 `java.util.concurrent.Executors` 下
+- newFixedThreadPool
+- newWorkStealingPool
+- newSingleThreadExecutor
+- newCachedThreadPool
+- newSingleThreadScheduledExecutor
+- newScheduledThreadPool
+
+
+## 线程池状态
+`java.util.concurrent.ThreadPoolExecutor`
+```java
+    // 能接受新提交的任务，并且也能处理阻塞队列中的任务；
+    private static final int RUNNING    = -1 << COUNT_BITS;
+	//	关闭状态，不再接受新提交的任务，但却可以继续处理阻塞队列中已保存的任务。在线程池处于 RUNNING 状态时，调用 shutdown()方法会使线程池进入到该状态。（finalize() 方法在执行过程中也会调用shutdown()方法进入该状态）
+    private static final int SHUTDOWN   =  0 << COUNT_BITS;
+	//   不能接受新任务，也不处理队列中的任务，会中断正在处理任务的线程。在线程池处于 RUNNING 或 SHUTDOWN 状态时，调用 shutdownNow() 方法会使线程池进入到该状态；  
+	private static final int STOP       =  1 << COUNT_BITS;
+    //如果所有的任务都已终止了，workerCount (有效线程数) 为0，线程池进入该状态后会调用 terminated() 方法进入TERMINATED 状态。
+	private static final int TIDYING    =  2 << COUNT_BITS;
+    // 在terminated() 方法执行完后进入该状态，默认terminated()方法中什么也没有做。
+	private static final int TERMINATED =  3 << COUNT_BITS;
+```
+
+进入TERMINATED的条件如下：
+
+- 线程池不是RUNNING状态；
+- 线程池状态不是TIDYING状态或TERMINATED状态；
+- 如果线程池状态是SHUTDOWN并且workerQueue为空；
+- workerCount为0；
+- 设置TIDYING状态成功。
+
+
+
+
+
+
+
+## Submit() 和 execute() 区别
+
+| 方法      | runnable 任务 | callable任务 |
+| --------- | ------------- | ------------ |
+| execute() | 执行          | 不执行       |
+| submit()  | 执行          | 执行         |
+
+
+
+
+
+## 多线程安全如何保证
+
+1. 使用synchronized 
+2. 使用Lock
+3. 使用安全类
+
+
+
+## synchronized 和 volatile 的区别
+
+- volate
+  - 变量 修饰符
+  - 实现变量的修改可见性，不能保证原子性
+  - 不会阻塞线程
+- synchronized
+  - 类 、方法 、 代码段 修饰符
+  - 保证变量的修改可见性， 保证原子性
+  - 会阻塞线程
+
+
+
+
+
+## synchronized 和 lock 的区别
+
+- synchronized
+  - 给类 、方法、代码段 添加锁
+  - 不需要释放锁，这个行为JVM自动实现
+  - 不能确定是否获取锁
+
+- lock
+  - 给代码段添加锁
+  - 需要手动获取锁， 释放锁否则会陷入死锁的问题（`unlock`）
+  - 可以确定是否成功获取锁
+
+
+
+
+
+## 反射是什么
+
+程序运行时可以指定该类的方法、属性，并且可以调用
+
+```java
+public class Run {
+
+    public static void main(String[] args) throws Exception {
+        Cc cccc = new Cc();
+
+        Class<? extends Cc> aClass = cccc.getClass();
+
+        Method setAname = aClass.getDeclaredMethod("setAname", String.class);
+
+        Method sayHi = aClass.getDeclaredMethod("sayHi", null);
+        sayHi.setAccessible(true);
+
+        setAname.invoke(cccc, "张三");
+        sayHi.invoke(cccc, null);
+
+    }
+
+    private static class Cc {
+
+        private String aname;
+
+        private void sayHi() {
+            System.out.println("hello" + aname);
+        }
+
+        public String getAname() {
+            return aname;
+        }
+
+        public void setAname(String aname) {
+            this.aname = aname;
+        }
+    }
+
+}
+```
+
+
+
+
+
+## throw 和 throws 区别
+
+- throw 真实抛出一个异常
+- throws 声明式抛出一个异常 (可能发生)
+
+
+
+## try catch finally 可以省略那些
+
+`catch` 和 `finally` 两个只能省略其中一个 ，`try`必须保留
+
+
+
+## try catch finally 中， catch 有return ，finally 执行吗
+
+- **执行 ， 在catch中的return 结束后执行**
+
