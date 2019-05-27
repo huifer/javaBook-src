@@ -511,3 +511,4 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/rest/target/
 /design/target/
 /jdk/target/
+/microservice-core/big-file/target/

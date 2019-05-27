@@ -91,7 +91,7 @@ public class Controller {
 ## `@RequestMapping`
 
 - `@RequestMapping`
-    
+  
     - `@GetMapping`
     
         ```java
@@ -205,4 +205,10 @@ public class Run {
 ![1558596538312](assets/1558596538312.png)
 
 - 在`af2`变量中它存放了 `@F1#method`的数据
+
+
+
+
+
+----
 
