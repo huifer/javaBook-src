@@ -8,6 +8,7 @@
     <module>mvc</module>
     <module>rest</module>
     <module>big-file</module>
+    <module>cloud</module>
   </modules>
   <parent>
     <groupId>org.springframework.boot</groupId>

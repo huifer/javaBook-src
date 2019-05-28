@@ -512,3 +512,5 @@ microservice-core/spring-application/target/generated-sources/
 /design/target/
 /jdk/target/
 /microservice-core/big-file/target/
+/microservice-core/cloud/cloud-application/target/
+/microservice-core/cloud/cloud-config-server/target/
