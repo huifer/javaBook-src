@@ -194,6 +194,8 @@ public class CloudApp {
 
 ## spring cloud config 
 
+### 服务端
+
 - 服务端依赖
 
 ```java
@@ -308,7 +310,84 @@ public class CloudApp {
     }
     ```
 
-    
+- 访问路径规则
 
-----
+  - /{application}/{profile}[/{label}]
+  - /{application}-{profile}.yml
+  - /{label}/{application}-{profile}.yml
+  - /{application}-{profile}.properties
+  - /{label}/{application}-{profile}.properties
+  - `config-dev.properties`中 `application = config `,` profile = dev `
+
+### 客户端
+
+- 依赖
+
+```xml
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-config-client</artifactId>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+- `application.properties`
+
+  ```properties
+  spring.application.name=cloud-config-client
+  
+  server.port=9091
+  ```
+
+- `bootstrap.properties`
+
+  ```properties
+  spring.cloud.config.name=config
+  spring.cloud.config.profile=dev
+  spring.cloud.config.uri=http://localhost:9090/
+  spring.cloud.config.label=master
+  ```
+
+  - spring.application.name：对应{application}部分
+  - spring.cloud.config.profile：对应{profile}部分
+  - spring.cloud.config.label：对应git的分支。如果配置中心使用的是本地存储，则该参数无用
+  - spring.cloud.config.uri：配置中心的具体地址
+  - spring.cloud.config.discovery.service-id：指定配置中心的service-id，便于扩展为高可用配置集群。
+  - 必须配置在`bootstrap.properties`中
+
+
+
+
+
+- 测试
+
+  ```java
+  @SpringBootApplication
+  @RestController
+  public class ConfigClient {
+  
+  
+      @Value("${name}")
+      private String message;
+  
+      public static void main(String[] args) {
+          SpringApplication.run(ConfigClient.class, args);
+      }
+  
+      @GetMapping
+      public String index() {
+          return message;
+      }
+  }
+  ```
+
+  - 访问 <http://localhost:9091/> 返回 `huifer` 和 `config-dev.properties` 中内容相等 。
+
+
+
+
 

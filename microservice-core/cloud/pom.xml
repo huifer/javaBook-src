@@ -15,6 +15,7 @@
   <modules>
     <module>cloud-application</module>
     <module>cloud-config-server</module>
+    <module>cloud-config-client</module>
   </modules>
 
   <properties>
