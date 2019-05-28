@@ -514,4 +514,4 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/big-file/target/
 /microservice-core/cloud/cloud-application/target/
 /microservice-core/cloud/cloud-config-server/target/
-!/microservice-core/cloud/cloud-config-client/target/
+/microservice-core/cloud/cloud-config-client/target/
