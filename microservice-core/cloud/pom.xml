@@ -16,6 +16,7 @@
     <module>cloud-application</module>
     <module>cloud-config-server</module>
     <module>cloud-config-client</module>
+    <module>zk</module>
   </modules>
 
   <properties>

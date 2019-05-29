@@ -566,14 +566,6 @@ public class CloudApp {
               
                   
               
-                  
-              
-                  
-              
-                  
-              
-                  
-              
                   - `org.springframework.cloud.config.server.environment.EnvironmentRepository`
               
                     ```java
@@ -751,76 +743,646 @@ spring.cloud.config.label=master
 
   - ```java
     	@Override
-    	@Retryable(interceptor = "configServerRetryInterceptor")
-    	public org.springframework.core.env.PropertySource<?> locate(
-    			org.springframework.core.env.Environment environment) {
-    		ConfigClientProperties properties = this.defaultProperties.override(environment);
-    		CompositePropertySource composite = new CompositePropertySource("configService");
-    			// RestTemplate 用来进行api访问
+      	@Retryable(interceptor = "configServerRetryInterceptor")
+      	public org.springframework.core.env.PropertySource<?> locate(
+      			org.springframework.core.env.Environment environment) {
+      		ConfigClientProperties properties = this.defaultProperties.override(environment);
+      		CompositePropertySource composite = new CompositePropertySource("configService");
+      			// RestTemplate 用来进行api访问
             RestTemplate restTemplate = this.restTemplate == null
-    				? getSecureRestTemplate(properties) : this.restTemplate;
-    		Exception error = null;
-    		String errorBody = null;
-    		try {
+      				? getSecureRestTemplate(properties) : this.restTemplate;
+      		Exception error = null;
+      		String errorBody = null;
+      		try {
                 // 获取 application  profile lable 
-    			String[] labels = new String[] { "" };
-    			if (StringUtils.hasText(properties.getLabel())) {
-    				labels = StringUtils
-    						.commaDelimitedListToStringArray(properties.getLabel());
-    			}
-    			String state = ConfigClientStateHolder.getState();
-    			// Try all the labels until one works
+      			String[] labels = new String[] { "" };
+      			if (StringUtils.hasText(properties.getLabel())) {
+      				labels = StringUtils
+      						.commaDelimitedListToStringArray(properties.getLabel());
+      			}
+      			String state = ConfigClientStateHolder.getState();
+      			// Try all the labels until one works
                 // 遍历标签来获取配置信息
-    			for (String label : labels) {
-    				Environment result = getRemoteEnvironment(restTemplate, properties,
-    						label.trim(), state);
-    				if (result != null) {
-    					log(result);
-    
-    					if (result.getPropertySources() != null) { // result.getPropertySources()
-    																// can be null if using
-    																// xml
-    						for (PropertySource source : result.getPropertySources()) {
-    							@SuppressWarnings("unchecked")
-    							Map<String, Object> map = (Map<String, Object>) source
-    									.getSource();
-    							composite.addPropertySource(
-    									new MapPropertySource(source.getName(), map));
-    						}
-    					}
-    
-    					if (StringUtils.hasText(result.getState())
-    							|| StringUtils.hasText(result.getVersion())) {
+      			for (String label : labels) {
+      				Environment result = getRemoteEnvironment(restTemplate, properties,
+      						label.trim(), state);
+      				if (result != null) {
+      					log(result);
+      
+      					if (result.getPropertySources() != null) { // result.getPropertySources()
+      																// can be null if using
+      																// xml
+      						for (PropertySource source : result.getPropertySources()) {
+      							@SuppressWarnings("unchecked")
+      							Map<String, Object> map = (Map<String, Object>) source
+      									.getSource();
+      							composite.addPropertySource(
+      									new MapPropertySource(source.getName(), map));
+      						}
+      					}
+      
+      					if (StringUtils.hasText(result.getState())
+      							|| StringUtils.hasText(result.getVersion())) {
                             // 设置客户端状态 以及 版本信息
-    						HashMap<String, Object> map = new HashMap<>();
-    						putValue(map, "config.client.state", result.getState());
-    						putValue(map, "config.client.version", result.getVersion());
-    						composite.addFirstPropertySource(
-    								new MapPropertySource("configClient", map));
-    					}
-    					return composite;
-    				}
-    			}
-    		}
-    		catch (HttpServerErrorException e) {
-    			error = e;
-    			if (MediaType.APPLICATION_JSON
-    					.includes(e.getResponseHeaders().getContentType())) {
-    				errorBody = e.getResponseBodyAsString();
-    			}
-    		}
-    		catch (Exception e) {
-    			error = e;
-    		}
-    		if (properties.isFailFast()) {
-    			throw new IllegalStateException(
-    					"Could not locate PropertySource and the fail fast property is set, failing"
-    							+ (errorBody == null ? "" : ": " + errorBody),
-    					error);
-    		}
-    		logger.warn("Could not locate PropertySource: " + (errorBody == null
-    				? error == null ? "label not found" : error.getMessage() : errorBody));
-    		return null;
-    
-    	}
+      						HashMap<String, Object> map = new HashMap<>();
+      						putValue(map, "config.client.state", result.getState());
+      						putValue(map, "config.client.version", result.getVersion());
+      						composite.addFirstPropertySource(
+      								new MapPropertySource("configClient", map));
+      					}
+      					return composite;
+      				}
+      			}
+      		}
+      		catch (HttpServerErrorException e) {
+      			error = e;
+      			if (MediaType.APPLICATION_JSON
+      					.includes(e.getResponseHeaders().getContentType())) {
+      				errorBody = e.getResponseBodyAsString();
+      			}
+      		}
+      		catch (Exception e) {
+      			error = e;
+      		}
+      		if (properties.isFailFast()) {
+      			throw new IllegalStateException(
+      					"Could not locate PropertySource and the fail fast property is set, failing"
+      							+ (errorBody == null ? "" : ": " + errorBody),
+      					error);
+      		}
+      		logger.warn("Could not locate PropertySource: " + (errorBody == null
+      				? error == null ? "label not found" : error.getMessage() : errorBody));
+      		return null;
+      
+      	}
     ```
+
+
+
+
+
+### 自定义配置仓库
+
+经过源码查看 可知 最终的接口为`EnvironmentRepository` 实现一个这个接口 注入到spring 中就可以实现自定义仓库
+
+
+
+```java
+@Configuration
+public class MyEnvironmentRepository {
+
+    @Bean
+    public EnvironmentRepository environmentRepository() {
+        EnvironmentRepository environmentRepository = new EnvironmentRepository() {
+            @Override
+            public Environment findOne(String application, String profile, String label) {
+                Environment environment = new Environment("default", profile);
+                List<PropertySource> propertySources = environment.getPropertySources();
+
+                Map<String, String> source = new HashMap<>();
+                source.put("MyEnvironmentRepository", "hello,world");
+
+                PropertySource propertySource = new PropertySource("new_property", source);
+
+                propertySources.add(propertySource);
+                return environment;
+            }
+        };
+
+        return environmentRepository;
+    }
+
+
+}
+```
+
+- 访问url
+
+```json
+// http://localhost:9090/config/default
+
+{
+  "name": "config",
+  "profiles": [
+    "default"
+  ],
+  "label": null,
+  "version": null,
+  "state": null,
+  "propertySources": [
+    {
+      "name": "new_property",
+      "source": {
+        "MyEnvironmentRepository": "hello,world"
+      }
+    }
+  ]
+}
+```
+
+
+
+
+
+### EnvironmentController
+
+- `org.springframework.cloud.config.server.environment.EnvironmentController`
+
+  ```java
+  @RequestMapping("/{name}/{profiles}/{label:.*}")
+  public Environment labelled(@PathVariable String name, @PathVariable String profiles,
+        @PathVariable String label) {
+     if (name != null && name.contains("(_)")) {
+        // "(_)" is uncommon in a git repo name, but "/" cannot be matched
+        // by Spring MVC
+        name = name.replace("(_)", "/");
+     }
+     if (label != null && label.contains("(_)")) {
+        // "(_)" is uncommon in a git branch name, but "/" cannot be matched
+        // by Spring MVC
+        label = label.replace("(_)", "/");
+     }
+     Environment environment = this.repository.findOne(name, profiles, label);
+     if (!this.acceptEmpty
+           && (environment == null || environment.getPropertySources().isEmpty())) {
+        throw new EnvironmentNotFoundException("Profile Not found");
+     }
+     return environment;
+  }
+  ```
+
+
+
+
+
+## 服务发现
+
+### 简单项目
+
+#### zookeeper linux 
+
+```shell
+tar -zxvf zookeeper-3.5.4-beta.tar.gz 
+cd zookeeper-3.5.4-beta
+cp conf/zoo_sample.cfg zoo.cfg
+# 启动
+bin/zkServer.sh start
+# 关闭
+bin/zkServer.sh stop
+```
+
+
+
+#### zookeeper windows
+
+1. 解压文件
+
+2. 复制 `zoo_sample.cfg` 为 `zoo.cfg`
+
+   ```properties
+   #...
+   # 修改成具体存放路径
+   dataDir=D:/dev/zookeeper-3.5.4-beta/temp/zookeeper
+   #...
+   ```
+
+3. bin 目录下zkServer.cmd启动
+
+
+
+
+
+- 依赖配置
+
+```xml
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+    </dependency>
+```
+
+- 启动器
+
+  ```java
+  @SpringBootApplication
+  @EnableDiscoveryClient
+  public class DiscoveryApp {
+  
+      public static void main(String[] args) {
+          SpringApplication.run(DiscoveryApp.class, args);
+      }
+  }
+  ```
+
+- 启动两个实例
+
+	- 第一个实例端口9000
+
+  ![1559091435791](assets/1559091435791.png)
+  
+  - 第二个实例端口9001  ![1559091452613](assets/1559091452613.png)
+
+
+
+
+
+- 具体的zk实例查看
+
+  - `zkCli.cmd`
+  - `ls /serverices/{spring.application.name}/{service_id}`
+  - ![1559091739694](assets/1559091739694.png)
+
+  - 通过命令行查看结果可以得知存在 `zk-Discovery` + `[1fd448a2-1a20-493a-bc47-cecef807cb5b, eab7fb85-a5a1-472d-92cf-a3f3482b0b75]` 两个节点
+
+  
+
+- `1fd448a2-1a20-493a-bc47-cecef807cb5b`
+
+  `get /serverices/{spring.application.name}/{service_id}`
+
+  ```json
+  {"name":"zk-Discovery","id":"1fd448a2-1a20-493a-bc47-cecef807cb5b","address":"DESKTOP-OKE7U7E","port":9000,"sslPort":null,"payload":{"@class":"org.springframework.cloud.zookeeper.discovery.ZookeeperInstance","id":"application-1","name":"zk-Discovery","metadata":{}},"registrationTimeUTC":1559091492114,"serviceType":"DYNAMIC","uriSpec":{"parts":[{"value":"scheme","variable":true},{"value":"://","variable":false},{"value":"address","variable":true},{"value":":","variable":false},{"value":"port","variable":true}]}}
+  ```
+
+  
+
+- `eab7fb85-a5a1-472d-92cf-a3f3482b0b75`
+
+  ```json
+  [zk: localhost:2181(CONNECTED) 6] get /services/zk-Discovery/eab7fb85-a5a1-472d-92cf-a3f3482b0b75
+  {"name":"zk-Discovery","id":"eab7fb85-a5a1-472d-92cf-a3f3482b0b75","address":"DESKTOP-OKE7U7E","port":9001,"sslPort":null,"payload":{"@class":"org.springframework.cloud.zookeeper.discovery.ZookeeperInstance","id":"application-1","name":"zk-Discovery","metadata":{}},"registrationTimeUTC":1559091501167,"serviceType":"DYNAMIC","uriSpec":{"parts":[{"value":"scheme","variable":true},{"value":"://","variable":false},{"value":"address","variable":true},{"value":":","variable":false},{"value":"port","variable":true}]}}
+  ```
+
+  
+
+
+
+- 在第二个实例中 启动了 actuator 
+
+  <http://localhost:9003/actuator/env>
+
+```json
+{
+	"activeProfiles": [
+
+	],
+	"propertySources": [{
+		"name": "server.ports",
+		"properties": {
+			"local.server.port": {
+				"value": 9001
+			},
+			"local.management.port": {
+				"value": 9003
+			}
+		}
+	}]
+
+}
+```
+
+### 获取所有服务
+
+```java
+package com.huifer.zk.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * <p>Title : ServiceController </p>
+ * <p>Description : </p>
+ *
+ * @author huifer
+ * @date 2019-05-29
+ */
+@RestController
+public class ServiceController {
+
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
+    @Value("${spring.application.name}")
+    private String applicationName;
+
+    /**
+     * 获取所有的服务
+     */
+    @GetMapping("/services")
+    public List<String> getAllServices() {
+        return discoveryClient.getServices();
+    }
+
+    /**
+     * 获取服务实例
+     */
+    @GetMapping("/services/instances")
+    public List<String> getAllServiceInstances() {
+        return discoveryClient.getInstances(applicationName).stream().map(
+                serviceInstance -> {
+                    return serviceInstance.getServiceId() + "-" + serviceInstance.getHost() + ":"
+                            + serviceInstance.getPort();
+                }
+        ).collect(Collectors.toList());
+    }
+
+
+}
+
+```
+
+
+
+### 源码阅读
+
+#### EnableDiscoveryClient
+
+- `@EnableDiscoveryClient`
+
+    ```java
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Inherited
+    @Import(EnableDiscoveryClientImportSelector.class)
+    public @interface EnableDiscoveryClient {
+       boolean autoRegister() default true;
+
+    }
+    ```
+	- `EnableDiscoveryClientImportSelector`
+	
+	  ```java
+	  	@Override
+	  	public String[] selectImports(AnnotationMetadata metadata) {
+	  		String[] imports = super.selectImports(metadata);
+	  
+	  		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
+	  				metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
+	  
+	  		boolean autoRegister = attributes.getBoolean("autoRegister");
+	  
+	  		if (autoRegister) {
+	  			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
+	  			importsList.add(
+	  					"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
+	  			imports = importsList.toArray(new String[0]);
+	  		}
+	  		else {
+	  			Environment env = getEnvironment();
+	  			if (ConfigurableEnvironment.class.isInstance(env)) {
+	  				ConfigurableEnvironment configEnv = (ConfigurableEnvironment) env;
+	  				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+	  				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
+	  				MapPropertySource propertySource = new MapPropertySource(
+	  						"springCloudDiscoveryClient", map);
+	  				configEnv.getPropertySources().addLast(propertySource);
+	  			}
+	  
+	  		}
+	  
+	  		return imports;
+	  	}
+	  
+	  ```
+	
+	  - 这里的`AnnotationMetadata metadata`可以理解成被`@EnableDiscoveryClient`注解的类
+	
+	    ![1559093385712](assets/1559093385712.png)
+	
+	    - `String[] imports = super.selectImports(metadata); `进入`oorg.springframework.cloud.commons.util.SpringFactoryImportSelector#selectImports`方法中
+	
+	      ```java
+	      @Override
+	      public String[] selectImports(AnnotationMetadata metadata) {
+	         if (!isEnabled()) { // 调用org.springframework.cloud.client.discovery.EnableDiscoveryClientImportSelector#isEnabled 
+	            return new String[0];
+	         }
+	         AnnotationAttributes attributes = AnnotationAttributes.fromMap(
+	               metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
+	      
+	         Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
+	               + metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
+	      
+	         // Find all possible auto configuration classes, filtering duplicates
+	         List<String> factories = new ArrayList<>(new LinkedHashSet<>(SpringFactoriesLoader
+	               .loadFactoryNames(this.annotationClass, this.beanClassLoader)));
+	      
+	         if (factories.isEmpty() && !hasDefaultFactory()) {
+	            throw new IllegalStateException("Annotation @" + getSimpleName()
+	                  + " found, but there are no implementations. Did you forget to include a starter?");
+	         }
+	      
+	         if (factories.size() > 1) {
+	            // there should only ever be one DiscoveryClient, but there might be more than
+	            // one factory
+	            this.log.warn("More than one implementation " + "of @" + getSimpleName()
+	                  + " (now relying on @Conditionals to pick one): " + factories);
+	         }
+	      
+	         return factories.toArray(new String[factories.size()]);
+	      }
+	      ```
+	
+	      1. 调用 `org.springframework.cloud.client.discovery.EnableDiscoveryClientImportSelector#isEnabled`
+	
+	         ```java
+	         @Override
+	         protected boolean isEnabled() {
+	            return getEnvironment().getProperty("spring.cloud.discovery.enabled",
+	                  Boolean.class, Boolean.TRUE);
+	         }
+	         ```
+	
+	         返回`true`
+	
+	         通过这里的操作来实现一个自动注册的属性值`autoRegister=true`,
+	
+	    - 回到selectImports方法中
+          
+            `boolean autoRegister = attributes.getBoolean("autoRegister");` 返回值为true
+            
+            ```java
+if (autoRegister) {
+            			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
+            			importsList.add(
+					"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
+            			imports = importsList.toArray(new String[0]);
+            		}
+            		else {
+            			Environment env = getEnvironment();
+            			if (ConfigurableEnvironment.class.isInstance(env)) {
+            				ConfigurableEnvironment configEnv = (ConfigurableEnvironment) env;
+            				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+            				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
+            				MapPropertySource propertySource = new MapPropertySource(
+            						"springCloudDiscoveryClient", map);
+            				configEnv.getPropertySources().addLast(propertySource);
+            			}
+            
+            		}
+            ```
+            
+            - 最终返回 `imports`
+        
+
+
+![1559093118222](assets/1559093118222.png)
+
+#### zookeeper注册
+
+- `ZookeeperAutoServiceRegistrationAutoConfiguration`
+
+  ```java
+  @Bean
+  @ConditionalOnMissingBean({ZookeeperRegistration.class})
+  public ServiceInstanceRegistration serviceInstanceRegistration(ApplicationContext context, ZookeeperDiscoveryProperties properties) {
+      String appName = context.getEnvironment().getProperty("spring.application.name", "application");
+      String host = properties.getInstanceHost();
+      if (!StringUtils.hasText(host)) {
+          throw new IllegalStateException("instanceHost must not be empty");
+      } else {
+          ZookeeperInstance zookeeperInstance = new ZookeeperInstance(context.getId(), appName, properties.getMetadata());
+          RegistrationBuilder builder = ServiceInstanceRegistration.builder().address(host).name(appName).payload(zookeeperInstance).uriSpec(properties.getUriSpec());
+          if (properties.getInstanceSslPort() != null) {
+              builder.sslPort(properties.getInstanceSslPort());
+          }
+  
+          if (properties.getInstanceId() != null) {
+              builder.id(properties.getInstanceId());
+          }
+  
+          return builder.build();
+      }
+  }
+  ```
+
+  `RegistrationBuilder builder = ServiceInstanceRegistration.builder().address(host).name(appName).payload(zookeeperInstance).uriSpec(properties.getUriSpec());` 主要内容
+
+  - `org.springframework.cloud.zookeeper.serviceregistry.ServiceInstanceRegistration`
+
+    ```java
+    public static ServiceInstanceRegistration.RegistrationBuilder builder() {
+        try {
+            return new ServiceInstanceRegistration.RegistrationBuilder(ServiceInstance.builder());
+        } catch (Exception var1) {
+            throw new RuntimeException("Error creating ServiceInstanceBuilder", var1);
+        }
+    }
+    ```
+
+    - `org.apache.curator.x.discovery.ServiceInstance`
+
+      ```java
+      public static <T> ServiceInstanceBuilder<T> builder() throws Exception {
+          String address = null;
+          Collection<InetAddress> ips = ServiceInstanceBuilder.getAllLocalIPs();
+          if (ips.size() > 0) {
+              address = ((InetAddress)ips.iterator().next()).getHostAddress();
+          }
+      
+          String id = UUID.randomUUID().toString();
+          return (new ServiceInstanceBuilder()).address(address).id(id).registrationTimeUTC(System.currentTimeMillis());
+      }
+      ```
+
+      将端口、ip、服务id获取 创建一个 `ServiceInstanceBuilder`
+
+      ​	![1559095719840](assets/1559095719840.png)
+
+      - 注册 `org.springframework.cloud.zookeeper.serviceregistry.ZookeeperAutoServiceRegistration#register`
+
+        ```java
+        protected void register() {
+            if (!this.properties.isRegister()) {
+                log.debug("Registration disabled.");
+            } else {
+                if (this.registration.getPort() == 0) {
+                    this.registration.setPort(this.getPort().get());
+                }
+                super.register();
+            }
+        }
+        ```
+
+        ![1559095741732](assets/1559095741732.png)
+
+        - `org.springframework.cloud.zookeeper.serviceregistry.ZookeeperServiceRegistry#register`
+
+          ```java
+          public void register(ZookeeperRegistration registration) {
+              try {
+                  this.getServiceDiscovery().registerService(registration.getServiceInstance());
+              } catch (Exception var3) {
+                  ReflectionUtils.rethrowRuntimeException(var3);
+              }
+          
+          }
+          ```
+
+          - `org.apache.curator.x.discovery.details.ServiceDiscoveryImpl#registerService`
+
+            ```java
+            public void registerService(ServiceInstance<T> service) throws Exception {
+                ServiceDiscoveryImpl.Entry<T> newEntry = new ServiceDiscoveryImpl.Entry(service);
+                ServiceDiscoveryImpl.Entry<T> oldEntry = (ServiceDiscoveryImpl.Entry)this.services.putIfAbsent(service.getId(), newEntry);
+                ServiceDiscoveryImpl.Entry<T> useEntry = oldEntry != null ? oldEntry : newEntry;
+                synchronized(useEntry) {
+                    if (useEntry == newEntry) {
+                        useEntry.cache = this.makeNodeCache(service);
+                    }
+            
+                    this.internalRegisterService(service);
+                }
+            }
+            ```
+
+            ![1559096011055](assets/1559096011055.png)
+
+            - `org.apache.curator.x.discovery.details.ServiceDiscoveryImpl#internalRegisterService`
+
+              ```
+              protected void internalRegisterService(ServiceInstance<T> service) throws Exception {
+                  byte[] bytes = this.serializer.serialize(service);
+                  String path = this.pathForInstance(service.getName(), service.getId());
+                  int MAX_TRIES = true;
+                  boolean isDone = false;
+              
+                  for(int i = 0; !isDone && i < 2; ++i) {
+                      try {
+                          CreateMode mode;
+                          switch(service.getServiceType()) {
+                          case DYNAMIC:
+                              mode = CreateMode.EPHEMERAL;
+                              break;
+                          case DYNAMIC_SEQUENTIAL:
+                              mode = CreateMode.EPHEMERAL_SEQUENTIAL;
+                              break;
+                          default:
+                              mode = CreateMode.PERSISTENT;
+                          }
+                     ((ACLBackgroundPathAndBytesable)this.client.create().creatingParentContainersIfNeeded().withMode(mode)).forPath(path, bytes);
+                          isDone = true;
+                      } catch (NodeExistsException var8) {
+                          this.client.delete().forPath(path);
+                      }
+                  }
+              
+              }
+              ```
+
+              - 这部分代码执行完成
+
+                ![1559096214590](assets/1559096214590.png)
+
+                ![1559096225248](assets/1559096225248.png)
+
+                - 这样就注册成功了
+
+---
+
