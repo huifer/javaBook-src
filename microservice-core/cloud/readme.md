@@ -423,9 +423,7 @@ public class CloudApp {
                 }
             }
         }
-        ```
-        
-        ```java
+    
         @Configuration
         @ConditionalOnBean(ConfigServerConfiguration.Marker.class)
         @EnableConfigurationProperties(ConfigServerProperties.class)
@@ -453,25 +451,22 @@ public class CloudApp {
           }
           ```
         
-          - ```
-            GitRepositoryConfiguration
-            SvnRepositoryConfiguration
-            VaultRepositoryConfiguration
-            ...
-            ```
-        
+          - 1. GitRepositoryConfiguration
+            2. SvnRepositoryConfiguration
+            3. VaultRepositoryConfiguration
+            
             - `org.springframework.cloud.config.server.config.GitRepositoryConfiguration`
-        
-              ```java
+            
+          ```java
               @Configuration
-              @Profile("git")
+          @Profile("git")
               class GitRepositoryConfiguration extends DefaultRepositoryConfiguration {}
               ```
               继承`DefaultRepositoryConfiguration` 默认使用git进行配置
-        
+            
               - `org.springframework.cloud.config.server.config.DefaultRepositoryConfiguration`
               
-                ```java
+            ```java
                 @Configuration
                 @ConditionalOnMissingBean(value = EnvironmentRepository.class, search = SearchStrategy.CURRENT)
                 class DefaultRepositoryConfiguration {

@@ -516,3 +516,4 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/cloud/cloud-config-server/target/
 /microservice-core/cloud/cloud-config-client/target/
 /microservice-core/cloud/zk/target/
+/microservice-core/cloud/zk-resttemplate/target/
