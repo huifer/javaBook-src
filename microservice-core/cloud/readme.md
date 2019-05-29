@@ -1207,11 +1207,13 @@ public class ServiceController {
           
             `boolean autoRegister = attributes.getBoolean("autoRegister");` 返回值为true
             
+            
+
             ```java
-if (autoRegister) {
-            			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
+            if (autoRegister) {
+							List<String> importsList = new ArrayList<>(Arrays.asList(imports));
             			importsList.add(
-					"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
+            	"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
             			imports = importsList.toArray(new String[0]);
             		}
             		else {
@@ -1227,6 +1229,8 @@ if (autoRegister) {
             
             		}
             ```
+            
+            
             
             - 最终返回 `imports`
         
@@ -1386,3 +1390,4 @@ if (autoRegister) {
 
 ---
 
+## 
