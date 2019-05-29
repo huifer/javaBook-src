@@ -212,3 +212,113 @@ public class Run {
 
 ----
 
+## RestTemplate
+
+- `org.springframework.web.client.RestTemplate`
+
+```java
+public RestTemplate() {
+   this.messageConverters.add(new ByteArrayHttpMessageConverter());
+   this.messageConverters.add(new StringHttpMessageConverter());
+   this.messageConverters.add(new ResourceHttpMessageConverter(false));
+//...
+}
+```
+
+构造方法中加入了很多 `HttpMessageConverter`实现类
+
+- `HttpMessageConverter`
+
+```java
+public interface HttpMessageConverter<T> {
+
+  boolean canRead(Class<?> clazz, @Nullable MediaType mediaType);
+
+  boolean canWrite(Class<?> clazz, @Nullable MediaType mediaType);
+
+    List<MediaType> getSupportedMediaTypes();
+
+  T read(Class<? extends T> clazz, HttpInputMessage inputMessage)
+         throws IOException, HttpMessageNotReadableException;
+
+  void write(T t, @Nullable MediaType contentType, HttpOutputMessage outputMessage)
+         throws IOException, HttpMessageNotWritableException;
+
+}
+```
+
+流程
+
+```sequence
+请求发送 -> canRead: 发送一个请求
+canRead -> read: 经过判断是否能够继续操作，通过HttpInputMessage获取
+read -> java对象: 转换成java对象
+java对象 -> write: 经过canwrite判断，通过HttpOutputMessage返回
+```
+
+
+
+- 以`String `为例，相关转换器 `org.springframework.http.converter.StringHttpMessageConverter`
+
+  ![1559111599103](assets/1559111599103.png)
+
+
+
+
+
+```java
+@PostMapping(value="/string")
+public String readString(@RequestBody String string) {
+    return "测试数据" + string + "'";
+}
+```
+
+
+
+- 发送`http://localhost:3919/string` 参数为
+
+  ```json
+  {
+    "value": [
+      "Z"
+    ],
+    "hash": 1,
+    "serialVersionUID": 1
+  }
+  ```
+
+  1. `org.springframework.http.converter.AbstractHttpMessageConverter#read`这个步骤还没有到return 返回
+
+     ```java
+     @Override
+     public final T read(Class<? extends T> clazz, HttpInputMessage inputMessage)
+           throws IOException, HttpMessageNotReadableException {
+     
+        return readInternal(clazz, inputMessage);
+     }
+     
+     // org.springframework.http.converter.StringHttpMessageConverter#readInternal
+     	@Override
+     	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
+     		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
+     		return StreamUtils.copyToString(inputMessage.getBody(), charset);
+     	}
+     ```
+
+     ![1559112075806](assets/1559112075806.png)
+
+  2. 将body赋值
+
+     ```java
+     @Override
+     public InputStream getBody() {
+        return (this.body != null ? this.body : StreamUtils.emptyInput());
+     }
+     ```
+
+  3. 执行到return 后 进入`org.springframework.http.converter.AbstractHttpMessageConverter#write`
+
+     ![1559111829439](assets/1559111829439.png)
+
+
+
