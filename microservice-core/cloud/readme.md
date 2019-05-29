@@ -110,8 +110,10 @@ public class CloudApp {
     ```
 
     
-    - `org.springframework.context.support.AbstractApplicationContext#setParent`
+    - `org.springframework.context.support.AbstractApplicationContext#setParent `方法具体代码如下
 
+      
+      
       ```java
       @Override
       public void setParent(@Nullable ApplicationContext parent) {
