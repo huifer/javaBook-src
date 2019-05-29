@@ -1205,17 +1205,13 @@ public class ServiceController {
 	
 	    - 回到selectImports方法中
           
-            `boolean autoRegister = attributes.getBoolean("autoRegister");` 返回值为true
-            
-            
-
-            ```java
+            ```
             if (autoRegister) {
-							List<String> importsList = new ArrayList<>(Arrays.asList(imports));
-            			importsList.add(
+            			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
+			importsList.add(
             	"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
             			imports = importsList.toArray(new String[0]);
-            		}
+						}
             		else {
             			Environment env = getEnvironment();
             			if (ConfigurableEnvironment.class.isInstance(env)) {
@@ -1231,8 +1227,6 @@ public class ServiceController {
             ```
             
             
-            
-            - 最终返回 `imports`
         
 
 
