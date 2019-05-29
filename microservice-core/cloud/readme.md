@@ -1386,4 +1386,145 @@ public class ServiceController {
 
 ---
 
-## 
+## restTemplate & zookeeper
+
+- 构建一个controller ， 这个服务后续会启动多个实例 端口:`9000`和`9001`
+
+```java
+@RestController
+public class SayController {
+
+    @GetMapping("/say")
+    public String say(@RequestParam String message) {
+        return "接收内容 : " + message;
+    }
+}
+```
+
+- 客户端编写 端口 `9004`
+
+  ```properties
+  
+  # 去那个服务上找
+  find.server.name=zk-Discovery
+  server.port=9004
+  
+  ```
+
+  
+
+  ```java
+  @RestController
+  @EnableScheduling
+  public class FindServerController {
+  
+      /**
+       * 用来发送请求
+       */
+      @Autowired
+      private RestTemplate restTemplate;
+      /**
+       * 服务发现
+       */
+      @Autowired
+      private DiscoveryClient discoveryClient;
+  
+      /**
+       * 查询的服务名称
+       */
+      @Value("${find.server.name}")
+      private String findServerAppName;
+      private volatile Set<String> targetUrls = new ConcurrentSkipListSet<>();
+  
+      /**
+       * 创建restTemplate
+       */
+      @Bean
+      public RestTemplate restTemplate() {
+          return new RestTemplate();
+      }
+  
+      @GetMapping("/getsay")
+      public String getSay(@RequestParam String message) {
+          List<String> targetUrls = new ArrayList<>(this.targetUrls);
+  
+          int index = new Random().nextInt(targetUrls.size());
+          String s = targetUrls.get(index);
+          System.out.println("当前请求地址 : " + s);
+          String forObject = restTemplate.getForObject(s + "/say?message=" + message, String.class);
+  
+          return forObject;
+      }
+  
+      /**
+       * 十秒钟查询一次服务
+       */
+      @Scheduled(fixedRate = 10 * 1000)
+      @Lazy(false)
+      public void updateTargetUrls() {
+          System.out.println(System.currentTimeMillis() + "当前总共有 " + targetUrls.size() + "个服务被发现");
+  
+          Set<String> oldTargetUrls = this.targetUrls;
+          Set<String> newTargetUrls = new HashSet<>();
+          // 获取 http://host:port 路由地址
+          newTargetUrls.addAll(
+                  discoveryClient.getInstances(findServerAppName).stream().map(
+                          serviceInstance -> "http://" + serviceInstance.getHost() + ":"
+                                  + serviceInstance
+                                  .getPort()
+                  ).collect(Collectors.toSet())
+          );
+  
+          this.targetUrls = newTargetUrls;
+          System.out.println("跟新后存在" + targetUrls.size() + "个服务");
+          targetUrls.forEach(
+                  s -> {
+                      System.out.println(s);
+                  }
+          );
+          oldTargetUrls.clear();
+      }
+  
+  
+  }
+  ```
+
+- 启动客户端服务
+
+  ```
+  1559116640978当前总共有 0个服务被发现
+  2019-05-29 15:57:20.988  INFO 13456 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9004 (http) with context path ''
+  跟新后存在1个服务
+  http://DESKTOP-OKE7U7E:9000
+  2019-05-29 15:57:21.096  INFO 13456 --- [           main] com.huifer.zk.ZkRestApp                  : Started ZkRestApp in 2.972 seconds (JVM running for 3.587)
+  ​```
+  ```
+
+  - 启动2个实例
+
+    ```
+    1559116670980当前总共有 1个服务被发现
+    跟新后存在2个服务
+    http://DESKTOP-OKE7U7E:9001
+    http://DESKTOP-OKE7U7E:9000
+    ```
+
+    
+
+- 连续访问 `http://localhost:9004/getsay?message=helloworld`
+
+  ```
+  当前请求地址 : http://DESKTOP-OKE7U7E:9001
+  当前请求地址 : http://DESKTOP-OKE7U7E:9000
+  当前请求地址 : http://DESKTOP-OKE7U7E:9000
+  当前请求地址 : http://DESKTOP-OKE7U7E:9001
+  当前请求地址 : http://DESKTOP-OKE7U7E:9000
+  当前请求地址 : http://DESKTOP-OKE7U7E:9000
+  当前请求地址 : http://DESKTOP-OKE7U7E:9001
+  当前请求地址 : http://DESKTOP-OKE7U7E:9001
+  当前请求地址 : http://DESKTOP-OKE7U7E:9001
+  当前请求地址 : http://DESKTOP-OKE7U7E:9000
+  
+  ```
+
+- 可以发现此处的请求地址是一个随机值，符合我们的需求

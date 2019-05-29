@@ -17,6 +17,7 @@
     <module>cloud-config-server</module>
     <module>cloud-config-client</module>
     <module>zk</module>
+    <module>zk-resttemplate</module>
   </modules>
 
   <properties>
