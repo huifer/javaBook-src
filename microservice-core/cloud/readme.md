@@ -184,14 +184,7 @@ public class CloudApp {
 
         - `org.springframework.core.env.PropertiesPropertySource`
 
-          
-
-
-
-
-
-
-
+     
 
 
 ## spring cloud config 
@@ -200,7 +193,7 @@ public class CloudApp {
 
 - 服务端依赖
 
-```java
+```xml
 <dependency>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-config-server</artifactId>
@@ -411,12 +404,12 @@ public class CloudApp {
         @Configuration
         public class ConfigServerConfiguration {
             public ConfigServerConfiguration() {
-    }
+          }
         
             @Bean
             public ConfigServerConfiguration.Marker enableConfigServerMarker() {
                 return new ConfigServerConfiguration.Marker();
-    }
+          }
         
             class Marker {
                 Marker() {
@@ -451,129 +444,131 @@ public class CloudApp {
           }
           ```
         
-          - 1. GitRepositoryConfiguration
+            1. GitRepositoryConfiguration
             2. SvnRepositoryConfiguration
             3. VaultRepositoryConfiguration
             
             - `org.springframework.cloud.config.server.config.GitRepositoryConfiguration`
             
-          ```java
+              ```java
               @Configuration
-          @Profile("git")
+              @Profile("git")
               class GitRepositoryConfiguration extends DefaultRepositoryConfiguration {}
               ```
+    
               继承`DefaultRepositoryConfiguration` 默认使用git进行配置
             
-              - `org.springframework.cloud.config.server.config.DefaultRepositoryConfiguration`
+    
+ - org.springframework.cloud.config.server.config.DefaultRepositoryConfiguration
               
-            ```java
-                @Configuration
-                @ConditionalOnMissingBean(value = EnvironmentRepository.class, search = SearchStrategy.CURRENT)
-                class DefaultRepositoryConfiguration {
-                
-                   @Bean
-                   public MultipleJGitEnvironmentRepository defaultEnvironmentRepository(
-                         MultipleJGitEnvironmentRepositoryFactory gitEnvironmentRepositoryFactory,
-                         MultipleJGitEnvironmentProperties environmentProperties) throws Exception {
-                      return gitEnvironmentRepositoryFactory.build(environmentProperties);
-                   }
-                
-                }
-                ```
+```java
+@Configuration
+@ConditionalOnMissingBean(value = EnvironmentRepository.class, search = SearchStrategy.CURRENT)
+class DefaultRepositoryConfiguration {
+
+   @Bean
+   public MultipleJGitEnvironmentRepository defaultEnvironmentRepository(
+         MultipleJGitEnvironmentRepositoryFactory gitEnvironmentRepositoryFactory,
+         MultipleJGitEnvironmentProperties environmentProperties) throws Exception {
+      return gitEnvironmentRepositoryFactory.build(environmentProperties);
+   }
+
+}
+```
               
-              - `org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentRepository`
+- `org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentRepository`
               
-                - `org.springframework.cloud.config.server.environment.AbstractScmEnvironmentRepository#findOne`
+  - `org.springframework.cloud.config.server.environment.AbstractScmEnvironmentRepository#findOne`
               
-                  ```java
-                  @Override
-                  public synchronized Environment findOne(String application, String profile,
-                        String label) {
-                      // 创建本地仓储来进行临时操作
-                     NativeEnvironmentRepository delegate = new NativeEnvironmentRepository(
-                           getEnvironment(), new NativeEnvironmentProperties());
-                      // 本地仓库中应用位置
-                     Locations locations = getLocations(application, profile, label);
-                     delegate.setSearchLocations(locations.getLocations());
-                     // 根据仓库来搜索应用相关配置
-                      Environment result = delegate.findOne(application, profile, "");
-                     result.setVersion(locations.getVersion());
-                     result.setLabel(label);
-                     return this.cleaner.clean(result, getWorkingDirectory().toURI().toString(),
-                           getUri());
-                  }
-                  ```
+    ```java
+    @Override
+    public synchronized Environment findOne(String application, String profile,
+          String label) {
+        // 创建本地仓储来进行临时操作
+       NativeEnvironmentRepository delegate = new NativeEnvironmentRepository(
+             getEnvironment(), new NativeEnvironmentProperties());
+        // 本地仓库中应用位置
+       Locations locations = getLocations(application, profile, label);
+       delegate.setSearchLocations(locations.getLocations());
+       // 根据仓库来搜索应用相关配置
+        Environment result = delegate.findOne(application, profile, "");
+       result.setVersion(locations.getVersion());
+       result.setLabel(label);
+       return this.cleaner.clean(result, getWorkingDirectory().toURI().toString(),
+             getUri());
+    }
+    ```
               
-                  - `getLocations`多种实现
+    - `getLocations`多种实现
               
-                    1. `JGitEnvironmentRepository`
-                       1. 根据类图我们选择这个类进行解析
-                    2. `MultipleJGitEnvironmentRepository`
-                    3. `SvnKitEnvironmentRepository`
+        1. `JGitEnvironmentRepository`
+           1. 根据类图我们选择这个类进行解析
+        2. `MultipleJGitEnvironmentRepository`
+        3. `SvnKitEnvironmentRepository`
               
-                    - `org.springframework.cloud.config.server.environment.JGitEnvironmentRepository#getLocations`
+        - `org.springframework.cloud.config.server.environment.JGitEnvironmentRepository#getLocations`
               
-                      ```java
-                      	@Override
-                      	public synchronized Locations getLocations(String application, String profile,
-                      			String label) {
-                      		if (label == null) {
-                      			label = this.defaultLabel;
-                      		}
-                              // 拉取最新版本号
-                      		String version = refresh(label);
-                              // 返回资源路径
-                      		return new Locations(application, profile, label, version,
-                      				getSearchLocations(getWorkingDirectory(), application, profile, label));
-                      	}
-                      ```
+          ```java
+            @Override
+            public synchronized Locations getLocations(String application, String profile,
+                String label) {
+              if (label == null) {
+                label = this.defaultLabel;
+              }
+                  // 拉取最新版本号
+              String version = refresh(label);
+                  // 返回资源路径
+              return new Locations(application, profile, label, version,
+                  getSearchLocations(getWorkingDirectory(), application, profile, label));
+            }
+          ```
               
-                      - `org.springframework.cloud.config.server.environment.JGitEnvironmentRepository#refresh`
-              
-                        ```java
-                        public String refresh(String label) {
-                        	// 创建一个git客户端	
-                            Git git = null;
-                        			git = createGitClient();
-                            // 是否执行git pull
-                        			if (shouldPull(git)) {
-                        				FetchResult fetchStatus = fetch(git, label);
-                        				if (this.deleteUntrackedBranches && fetchStatus != null) {
-                        					deleteUntrackedLocalBranches(fetchStatus.getTrackingRefUpdates(),
-                        							git);
-                        				}
-                        				// checkout after fetch so we can get any new branches, tags, ect.
-                                        // 校验查看是否能够全部获取
-                        				checkout(git, label);
-                        				tryMerge(git, label);
-                        			}
-                        			else {
-                        				// nothing to update so just checkout and merge.
-                        				// Merge because remote branch could have been updated before
-                        				checkout(git, label);
-                        				tryMerge(git, label);
-                        			}
-                        			// always return what is currently HEAD as the version
-                            // 返回当前版本的数据内容
-                        			return git.getRepository().findRef("HEAD").getObjectId().getName();
-                        		//... 省略异常处理
-                        ```
+  - `org.springframework.cloud.config.server.environment.JGitEnvironmentRepository#refresh`
+
+    ```java
+    public String refresh(String label) {
+      // 创建一个git客户端	
+        Git git = null;
+          git = createGitClient();
+        // 是否执行git pull
+          if (shouldPull(git)) {
+            FetchResult fetchStatus = fetch(git, label);
+            if (this.deleteUntrackedBranches && fetchStatus != null) {
+              deleteUntrackedLocalBranches(fetchStatus.getTrackingRefUpdates(),
+                  git);
+            }
+            // checkout after fetch so we can get any new branches, tags, ect.
+                    // 校验查看是否能够全部获取
+            checkout(git, label);
+            tryMerge(git, label);
+          }
+          else {
+            // nothing to update so just checkout and merge.
+            // Merge because remote branch could have been updated before
+            checkout(git, label);
+            tryMerge(git, label);
+          }
+          // always return what is currently HEAD as the version
+        // 返回当前版本的数据内容
+          return git.getRepository().findRef("HEAD").getObjectId().getName();
+        //... 省略异常处理
+    ```
               
                         
               
                   
               
-                  - `org.springframework.cloud.config.server.environment.EnvironmentRepository`
+- `org.springframework.cloud.config.server.environment.EnvironmentRepository`
+
+  ```java
+  public interface EnvironmentRepository {
+  
+     Environment findOne(String application, String profile, String label);
+  
+  }
+  ```
               
-                    ```java
-                    public interface EnvironmentRepository {
-                    
-                       Environment findOne(String application, String profile, String label);
-                    
-                    }
-                    ```
-              
-                    - 最终读取 `application` `profile` `label`
+- 最终读取 `application` `profile` `label`
 
 ![1559030879315](assets/1559030879315.png)
 
