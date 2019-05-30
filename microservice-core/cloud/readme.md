@@ -447,7 +447,7 @@ public class CloudApp {
             1. GitRepositoryConfiguration
             2. SvnRepositoryConfiguration
             3. VaultRepositoryConfiguration
-            
+          
             - `org.springframework.cloud.config.server.config.GitRepositoryConfiguration`
             
               ```java
@@ -457,7 +457,7 @@ public class CloudApp {
               ```
     
               继承`DefaultRepositoryConfiguration` 默认使用git进行配置
-            
+          
     
  - org.springframework.cloud.config.server.config.DefaultRepositoryConfiguration
               
@@ -475,7 +475,7 @@ class DefaultRepositoryConfiguration {
 
 }
 ```
-              
+
 - `org.springframework.cloud.config.server.environment.MultipleJGitEnvironmentRepository`
               
   - `org.springframework.cloud.config.server.environment.AbstractScmEnvironmentRepository#findOne`
@@ -498,14 +498,14 @@ class DefaultRepositoryConfiguration {
              getUri());
     }
     ```
-              
+    
     - `getLocations`多种实现
               
         1. `JGitEnvironmentRepository`
            1. 根据类图我们选择这个类进行解析
         2. `MultipleJGitEnvironmentRepository`
         3. `SvnKitEnvironmentRepository`
-              
+           
         - `org.springframework.cloud.config.server.environment.JGitEnvironmentRepository#getLocations`
               
           ```java
@@ -522,7 +522,7 @@ class DefaultRepositoryConfiguration {
                   getSearchLocations(getWorkingDirectory(), application, profile, label));
             }
           ```
-              
+    
   - `org.springframework.cloud.config.server.environment.JGitEnvironmentRepository#refresh`
 
     ```java
@@ -553,11 +553,11 @@ class DefaultRepositoryConfiguration {
           return git.getRepository().findRef("HEAD").getObjectId().getName();
         //... 省略异常处理
     ```
-              
-                        
-              
-                  
-              
+    
+    
+    ​          
+    ​              
+  
 - `org.springframework.cloud.config.server.environment.EnvironmentRepository`
 
   ```java
@@ -567,7 +567,7 @@ class DefaultRepositoryConfiguration {
   
   }
   ```
-              
+  
 - 最终读取 `application` `profile` `label`
 
 ![1559030879315](assets/1559030879315.png)
@@ -1376,7 +1376,7 @@ public class ServiceController {
 
 ---
 
-## restTemplate & zookeeper
+## restTemplate & zookeeper 负载均衡？
 
 - 构建一个controller ， 这个服务后续会启动多个实例 端口:`9000`和`9001`
 
@@ -1518,3 +1518,420 @@ public class SayController {
   ```
 
 - 可以发现此处的请求地址是一个随机值，符合我们的需求
+
+
+
+```mermaid
+graph TD
+start[用户发送请求] --> Ca[外部暴露端口 localhost:9004]
+Ca --> ce[通过随机的方式获取具体应用实例来访问]
+ce --> Cb[localhost:9001]
+ce --> Cd[localhost:9000]
+
+```
+
+### 多个应用
+
+```java
+@GetMapping("/{service}/getsay")
+public String getSayService(
+        @PathVariable String service,
+        @RequestParam String message) {
+    List<String> targetUrls = new ArrayList<>(this.allServerUrls.get(service));
+
+    if (targetUrls.size() == 1) {
+        String forObject = restTemplate
+                .getForObject(targetUrls.get(0) + "/say?message=" + message, String.class);
+        return forObject;
+
+    } else {
+
+        int index = new Random().nextInt(targetUrls.size());
+        String s = targetUrls.get(index);
+        System.out.println("当前请求地址 : " + s);
+        String forObject = restTemplate
+                .getForObject(s + "/say?message=" + message, String.class);
+
+        return forObject;
+    }
+}
+
+
+@Scheduled(fixedRate = 10 * 1000)
+@Lazy(false)
+public void updateOtherServer() {
+
+    HashMap<String, Set<String>> oldAllServerUrls = this.allServerUrls;
+    HashMap<String, Set<String>> newAllServerUrls = new HashMap<>();
+
+    discoveryClient.getServices().forEach(
+            s -> {
+                List<ServiceInstance> instances = discoveryClient.getInstances(s);
+                Set<String> collect = instances.stream().map(
+                        server ->
+                                server.isSecure() ? "https://" + server.getHost() + ":" + server
+                                        .getPort() :
+                                        "http://" + server.getHost() + ":" + server.getPort()
+
+                ).collect(Collectors.toSet());
+                newAllServerUrls.put(s, collect);
+            }
+    );
+
+    this.allServerUrls = newAllServerUrls;
+    oldAllServerUrls.clear();
+}
+```
+
+
+
+### ribbon 
+
+```java
+@RestController
+public class RibbonRestController {
+
+
+    @Autowired
+    @Qualifier(value = "ribbon")
+    private RestTemplate restTemplate3;
+
+
+    @Bean
+    @Autowired
+    @Qualifier(value = "ribbon") // 固定搜索范围
+    public RestTemplate restTemplate3() {
+        return new RestTemplate();
+    }
+
+    @GetMapping("/lb/{service}/say")
+    public String lbSay(@PathVariable String service,
+            @RequestParam String message) {
+        return restTemplate3
+                .getForObject("http://" + service + "/say?message=" + message, String.class);
+    }
+
+
+    
+    @Bean
+    @Autowired
+    public Object f(@Qualifier(value = "ribbon") Collection<RestTemplate> restTemplates,
+            ClientHttpRequestInterceptor interceptor) {
+        restTemplates.forEach(
+                restTemplate -> {
+                    restTemplate.setInterceptors(Arrays.asList(interceptor));
+                }
+        );
+        return new Object();
+    }
+
+
+}
+```
+
+
+
+
+
+## 熔断 hystrix
+
+### 简单案例
+
+- 依赖
+
+```xml
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+    </dependency>
+```
+
+- 启动器
+
+  ```java
+  @SpringBootApplication
+  @EnableHystrix
+  public class HystrixApp {
+  
+      public static void main(String[] args) {
+          SpringApplication.run(HystrixApp.class, args);
+      }
+  
+  }
+  ```
+
+- controller
+
+  ```java
+  @RestController
+  public class HystrixController {
+  
+      private Random random = new Random();
+  
+      @HystrixCommand(
+              fallbackMethod = "errorHystrix",
+              commandProperties = {
+                      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "100"),
+              }
+      )
+      @GetMapping("hystrix")
+      public String hystrix() throws Exception {
+          int i = random.nextInt(200);
+          System.out.println("sleep " + i + "ms");
+          Thread.sleep(i);
+          return "hello hystrix";
+      }
+  
+      public String errorHystrix() {
+          return "error hystrix";
+      }
+  
+  }
+  ```
+
+- `@HystrixCommand`简单说明
+
+  - `fallbackMethod` 超时执行方法
+
+  - ```java
+    commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "100"),
+    }
+    ```
+
+    设置具体等待时间
+
+- **异常情况**
+
+  ```java
+  @HystrixCommand(
+          fallbackMethod = "errorHystrix2",
+          commandProperties = {
+                  @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "100"),
+          }
+  )
+  @GetMapping("hystrix2")
+  public String hystrix2(@RequestParam String msg) throws Exception {
+      int i = random.nextInt(200);
+      System.out.println("sleep " + i + "ms");
+      Thread.sleep(i);
+      return "hello hystrix";
+  }
+  public String errorHystrix2() {
+      return "error hystrix";
+  }
+  ```
+
+  访问 <http://localhost:9005/hystrix2?msg=123>出现如下异常
+
+  `com.netflix.hystrix.contrib.javanica.exception.FallbackDefinitionException: fallback method wasn't found: errorHystrix2([class java.lang.String])`
+
+  - 简单来说 `fallbackMethod` 方法的参数需要和 被`@HystrixCommand`标记的参数相等
+
+    ```java
+    public String errorHystrix2( String msg) {
+        return "error hystrix";
+    }
+    ```
+
+### 熔断自实现
+
+- 通用方法
+
+  ```java
+   private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+      private Random random = new Random();
+  
+  private String errorMsg(String msg) {
+      return "error " + msg;
+  }
+  
+  
+  private String resultMsg(String msg) {
+      try {
+          int i = random.nextInt(200);
+          System.out.println("sleep " + i + " ms");
+          Thread.sleep(i);
+          return "msg = " + msg;
+      } catch (Exception e) {
+          e.printStackTrace();
+          return null;
+      }
+  }
+  ```
+
+#### v1版本
+
+> 思路：通过线程进行一个等待操作，当等待操作时间超过目标值100 进行熔断，使用try catch方式，当出现TimeoutException就熔断，发送熔断信息
+
+- controller
+
+```java
+@GetMapping("/v1")
+public String v1(@RequestParam String msg) throws Exception {
+
+    Future<String> submit = executorService.submit(
+            () -> resultMsg(msg)
+    );
+    String s;
+    try {
+        // 强制等待100ms 执行
+        s = submit.get(100, TimeUnit.MILLISECONDS);
+    } catch (Exception e) {
+        s = errorMsg(msg);
+    }
+    return s;
+}
+```
+
+#### v2版本
+
+> 思路：使用@RestControllerAdvice 注解获取异常，再返回异常信息
+
+```java
+@GetMapping("v2")
+public String v2(@RequestParam String msg) throws Exception {
+
+    Future<String> submit = executorService.submit(
+        () -> resultMsg(msg)
+    );
+    String s = submit.get(100, TimeUnit.MILLISECONDS);
+    return s;
+}
+
+@RestControllerAdvice(assignableTypes = {MyHystrixController.class})
+public class TimeoutController {
+
+
+    @ExceptionHandler
+    public void onTimeoutException(TimeoutException timeoutException, Writer writer)
+            throws IOException {
+        writer.write(s(""));
+
+    }
+
+    private String s(String mse) {
+        return "error " + mse;
+    }
+
+}
+```
+
+#### v3版本
+
+> 思路：aop拦截，将v1版本的内容用aop来做
+
+```java
+
+@GetMapping("v3")
+public String v3(@RequestParam String msg)
+    throws InterruptedException, ExecutionException, TimeoutException {
+    return resultMsg(msg);
+}
+
+
+@Aspect
+@Component
+public class MyHystrixControllerAspect {
+
+    private final ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
+
+    @Around(" execution(*  com.huifer.hystrix.controller.MyHystrixController.v3(..)  )  && args(msg)")
+    public Object timeout(ProceedingJoinPoint joinPoint, String msg) throws Throwable {
+
+        Future<Object> submit = executorService.submit(() -> {
+            Object resout = null;
+            try {
+                resout = joinPoint.proceed(new String[]{msg});
+            } catch (Throwable throwable) {
+            }
+            return resout;
+        });
+        String s;
+        try {
+            s = (String) submit.get(100, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException t) {
+            s = errorMsg(msg);
+        }
+
+        return s;
+
+
+    }
+
+    private String errorMsg(String msg) {
+        return "AOP 熔断 " + msg;
+    }
+
+
+}
+```
+
+#### v4版本
+
+> 思路： 模拟一个注解内容
+>
+> ```java
+> @HystrixCommand(
+>         fallbackMethod = "errorHystrix2",
+>         commandProperties = {
+>                 @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "100"),
+>         }
+> )
+> ```
+
+
+
+```java
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Documented
+public @interface Fusing {
+
+    /**
+     * 超时时间
+     * @return
+     */
+    int timeout() default 100;
+
+}
+
+
+
+
+    @GetMapping("v4")
+    @Fusing(timeout = 200)
+    public String v4(@RequestParam String msg) {
+        System.out.println("v4 gogogo");
+        return resultMsg(msg);
+    }
+
+
+
+    @Around("execution(*  com.huifer.hystrix.controller.MyHystrixController.v4(..)  ) && args(msg) && @annotation( fusing )")
+    public Object versionFour(ProceedingJoinPoint joinPoint, String msg, Fusing fusing)
+            throws Throwable {
+
+        int timeout = fusing.timeout();
+
+        Future<Object> submit = executorService.submit(() -> {
+            Object resout = null;
+            try {
+                resout = joinPoint.proceed(new String[]{msg});
+            } catch (Throwable throwable) {
+            }
+            return resout;
+        });
+        String s;
+        try {
+            s = (String) submit.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException t) {
+            s = errorMsg("注解形式 "+msg);
+        }
+
+        return s;
+
+    }
+```

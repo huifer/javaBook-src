@@ -18,6 +18,7 @@
     <module>cloud-config-client</module>
     <module>zk</module>
     <module>zk-resttemplate</module>
+    <module>hystrix</module>
   </modules>
 
   <properties>
