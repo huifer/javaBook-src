@@ -21,6 +21,8 @@
     <module>hystrix</module>
     <module>feign-client</module>
     <module>gateway</module>
+    <module>cloud-stream</module>
+    <module>cloud-stream-server</module>
   </modules>
 
   <properties>

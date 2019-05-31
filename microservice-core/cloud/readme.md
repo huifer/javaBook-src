@@ -2289,7 +2289,166 @@ public <T> T newInstance(Target<T> target) {
 ## Stream 构建消息驱动微服务
 
 - 统一编程模型
-
 - 注解驱动
 
+
+
+### 简单案例
+
+#### 消息创建端
+
+- 依赖
+
+  ```xml
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-stream-rabbit</artifactId>
+  </dependency>
+  ```
+
+- controller
+
+  ```java
+  @RestController
+  public class RabbitController {
   
+      @Autowired
+      private RabbitTemplate rabbitTemplate;
+  
+      @GetMapping("/rb")
+      public String send(@RequestParam String message) {
+          rabbitTemplate.convertAndSend(message);
+          return "ok  " + message;
+      }
+  
+  }
+  ```
+
+- stream
+
+  ```java
+  public interface SimpleClient {
+  
+      @Output("huifer")
+      MessageChannel huifer();
+  
+  }
+  ```
+
+- 配置
+
+  ```properties
+  server.port=9008
+  spring.application.name=stream-client
+  # 渠道 spring.cloud.stream.binders.${channel-name}.destination
+  spring.cloud.stream.binders.huifer.destination=123123
+  ```
+
+- 启动项
+
+  ```java
+  @SpringBootApplication
+  @EnableDiscoveryClient
+  @EnableBinding(SimpleClient.class)
+  public class StreamApp {
+  
+      public static void main(String[] args) {
+          SpringApplication.run(StreamApp.class, args);
+      }
+  }
+  ```
+
+
+
+
+
+#### 消息接收端
+
+- 配置
+
+  ```properties
+  server.port=9009
+  spring.application.name=  stream-server
+  spring.cloud.stream.binders.huifer.destination=123123
+  ```
+
+- 接收器
+
+  ```java
+  package com.huifer.stream.controller;
+  
+  import com.huifer.stream.stream.SimpleServer;
+  import java.io.UnsupportedEncodingException;
+  import javax.annotation.PostConstruct;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.messaging.Message;
+  import org.springframework.messaging.MessageHandler;
+  import org.springframework.messaging.MessageHeaders;
+  import org.springframework.messaging.MessagingException;
+  import org.springframework.messaging.SubscribableChannel;
+  import org.springframework.stereotype.Component;
+  
+  
+  @Component
+  public class StreamController {
+  
+      @Autowired
+      private SimpleServer simpleServer;
+  
+  
+      @PostConstruct
+      public void init() {
+          // SubscribableChannel获取
+          SubscribableChannel huifer = simpleServer.huifer();
+          huifer.subscribe(new MessageHandler() {
+              @Override
+              public void handleMessage(Message<?> message) throws MessagingException {
+                  MessageHeaders headers = message.getHeaders();
+                  String o = (String) headers.get("charset-encoding");
+                  try {
+                      System.out.println("消息内容为 " + new String((byte[]) message.getPayload(), o));
+                  } catch (UnsupportedEncodingException e) {
+                      e.printStackTrace();
+                  }
+              }
+          });
+  
+      }
+  
+  
+  }
+  ```
+
+- stream
+
+  ```java
+  public interface SimpleServer {
+  
+      @Input("huifer")
+      SubscribableChannel huifer();
+  
+  
+  }
+  ```
+
+- 启动项
+
+  ```java
+  @SpringBootApplication
+  @EnableDiscoveryClient
+  @EnableBinding(SimpleServer.class)
+  public class StreamServerApp {
+  
+      public static void main(String[] args) {
+          SpringApplication.run(StreamServerApp.class, args);
+      }
+  }
+  ```
