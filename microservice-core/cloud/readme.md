@@ -981,7 +981,7 @@ bin/zkServer.sh stop
 - 具体的zk实例查看
 
   - `zkCli.cmd`
-  - `ls /serverices/{spring.application.name}/{service_id}`
+  - `ls /serveices/{spring.application.name}/{service_id}`
   - ![1559091739694](assets/1559091739694.png)
 
   - 通过命令行查看结果可以得知存在 `zk-Discovery` + `[1fd448a2-1a20-493a-bc47-cecef807cb5b, eab7fb85-a5a1-472d-92cf-a3f3482b0b75]` 两个节点
@@ -990,7 +990,7 @@ bin/zkServer.sh stop
 
 - `1fd448a2-1a20-493a-bc47-cecef807cb5b`
 
-  `get /serverices/{spring.application.name}/{service_id}`
+  `get /serveices/{spring.application.name}/{service_id}`
 
   ```json
   {"name":"zk-Discovery","id":"1fd448a2-1a20-493a-bc47-cecef807cb5b","address":"DESKTOP-OKE7U7E","port":9000,"sslPort":null,"payload":{"@class":"org.springframework.cloud.zookeeper.discovery.ZookeeperInstance","id":"application-1","name":"zk-Discovery","metadata":{}},"registrationTimeUTC":1559091492114,"serviceType":"DYNAMIC","uriSpec":{"parts":[{"value":"scheme","variable":true},{"value":"://","variable":false},{"value":"address","variable":true},{"value":":","variable":false},{"value":"port","variable":true}]}}
@@ -1935,3 +1935,257 @@ public @interface Fusing {
 
     }
 ```
+
+## 服务调用
+
+### Spring Cloud Feign 
+
+#### 简单案例
+
+- 依赖
+
+  ```xml
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+  </dependency>
+  ```
+
+- 启动器
+
+  - `@EnableFeignClients`
+
+  ```java
+  @SpringBootApplication
+  @EnableFeignClients
+  public class FeignClientApp {
+  
+      public static void main(String[] args) {
+          SpringApplication.run(FeignClientApp.class, args);
+      }
+  
+  }
+  ```
+
+- feign 配置
+
+  ```properties
+  server.port=9006
+  spring.application.name=feign-client
+  # 去那个服务上找
+  find.server.name=zk-Discovery
+  ```
+
+- 服务端接口
+
+  ```java
+  @RestController
+  public class SayController {
+  
+      @GetMapping("/say")
+      public String say(@RequestParam String message) {
+          return "接收内容 : " + message;
+      }
+  
+  }
+  ```
+
+- 服务端配置
+
+  ```properties
+  spring.application.name=zk-Discovery
+  ```
+
+- Say服务
+
+  ```java
+  @FeignClient(name = "${find.server.name}")
+  public interface SayService {
+  
+      /**
+       * 获取  com.huifer.zk.controller.SayController#say(java.lang.String) 返回信息
+       */
+      @GetMapping("/say")
+      String say(@RequestParam String message);
+  
+  
+  }
+  ```
+
+- sayController
+
+  ```java
+  @RestController
+  public class NewRestController {
+  
+      @Autowired
+      private SayService sayService;
+  
+      @GetMapping("/feign/say")
+      public String say(@RequestParam String message) {
+          String say = sayService.say(message);
+          return say;
+      }
+  
+  }
+  ```
+
+
+
+#### feign 特征
+
+1. 需要知道提供服务的服务端名称
+2. 具体的HTTP方法`@RequestMapping`
+3. 具体的请求参数`@RequestParam`
+
+### `@EnableFeignClients`
+
+- `@EnableFeignClients`
+  - `FeignClientsRegistrar`
+    - `org.springframework.cloud.openfeign.FeignClientsRegistrar#registerBeanDefinitions`
+
+```java
+public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+    this.registerDefaultConfiguration(metadata, registry);
+    this.registerFeignClients(metadata, registry);
+}
+```
+
+```java
+public void registerFeignClients(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+    ClassPathScanningCandidateComponentProvider scanner = this.getScanner();
+    scanner.setResourceLoader(this.resourceLoader);
+    Map<String, Object> attrs = metadata.getAnnotationAttributes(EnableFeignClients.class.getName());
+  	// 获取所有的Feignclient注解类
+    AnnotationTypeFilter annotationTypeFilter = new AnnotationTypeFilter(FeignClient.class);
+ // 获取@FeignClient 的注解信息
+    Class<?>[] clients = attrs == null ? null : (Class[])((Class[])attrs.get("clients"));
+    
+}
+```
+
+- 下面这个方法获取正确的URL地址
+
+```java
+private void registerFeignClient(BeanDefinitionRegistry registry, AnnotationMetadata annotationMetadata, Map<String, Object> attributes) {
+        String className = annotationMetadata.getClassName();
+    // 创建一个feign客户端bean
+        BeanDefinitionBuilder definition = BeanDefinitionBuilder.genericBeanDefinition(FeignClientFactoryBean.class);
+        this.validate(attributes);
+        definition.addPropertyValue("url", this.getUrl(attributes));
+        definition.addPropertyValue("path", this.getPath(attributes));
+        String name = this.getName(attributes);
+        definition.addPropertyValue("name", name);
+        String contextId = this.getContextId(attributes);
+        definition.addPropertyValue("contextId", contextId);
+        definition.addPropertyValue("type", className);
+        definition.addPropertyValue("decode404", attributes.get("decode404"));
+        definition.addPropertyValue("fallback", attributes.get("fallback"));
+        definition.addPropertyValue("fallbackFactory", attributes.get("fallbackFactory"));
+        definition.setAutowireMode(2);
+        String alias = contextId + "FeignClient";
+        AbstractBeanDefinition beanDefinition = definition.getBeanDefinition();
+        boolean primary = (Boolean)attributes.get("primary");
+        beanDefinition.setPrimary(primary);
+        String qualifier = this.getQualifier(attributes);
+        if (StringUtils.hasText(qualifier)) {
+            alias = qualifier;
+        }
+
+        BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, new String[]{alias});
+        BeanDefinitionReaderUtils.registerBeanDefinition(holder, registry);
+    }
+```
+
+![1559262562586](assets/1559262562586.png)
+
+- `FeignClientFactoryBean`如何创建
+  - `org.springframework.cloud.openfeign.FeignClientFactoryBean#getObject`
+
+```java
+@Override
+public Object getObject() throws Exception {
+   return getTarget();
+}
+
+	<T> T getTarget() {
+        // application中获取feign上下文
+		FeignContext context = this.applicationContext.getBean(FeignContext.class);
+		Feign.Builder builder = feign(context);
+
+        // url装配
+		if (!StringUtils.hasText(this.url)) {
+			if (!this.name.startsWith("http")) {
+				this.url = "http://" + this.name;
+			}
+			else {
+				this.url = this.name;
+			}
+			this.url += cleanPath();
+          
+			return (T) loadBalance(builder, context,
+					new HardCodedTarget<>(this.type, this.name, this.url));
+		}
+		if (StringUtils.hasText(this.url) && !this.url.startsWith("http")) {
+			this.url = "http://" + this.url;
+		}
+		String url = this.url + cleanPath();
+		Client client = getOptional(context, Client.class);
+		if (client != null) {
+			if (client instanceof LoadBalancerFeignClient) {
+				// not load balancing because we have a url,
+				// but ribbon is on the classpath, so unwrap
+				client = ((LoadBalancerFeignClient) client).getDelegate();
+			}
+			builder.client(client);
+		}
+		Targeter targeter = get(context, Targeter.class);
+		return (T) targeter.target(this, builder, context,
+				new HardCodedTarget<>(this.type, this.name, url));
+	}
+```
+
+
+
+- `return (T) loadBalance(builder, context,new HardCodedTarget<>(this.type, this.name, this.url));`
+  - `org.springframework.cloud.openfeign.FeignClientFactoryBean#loadBalance`
+    - `org.springframework.cloud.openfeign.HystrixTargeter#target`
+      - `feign.Feign.Builder#target(feign.Target<T>)`
+        - `feign.ReflectiveFeign#newInstance`
+          1. 获取被`@FeignClient`在注解标记的方法以及请求路径
+
+```java
+@SuppressWarnings("unchecked")
+@Override
+public <T> T newInstance(Target<T> target) {
+  
+  Map<String, MethodHandler> nameToHandler = targetToHandlersByName.apply(target);
+  Map<Method, MethodHandler> methodToHandler = new LinkedHashMap<Method, MethodHandler>();
+  List<DefaultMethodHandler> defaultMethodHandlers = new LinkedList<DefaultMethodHandler>();
+
+  for (Method method : target.type().getMethods()) {
+    if (method.getDeclaringClass() == Object.class) {
+      continue;
+    } else if (Util.isDefault(method)) {
+      DefaultMethodHandler handler = new DefaultMethodHandler(method);
+      defaultMethodHandlers.add(handler);
+      methodToHandler.put(method, handler);
+    } else {
+      methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
+    }
+  }
+  InvocationHandler handler = factory.create(target, methodToHandler);
+  T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(),
+      new Class<?>[] {target.type()}, handler);
+
+  for (DefaultMethodHandler defaultMethodHandler : defaultMethodHandlers) {
+    defaultMethodHandler.bindTo(proxy);
+  }
+  return proxy;
+}
+```
+
+![1559263789318](assets/1559263789318.png)
+
+---
+

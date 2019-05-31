@@ -19,6 +19,7 @@
     <module>zk</module>
     <module>zk-resttemplate</module>
     <module>hystrix</module>
+    <module>feign-client</module>
   </modules>
 
   <properties>
