@@ -2189,3 +2189,107 @@ public <T> T newInstance(Target<T> target) {
 
 ---
 
+## 网关 spring - cloud - Gateway
+
+### 简单案例
+
+- 依赖
+
+  ```xml
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+  </dependency>
+  
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-zookeeper-discovery</artifactId>
+  </dependency>
+  
+  <dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway</artifactId>
+  </dependency>
+  ```
+
+- `application.yml`配置
+
+  ```yaml
+  spring:
+    application:
+      name: Gateway-app
+    cloud:
+      gateway:
+        routes:
+          - id: host_route
+            uri: http://localhost:9001
+            predicates:
+              - Path=/a/**
+            filters:
+              - StripPrefix=1
+          - id: host_route
+            uri: http://localhost:9000
+            predicates:
+              - Path=/b/**
+            filters:
+              - StripPrefix=1
+  server:
+    port: 9007
+  ```
+
+  
+
+- 启动项
+
+  ```java
+  @SpringBootApplication
+  public class GatewayApp {
+  
+      public static void main(String[] args) {
+          SpringApplication.run(GatewayApp.class, args);
+      }
+  
+  }
+  ```
+
+  
+
+- 路由说明
+
+  | 访问地址                                  | 转发地址                              |
+  | ----------------------------------------- | ------------------------------------- |
+  | <http://localhost:9007/a/say?message=123> | http://localhost:9001/say?message=123 |
+  | http://localhost:9007/a                   | http://localhost:9001                 |
+  | http://localhost:9008/b                   | http://localhost:9000                 |
+
+  
+
+- 编码配置方式
+
+  ```java
+  @Configuration
+  public class RouteConfig {
+  
+      @Bean
+      public RouteLocator routeLocator (RouteLocatorBuilder builder) {
+          StripPrefixGatewayFilterFactory.Config config = new StripPrefixGatewayFilterFactory.Config();
+          config.setParts(1);
+        return   builder.routes()
+                  .route("host_route", r -> r.path("/c/**").filters(f -> f.stripPrefix(1)).uri("http://localhost:9001"))
+                  .route("host_route", r -> r.path("/d/**").filters(f -> f.stripPrefix(1)).uri("http://localhost:9000"))
+                  .build();
+      }
+  
+  
+  }
+  ```
+
+
+
+## Stream 构建消息驱动微服务
+
+- 统一编程模型
+
+- 注解驱动
+
+  

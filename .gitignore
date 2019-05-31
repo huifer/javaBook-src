@@ -519,3 +519,4 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/cloud/zk-resttemplate/target/
 /microservice-core/cloud/hystrix/target/
 /microservice-core/cloud/feign-client/target/
+/microservice-core/cloud/gateway/target/

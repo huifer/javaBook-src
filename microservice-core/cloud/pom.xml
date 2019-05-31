@@ -20,6 +20,7 @@
     <module>zk-resttemplate</module>
     <module>hystrix</module>
     <module>feign-client</module>
+    <module>gateway</module>
   </modules>
 
   <properties>

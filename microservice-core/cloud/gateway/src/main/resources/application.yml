@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: Gateway-app
+  cloud:
+    gateway:
+      routes:
+        - id: host_route
+          uri: http://localhost:9001
+          predicates:
+            - Path=/a/**
+          filters:
+            - StripPrefix=1
+        - id: host_route
+          uri: http://localhost:9000
+          predicates:
+            - Path=/b/**
+          filters:
+            - StripPrefix=1
+server:
+  port: 9007
+
+
+
+
