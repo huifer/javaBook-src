@@ -272,3 +272,273 @@ data: fourth event continue
   ![sse](assets/sse.gif)
 
 - 使用SSE 的结果返回为一步步的返回， 不适用为等待所有处理完成后返回...
+
+
+
+
+
+## 整合mongodb
+
+- entity
+
+  ```
+  @Data
+  @Document(collection = "t_student")
+  public class Student {
+  
+      @Id
+      private String id;
+  
+  
+      @NotBlank(message = "名字不能空")
+      private String name;
+  
+      @Range(max = 200, min = 18)
+      private int age;
+  
+  
+  }
+  ```
+
+- repository
+
+  ```java
+  public interface StudentRepository
+          extends ReactiveMongoRepository<Student, String> {
+  
+  
+      /***
+       * 根据年龄上下限查询 ，都不包含边界
+       * @param below 下限
+       * @param top 上限
+       * @return
+       */
+      Flux<Student> findByAgeBetween(int below, int top);
+  
+  
+  }
+  ```
+
+- controller
+
+  ```java
+  package com.huifer.webflux.controller;
+  
+  import com.huifer.webflux.entity.Student;
+  import com.huifer.webflux.repository.StudentRepository;
+  import com.huifer.webflux.util.NameValidateUtil;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.http.HttpStatus;
+  import org.springframework.http.MediaType;
+  import org.springframework.http.ResponseEntity;
+  import org.springframework.web.bind.annotation.*;
+  import reactor.core.publisher.Flux;
+  import reactor.core.publisher.Mono;
+  
+  import javax.validation.Valid;
+  
+  
+  @RestController
+  @RequestMapping("/student")
+  public class StudentController {
+  
+  
+      @Autowired
+      private StudentRepository studentRepository;
+  
+      @GetMapping("/all")
+      public Flux<Student> all() {
+          return studentRepository.findAll();
+      }
+  
+      @GetMapping(value = "/sse/all", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+      public Flux<Student> allSSE() {
+          return studentRepository.findAll();
+      }
+  
+      @PostMapping("/update")
+      public ResponseEntity add(@Valid Student student) {
+          return ResponseEntity.ok(studentRepository.save(student));
+      }
+  
+  
+      @PostMapping("/save")
+      public ResponseEntity save(@Valid Student student) {
+          NameValidateUtil.validateName(student.getName());
+  
+          return ResponseEntity.ok(studentRepository.save(student));
+      }
+  
+  
+      @DeleteMapping("/del/{id}")
+      public Mono<Void> deleteStudentVoid(@PathVariable(value = "id") String id) {
+          // 无状态删除 不管是否成功 都是200
+          return studentRepository.deleteById(id);
+      }
+  
+      @DeleteMapping("/ddl/{id}")
+      public Mono<ResponseEntity> deleteStudent(@PathVariable(value = "id") String id) {
+          Mono<ResponseEntity> responseEntityMono = studentRepository.findById(id).flatMap(
+                  student -> studentRepository.delete(student)
+                          // 成功
+                          .then(Mono.just(ResponseEntity.ok().body(student)))
+                          // 失败
+                          .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND))
+          );
+  
+          return responseEntityMono;
+      }
+  
+  
+      @PutMapping("/put/{id}")
+      public Mono<ResponseEntity<Student>> update(@PathVariable(value = "id") String id, @RequestBody Student student) {
+  
+          Mono<ResponseEntity<Student>> responseEntityMono = studentRepository.findById(id).flatMap(
+                  stu -> {
+                      stu.setAge(student.getAge());
+                      stu.setName(student.getName());
+                      return studentRepository.save(stu);
+                  }).map(stu -> new ResponseEntity<Student>(stu, HttpStatus.OK))
+  
+                  .defaultIfEmpty(new ResponseEntity<Student>(HttpStatus.NOT_FOUND));
+  
+  
+          return responseEntityMono;
+      }
+  
+  
+      @GetMapping("/find/{id}")
+      public Mono<ResponseEntity<Student>> findById(@PathVariable("id") String id) {
+  
+          return studentRepository.findById(id).map(stu -> new ResponseEntity<Student>(stu, HttpStatus.OK))
+                  .defaultIfEmpty(new ResponseEntity<Student>(HttpStatus.NOT_FOUND));
+      }
+  
+  
+      @GetMapping("/age/{below}/{top}")
+      public Flux<Student> findByAge(@PathVariable("below") int below, @PathVariable("top") int top) {
+          return studentRepository.findByAgeBetween(below, top);
+      }
+  
+  
+  }
+  ```
+
+- exception
+
+  ```java
+  @Getter
+  @Setter
+  @NoArgsConstructor
+  public class StudentException extends RuntimeException {
+      private String errField;
+      private String errValue;
+  
+      public StudentException(String message, String errField, String errValue) {
+          super(message);
+          this.errField = errField;
+          this.errValue = errValue;
+      }
+  }
+  ```
+
+- advice
+
+  ```java
+  @ControllerAdvice
+  public class StucentAop {
+  
+      private static String apply(String s1, String s2) {
+          return s1 + "\n" + s2;
+      }
+  
+      @ExceptionHandler
+      public ResponseEntity validateHandleName(StudentException ex) {
+          return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+      }
+  
+  
+      @ExceptionHandler
+      public ResponseEntity validateHandle(WebExchangeBindException ex) {
+          return new ResponseEntity(ex2str(ex), HttpStatus.BAD_REQUEST);
+      }
+  
+      private String ex2str(WebExchangeBindException ex) {
+  
+          return ex.getFieldErrors().stream().map(
+                  e -> {
+                      return e.getField() + " : " + e.getDefaultMessage();
+                  }
+          ).reduce("", StucentAop::apply);
+  
+  
+      }
+  
+  
+  }
+  ```
+
+- util
+
+  ```java
+  public class NameValidateUtil {
+  
+  
+      public static final String[] INVALIDE_NAMES = {"ADMIN", "ROOT"};
+  
+      public static void validateName(String name) {
+  
+          Arrays.stream(INVALIDE_NAMES).filter(s -> name.equalsIgnoreCase(s))
+                  .findAny()
+                  .ifPresent(s -> {
+                      throw new StudentException("name 非法名词", s, "非法名词");
+                  });
+  
+          ;
+  
+      }
+  }
+  ```
+
+- 启动项
+
+  ```java
+  @SpringBootApplication
+  @EnableReactiveMongoRepositories
+  public class WebFluxApp {
+      public static void main(String[] args) {
+          SpringApplication.run(WebFluxApp.class, args);
+      }
+  }
+  ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
