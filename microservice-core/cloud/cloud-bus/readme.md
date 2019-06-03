@@ -327,3 +327,15 @@ public class SpringEventController implements ApplicationEventPublisherAware {
   }
   ```
 
+
+
+```sequence
+用户1 --> RemoteAppEventController:发送响应 
+RemoteAppEventController --> HttpRemoteAppEventListener: 接收响应内容，转发给具体的操作类
+HttpRemoteAppEventListener --> RemoteAppEventReceiverController: 处理完成具体的数据返回
+```
+
+
+
+
+
