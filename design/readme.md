@@ -2450,3 +2450,46 @@ public class YW implements Dev {
   ```
 
 - 将小偷的行为列出作为被监控的选项,通过反射方式来调用 发报告的这个操作.
+
+## 监听者模式
+
+### 事件监听器
+
+- 事件监听器扩展接口`java.util.EventListener`
+- 监听方法不会`throws` `Throwable` 
+
+### GUIEvent
+
+```java
+public class GUIEvent {
+
+    public static void main(String[] args) {
+        JFrame jFrame = new JFrame("GUI监听事件");
+        jFrame.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                System.out.printf("[%s]事件：%s\n", Thread.currentThread().getName(), e);
+            }
+        });
+
+        jFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                jFrame.dispose();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+
+        jFrame.setBounds(300, 300, 400, 300);
+        jFrame.setVisible(true);
+    }
+
+}
+```
+
+
+

@@ -23,6 +23,7 @@
     <module>gateway</module>
     <module>cloud-stream</module>
     <module>cloud-stream-server</module>
+    <module>cloud-bus</module>
   </modules>
 
   <properties>
