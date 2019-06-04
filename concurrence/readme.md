@@ -1079,3 +1079,193 @@ public class HelloExecutor {
 
 
 ![](pic/线程池.png)
+
+---
+
+## Disruptor
+
+### 编程模型
+
+1. 创建`Event`
+2. 创建`EventFactory`
+3. 创建`EventHandler`，用来处理数据
+4. 实例化`Disruptor`
+5. 创建生产者向`Disruptor`发送数据
+
+
+
+```java
+public Disruptor(final EventFactory<T> eventFactory,
+                 final int ringBufferSize,
+                 final Executor executor,
+                 final ProducerType producerType,
+                 final WaitStrategy waitStrategy)
+{
+    this(RingBuffer.create(producerType, eventFactory, ringBufferSize, waitStrategy),
+         executor);
+}
+```
+
+参数：
+
+- eventFactory:创建event 消息工厂
+- ringBufferSize:容器大小
+- executor:线程池
+- producerType:单生产模式，多生产模式
+  - `com.lmax.disruptor.dsl.ProducerType#SINGLE`
+  - `com.lmax.disruptor.dsl.ProducerType#MULTI`
+- waitStrategy:等待策略
+
+#### demo
+
+- `OrderEvent`
+
+  ```java
+  public class OrderEvent implements Serializable {
+  
+  
+      private static final long serialVersionUID = 4026526345323124428L;
+      private int value;
+  
+      public OrderEvent() {
+      }
+  
+      public static long getSerialVersionUID() {
+          return serialVersionUID;
+      }
+  
+      public void setValue(int value) {
+          this.value = value;
+      }
+  
+      public long getValue() {
+          return value;
+      }
+  
+  
+      @Override
+      public String toString() {
+          final StringBuilder sb = new StringBuilder("{");
+          sb.append("\"value\":")
+                  .append(value);
+          sb.append('}');
+          return sb.toString();
+      }
+  }
+  ```
+
+- `OrderEventFactory`
+
+  ```java
+  public class OrderEventFactory implements EventFactory {
+  
+      @Override
+      public Object newInstance() {
+          return new OrderEvent();
+      }
+  }
+  ```
+
+- `OrderEventHandler`
+
+  ```java
+  public class OrderEventHandler implements EventHandler<OrderEvent> {
+  
+      @Override
+      public void onEvent(OrderEvent orderEvent, long l, boolean b) throws Exception {
+          System.out.println(orderEvent);
+      }
+  }
+  ```
+
+- `OrderEventProducer`
+
+  ```java
+  public class OrderEventProducer {
+  
+      private RingBuffer<OrderEvent> ringBuffer;
+  
+      public OrderEventProducer(RingBuffer<OrderEvent> ringBuffer) {
+          this.ringBuffer = ringBuffer;
+      }
+  
+      public void send(ByteBuffer byteBuffer) {
+          //1.从RingBuffer中获取可用序号
+          long sequence = ringBuffer.next();
+          try {
+              //2. 根据sequence 需要找到一个没有数据内容的 Event
+              OrderEvent orderEvent = ringBuffer.get(sequence);
+              //3. 填充数据
+              orderEvent.setValue(byteBuffer.getInt(0));
+          } finally {
+              //4. 提交数据
+              ringBuffer.publish(sequence);
+          }
+  
+      }
+  
+  }
+  ```
+
+- `Run`
+
+  ```java
+  public class Test {
+  
+      public static void main(String[] args) {
+          OrderEventFactory orderEventFactory = new OrderEventFactory();
+          int ringBufferSize = 1024 * 1024;
+          ExecutorService service = Executors
+                  .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+          /**
+           * com.lmax.disruptor.dsl.Disruptor#Disruptor(com.lmax.disruptor.EventFactory, int, java.util.concurrent.Executor, com.lmax.disruptor.dsl.ProducerType, com.lmax.disruptor.WaitStrategy) 参数说明
+           * 1. orderEventFactory: 创建event 消息工厂
+           * 2. ringBufferSize: 容器大小
+           * 3. service: 线程池
+           * 4. ProducerType: 单生产模式，多生产模式
+           * 5. waitStrategy: 等待策略
+           */
+          // 步骤1：Disruptor实例创建
+          Disruptor<OrderEvent> disruptor = new Disruptor<>(
+                  orderEventFactory,
+                  ringBufferSize,
+                  service,
+                  ProducerType.SINGLE,
+                  new BlockingWaitStrategy()
+          );
+          // 步骤2：添加消费者监听器
+          disruptor.handleEventsWith(new OrderEventHandler());
+          disruptor.start();
+          // 步骤3: 数据生产者
+          // 获取存储数据的实例
+          RingBuffer<OrderEvent> ringBuffer = disruptor.getRingBuffer();
+          ringBuffer.addGatingSequences();
+  
+          OrderEventProducer producer = new OrderEventProducer(ringBuffer);
+  
+          ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+          for (int i = 0; i < 100; i++) {
+              byteBuffer.putInt(0, i);
+              producer.send(byteBuffer);
+          }
+  
+          disruptor.shutdown();
+          service.shutdown();
+  
+      }
+  
+  }
+  ```
+
+
+
+
+
+```sequence
+EventHandler --> Disruptor : 加载消费者监听器
+data --> Disruptor: 加载数据道Disruptor.getRingBuffer
+Disruptor --> EventProducer : 将消息从ringbuffer中获取交给生产者
+EventProducer --> EventHandler : 当有消息从EventProducer发送过来进行处理
+EventHandler --> print(data):  打印data
+```
+
