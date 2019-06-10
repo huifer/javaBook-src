@@ -524,3 +524,4 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/cloud/cloud-stream/target/
 /microservice-core/cloud/cloud-bus/target/
 /microservice-core/webflux/target/
+/distributed/kafka/target/
