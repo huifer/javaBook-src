@@ -1,11 +1,9 @@
-# RPC
-
-## rmi
+# rmi
 
 - 接口继承`java.rmi.Remote`
 - 实现类继承`java.rmi.server.UnicastRemoteObject`
 
-### 简单demo
+## 简单demo
 
 ```java
 public interface HelloService extends Remote {
