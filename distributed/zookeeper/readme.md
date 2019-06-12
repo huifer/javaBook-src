@@ -418,3 +418,205 @@ leader --> follower2: 死亡连接
 - datadir/myid（服务器id）
   - **myid越大，在leader选举中，权重越大**
 
+#### leader 选举源码
+
+```java
+    public Vote lookForLeader() throws InterruptedException {
+        try {
+            self.jmxLeaderElectionBean = new LeaderElectionBean();
+            MBeanRegistry.getInstance().register(
+                    self.jmxLeaderElectionBean, self.jmxLocalPeerBean);
+        } catch (Exception e) {
+            LOG.warn("Failed to register with JMX", e);
+            self.jmxLeaderElectionBean = null;
+        }
+        if (self.start_fle == 0) {
+           self.start_fle = Time.currentElapsedTime();
+        }
+        try {
+            // 收到的投票
+            Map<Long, Vote> recvset = new HashMap<Long, Vote>();
+			// 选举结果
+            Map<Long, Vote> outofelection = new HashMap<Long, Vote>();
+
+            int notTimeout = minNotificationInterval;
+
+            synchronized(this){
+                logicalclock.incrementAndGet();
+                updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
+            }
+
+            LOG.info("New election. My id =  " + self.getId() +
+                    ", proposed zxid=0x" + Long.toHexString(proposedZxid));
+            sendNotifications();
+
+            SyncedLearnerTracker voteSet;
+
+            /*
+             * Loop in which we exchange notifications until we find a leader
+             */
+			// 死循环直到选出leader结束
+            while ((self.getPeerState() == ServerState.LOOKING) &&
+                    (!stop)){
+                /*
+                 * Remove next notification from queue, times out after 2 times
+                 * the termination time
+                 */
+                // 透标消息
+                Notification n = recvqueue.poll(notTimeout,
+                        TimeUnit.MILLISECONDS);
+
+                /*
+                 * Sends more notifications if haven't received enough.
+                 * Otherwise processes new notification.
+                 */
+                if(n == null){
+                    if(manager.haveDelivered()){
+                        sendNotifications();
+                    } else {
+                        manager.connectAll();
+                    }
+
+                    /*
+                     * Exponential backoff
+                     */
+                    // 延长超时时间
+                    int tmpTimeOut = notTimeout*2;
+                    notTimeout = (tmpTimeOut < maxNotificationInterval?
+                            tmpTimeOut : maxNotificationInterval);
+                    LOG.info("Notification time out: " + notTimeout);
+                }
+                // 收到投票内容，判断是否属于当前集群
+                else if (validVoter(n.sid) && validVoter(n.leader)) {
+                    /*
+                     * Only proceed if the vote comes from a replica in the current or next
+                     * voting view for a replica in the current or next voting view.
+                     */
+                    // 判断当前节点状态
+                    switch (n.state) {
+                    case LOOKING:
+                        if (getInitLastLoggedZxid() == -1) {
+                            LOG.debug("Ignoring notification as our zxid is -1");
+                            break;
+                        }
+                        if (n.zxid == -1) {
+                            LOG.debug("Ignoring notification from member with -1 zxid" + n.sid);
+                            break;
+                        }
+                        // If notification > current, replace and send messages out
+                        // epoch >logicalclock 表示这是一个新的选举
+                        if (n.electionEpoch > logicalclock.get()) {
+                            // 跟新 logicalclock
+                            logicalclock.set(n.electionEpoch);
+                            // 清空收到的投票
+                            recvset.clear();
+                            // 判断当前消息是否可以作为leader
+                            if(totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
+                                    getInitId(), getInitLastLoggedZxid(), getPeerEpoch())) {
+                                // 选举成功，修改	投票
+                                updateProposal(n.leader, n.zxid, n.peerEpoch);
+                            } else {
+                                // 选举失败不操作
+                                updateProposal(getInitId(),
+                                        getInitLastLoggedZxid(),
+                                        getPeerEpoch());
+                            }
+                            
+                            sendNotifications();// 广播消息，让其他节点知道当前节点的投票信息
+                        } else if (n.electionEpoch < logicalclock.get()) {
+                            // 如果epoch小于<logicalclock则忽略
+                           
+                            if(LOG.isDebugEnabled()){
+                                LOG.debug("Notification election epoch is smaller than logicalclock. n.electionEpoch = 0x"
+                                        + Long.toHexString(n.electionEpoch)
+                                        + ", logicalclock=0x" + Long.toHexString(logicalclock.get()));
+                            }
+                            break;
+                        } else if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
+                                proposedLeader, proposedZxid, proposedEpoch)) {
+                            updateProposal(n.leader, n.zxid, n.peerEpoch);
+                            sendNotifications();
+                        }
+
+                        if(LOG.isDebugEnabled()){
+                            LOG.debug("Adding vote: from=" + n.sid +
+                                    ", proposed leader=" + n.leader +
+                                    ", proposed zxid=0x" + Long.toHexString(n.zxid) +
+                                    ", proposed election epoch=0x" + Long.toHexString(n.electionEpoch));
+                        }
+
+                        // don't care about the version if it's in LOOKING state
+                            // 将投票结果存入map中，过半数通过
+                        recvset.put(n.sid, new Vote(n.leader, n.zxid, n.electionEpoch, n.peerEpoch));
+
+                        voteSet = getVoteTracker(
+                                recvset, new Vote(proposedLeader, proposedZxid,
+                                        logicalclock.get(), proposedEpoch));
+
+                        if (voteSet.hasAllQuorums()) {
+
+                            // Verify if there is any change in the proposed leader
+                           	//
+                            while((n = recvqueue.poll(finalizeWait,
+                                    TimeUnit.MILLISECONDS)) != null){
+                                if(totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
+                                        proposedLeader, proposedZxid, proposedEpoch)){
+                                    recvqueue.put(n);
+                                    break;
+                                }
+                            }
+
+                            /*
+                             * This predicate is true once we don't read any new
+                             * relevant message from the reception queue
+                             */
+                            // 确认leader
+                            if (n == null) {
+                                setPeerState(proposedLeader, voteSet);
+                                Vote endVote = new Vote(proposedLeader,
+                                        proposedZxid, logicalclock.get(), 
+                                        proposedEpoch);
+                                leaveInstance(endVote);
+                                return endVote;
+                            }
+                        }
+                        break;
+                   // ...more
+    }	
+```
+
+- leader 选举的权重比较
+        - New epoch is higher
+        - New epoch is the same as current epoch, but new zxid is higher
+        - New epoch is the same as current epoch, new zxid is the same
+
+
+```java
+    /**
+     * Check if a pair (server id, zxid) succeeds our
+     * current vote.
+     *
+     */
+    protected boolean totalOrderPredicate(long newId, long newZxid, long newEpoch, long curId, long curZxid, long curEpoch) {
+        LOG.debug("id: " + newId + ", proposed id: " + curId + ", zxid: 0x" +
+                Long.toHexString(newZxid) + ", proposed zxid: 0x" + Long.toHexString(curZxid));
+        if(self.getQuorumVerifier().getWeight(newId) == 0){
+            return false;
+        }
+
+        /*
+         * We return true if one of the following three cases hold:
+         * 1- New epoch is higher
+         * 2- New epoch is the same as current epoch, but new zxid is higher
+         * 3- New epoch is the same as current epoch, new zxid is the same
+         *  as current zxid, but server id is higher.
+         */
+
+        return ((newEpoch > curEpoch) ||
+                ((newEpoch == curEpoch) &&
+                ((newZxid > curZxid) || ((newZxid == curZxid) && (newId > curId)))));
+    }
+```
+
+## zookeeper - java - api
+
