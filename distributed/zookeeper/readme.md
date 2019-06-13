@@ -620,3 +620,58 @@ leader --> follower2: 死亡连接
 
 ## zookeeper - java - api
 
+- 构造方法
+
+  ```java
+      /**
+       *
+       * @param connectString 服务端IP地址: 端口
+       * @param sessionTimeout 超时时间
+       * @throws IOException
+       */
+      public ZooKeeper(String connectString, int sessionTimeout, Watcher watcher) throws IOException {
+          this(connectString, sessionTimeout, watcher, false);
+      }
+  ```
+
+- 创建节点
+
+  ```java
+      /**
+       * 
+       * @param path 节点地址
+       * @param data value
+       * @param acl org.apache.zookeeper.ZooDefs.Ids
+       * @param createMode org.apache.zookeeper.CreateMode
+       */
+      public String create(String path, byte[] data, List<ACL> acl, CreateMode createMode) throws KeeperException, InterruptedException {
+      }
+  ```
+
+- 删除节点
+
+  ```java
+      /**
+       * 
+       * @param path 节点地址
+       * @param version 版本号
+       */
+      public void delete(String path, int version) throws InterruptedException, KeeperException {
+      }
+  
+  ```
+
+- 判断节点是否存在
+
+  ```java
+  /**
+   * 
+   * @param path 节点地址
+   */
+  public Stat exists(String path, boolean watch) throws KeeperException, InterruptedException {
+      return this.exists(path, watch ? this.watchManager.defaultWatcher : null);
+  }
+  ```
+
+   
+
