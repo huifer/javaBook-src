@@ -675,3 +675,28 @@ leader --> follower2: 死亡连接
 
    
 
+- 监听节点变化情况
+
+  ```java
+  private void registerWatcher(String path) {
+      try {
+  
+          PathChildrenCache childrenCache = new PathChildrenCache(curatorFramework, path, true);
+          PathChildrenCacheListener pathChildrenCacheListener = (curatorFramework, pathChildrenCacheEvent) ->
+                  servicePaths = curatorFramework.getChildren().forPath(path);
+  
+          childrenCache.getListenable().addListener(pathChildrenCacheListener);
+          childrenCache.start();
+      } catch (Exception e) {
+          System.out.println("注册 watcher 失败");
+          e.printStackTrace();
+      }
+  
+  }
+  ```
+
+- 获取子节点
+
+  ```java
+  curatorFramework.getChildren().forPath(path);
+  ```
