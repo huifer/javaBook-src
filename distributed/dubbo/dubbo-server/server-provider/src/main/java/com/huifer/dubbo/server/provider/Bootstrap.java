@@ -14,7 +14,7 @@ public class Bootstrap {
 
     public static void main(String[] args) throws IOException {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                "dubbo-server.xml");
+                "META-INF/spring/dubbo-server.xml");
         context.start();
         System.in.read();
     }

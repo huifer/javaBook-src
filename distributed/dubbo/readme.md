@@ -235,3 +235,44 @@
   ```
 
   
+
+
+
+## dubbo 在zookeeper
+
+启动一个dubbo服务端项目在zookeeper的结构
+
+- 启动一个dubbo服务端，内含包括
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+
+  <!-- 提供方应用信息，用于计算依赖关系 -->
+  <dubbo:application name="dubbo-server-provider" owner="hufier"/>
+
+  <dubbo:registry address="zookeeper://192.168.1.107:2181"/>
+  <!-- 用dubbo协议在20880端口暴露服务 -->
+  <dubbo:protocol name="dubbo" port="20880"/>
+
+  <!-- 声明需要暴露的服务接口 -->
+  <dubbo:service interface="com.huifer.dubbo.server.api.DubboHello" ref="dubboHello" protocol="dubbo"/>
+  <dubbo:service interface="com.huifer.dubbo.server.api.DubboHello2" ref="dubboHello2" protocol="hessian"/>
+
+  <!-- 和本地bean一样实现服务 id=server:ref-->
+  <bean id="dubboHello" class="com.huifer.dubbo.server.provider.DubboHelloImpl"/>
+  <bean id="dubboHello2" class="com.huifer.dubbo.server.provider.DubboHelloImpl2"/>
+
+</beans>
+```
+
+```sequence
+\ --> dubbo:
+
+```
+
+
+
