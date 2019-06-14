@@ -495,6 +495,89 @@ public interface DubboVersion1 {
 
 
 
+## SPI
+
+### Java SPI
+
+```sequence
+调用者-->BaseService:调用
+BaseService --> BaseServiceImpl1:发现
+BaseService --> BaseServiceImpl2:发现
+```
+
+![img](https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=1303612677,3379121401&fm=15&gp=0.jpg)
+
+- 基本接口
+
+  ```java
+  public interface BaseService {
+      String hello(String msg);
+  }
+  ```
+
+- 实现1
+
+  ```java
+  public class BaseServiceImplV1 implements BaseService {
+  
+      @Override
+      public String hello(String msg) {
+          return "v1 : " + msg;
+      }
+  }
+  ```
+
+- 实现2
+
+  ```java
+  public class BaseServiceImplV2 implements BaseService {
+  
+      @Override
+      public String hello(String msg) {
+          return "v2 : " + msg;
+      }
+  }
+  ```
+
+- 配置文件
+
+  `src/main/resources/`下创建` /META-INF/services`，并且以接口全类名创建文件，填写内容为实现该类的实现类的全类名
+
+  - `com.huifer.dubbo.spi.BaseService`
+
+    ```
+    com.huifer.dubbo.spi.BaseServiceImplV1
+    com.huifer.dubbo.spi.BaseServiceImplV2
+    
+    ```
+
+    ![1560483748172](assets/1560483748172.png)
+
+
+
+- 启动
+
+  ```java
+  public class Run {
+  
+      public static void main(String[] args) {
+          ServiceLoader<BaseService> baseServices = ServiceLoader.load(BaseService.class);
+  
+          for (BaseService baseService : baseServices) {
+              System.out.println(baseService.hello("fff"));;
+          }
+      }
+  
+  }
+  ```
+  - 运行结果
+
+    ```
+    v1 : fff
+    v2 : fff
+    ```
+
+    
 
 
 
@@ -506,20 +589,85 @@ public interface DubboVersion1 {
 
 
 
+### dubbo SPI
+
+官方文档 <http://dubbo.apache.org/zh-cn/docs/source_code_guide/dubbo-spi.html>
+
+- dubbo中spi资源应该放在那里？
+  - /META-INF/dubbo下
+- 文件编写
+  - 文件名: 全路径类名
+  - 内容 key=value
 
 
 
+- 接口
 
+  ```java
+  @SPI
+  public interface Robot {
+      void sayHello();
+  }
+  ```
 
+- 接口实现1
 
+  ```java
+  public class Bumblebee implements Robot {
+  
+      @Override
+      public void sayHello() {
+          System.out.println("Hello, I am Bumblebee.");
+      }
+  }
+  ```
 
+- 接口实现2
 
+  ```java
+  public class OptimusPrime implements Robot {
+  
+      @Override
+      public void sayHello() {
+          System.out.println("Hello, I am Optimus Prime.");
+      }
+  }
+  ```
 
+- 配置文件
 
+  ```
+  optimusPrime=com.huifer.dubbo.client.spi.OptimusPrime
+  bumblebee=com.huifer.dubbo.client.spi.Bumblebee
+  ```
 
+- 启动器
 
+  ```java
+  public class SpiDemo {
+  
+      public static void main(String[] args) {
+  
+          ExtensionLoader<Robot> extensionLoader =
+                  ExtensionLoader.getExtensionLoader(Robot.class);
+          Robot optimusPrime = extensionLoader.getExtension("optimusPrime");
+          optimusPrime.sayHello();
+          Robot bumblebee = extensionLoader.getExtension("bumblebee");
+          bumblebee.sayHello();
+  
+      }
+  
+  }
+  ```
 
+  - 下图为一个错误的拼写
 
+![1560494151911](assets/1560494151911.png)
+
+- 正确拼写
+  - ![1560494666016](assets/1560494666016.png)
+
+相关issues: <https://github.com/apache/dubbo/issues/4310> 问题在单词拼写 :cry:
 
 
 

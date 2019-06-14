@@ -11,6 +11,7 @@
   <modules>
     <module>dubbo-client</module>
     <module>dubbo-server</module>
+    <module>spi</module>
   </modules>
 
   <properties>
