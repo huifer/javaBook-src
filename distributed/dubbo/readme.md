@@ -591,6 +591,8 @@ BaseService --> BaseServiceImpl2:发现
 
 ### dubbo SPI
 
+#### demo
+
 官方文档 <http://dubbo.apache.org/zh-cn/docs/source_code_guide/dubbo-spi.html>
 
 - dubbo中spi资源应该放在那里？
@@ -669,6 +671,28 @@ BaseService --> BaseServiceImpl2:发现
 
 相关issues: <https://github.com/apache/dubbo/issues/4310> 问题在单词拼写 :cry:
 
+##### 检查流程
+
+- 打开target文件夹下查看编译后结果
+
+  ![1560495045916](assets/1560495045916.png)
+
+  然后就知道问题了!!!!!!!!
+
+  
+
+#### org.apache.dubbo.common.extension.ExtensionLoader 类
+
+> 调用链
+>
+> - `org.apache.dubbo.common.extension.ExtensionLoader#getExtensionLoader`
+>   - `org.apache.dubbo.common.extension.ExtensionLoader#getAdaptiveExtension`
+>     - `org.apache.dubbo.common.extension.ExtensionLoader#createAdaptiveExtension`
+>       - `org.apache.dubbo.common.extension.ExtensionLoader#getAdaptiveExtensionClass`
+>         - `org.apache.dubbo.common.extension.ExtensionLoader#getExtensionClasses`
+>           - `org.apache.dubbo.common.extension.ExtensionLoader#loadExtensionClasses`
+>             - `org.apache.dubbo.common.extension.ExtensionLoader#cacheDefaultExtensionName`
+>         - `org.apache.dubbo.common.extension.ExtensionLoader#createAdaptiveExtensionClass`
 
 
 
@@ -678,4 +702,161 @@ BaseService --> BaseServiceImpl2:发现
 
 
 
+- `org.apache.dubbo.common.extension.ExtensionLoader#getExtensionLoader`
+
+  - 作用: 传入一个class 来获得 `ExtensionLoader`
+
+  ```java
+  @SuppressWarnings("unchecked")
+  public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
+      if (type == null) {
+          throw new IllegalArgumentException("Extension type == null");
+      }
+      if (!type.isInterface()) {
+          throw new IllegalArgumentException("Extension type (" + type + ") is not an interface!");
+      }
+      if (!withExtensionAnnotation(type)) {
+          throw new IllegalArgumentException("Extension type (" + type +
+                  ") is not an extension, because it is NOT annotated with @" + SPI.class.getSimpleName() + "!");
+      }
+  	// 从EXTENSION_LOADERS中获取 这是个Map<Class,ExtensionLoader>
+      ExtensionLoader<T> loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
+      if (loader == null) {
+          // 创建一个 ExtensionLoader
+          EXTENSION_LOADERS.putIfAbsent(type, new ExtensionLoader<T>(type));
+          loader = (ExtensionLoader<T>) EXTENSION_LOADERS.get(type);
+      }
+      return loader;
+  }
+  ```
+
+- 继续debug进入到了`org.apache.dubbo.common.extension.ExtensionLoader#getAdaptiveExtension`方法
+
+  - 将instance 创建到内存中
+
+  ```java
+  @SuppressWarnings("unchecked")
+  public T getAdaptiveExtension() {
+      Object instance = cachedAdaptiveInstance.get();
+      if (instance == null) {
+          if (createAdaptiveInstanceError == null) {
+              synchronized (cachedAdaptiveInstance) {
+                  instance = cachedAdaptiveInstance.get();
+                  if (instance == null) {
+                      try {
+                          // 将 instance 放入cachedAdaptiveInstance
+                          instance = createAdaptiveExtension();
+                          cachedAdaptiveInstance.set(instance);
+                      } catch (Throwable t) {
+                          createAdaptiveInstanceError = t;
+                          throw new IllegalStateException("Failed to create adaptive instance: " + t.toString(), t);
+                      }
+                  }
+              }
+          } else {
+              throw new IllegalStateException("Failed to create adaptive instance: " + createAdaptiveInstanceError.toString(), createAdaptiveInstanceError);
+          }
+      }
+  
+      return (T) instance;
+  }
+  ```
+
+- `createAdaptiveExtension()`
+
+  ```java
+  @SuppressWarnings("unchecked")
+  private T createAdaptiveExtension() {
+      try {
+          // 获得一个适配器实例
+          return injectExtension((T) getAdaptiveExtensionClass().newInstance());
+      } catch (Exception e) {
+          throw new IllegalStateException("Can't create adaptive extension " + type + ", cause: " + e.getMessage(), e);
+      }
+  }
+  ```
+
+- `getAdaptiveExtensionClass()`
+
+  ```java
+  private Class<?> getAdaptiveExtensionClass() {
+      getExtensionClasses();
+      if (cachedAdaptiveClass != null) {
+          return cachedAdaptiveClass;
+      }
+      return cachedAdaptiveClass = createAdaptiveExtensionClass();
+  }
+  ```
+
+- `getExtensionClasses`
+
+  - 获取所有扩展类 `Holder<Map<String, Class<?>>> cachedClasses`
+
+  ```java
+  private Map<String, Class<?>> getExtensionClasses() {
+      Map<String, Class<?>> classes = cachedClasses.get();
+      if (classes == null) {
+          synchronized (cachedClasses) {
+              classes = cachedClasses.get();
+              if (classes == null) {
+                  classes = loadExtensionClasses();
+                  cachedClasses.set(classes);
+              }
+          }
+      }
+      return classes;
+  }
+  ```
+
+- `loadExtensionClasses`
+
+  加载dubbo预设扩展点
+
+  ```java
+  private Map<String, Class<?>> loadExtensionClasses() {
+      cacheDefaultExtensionName();
+  
+      Map<String, Class<?>> extensionClasses = new HashMap<>();
+      loadDirectory(extensionClasses, DUBBO_INTERNAL_DIRECTORY, type.getName());
+      loadDirectory(extensionClasses, DUBBO_INTERNAL_DIRECTORY, type.getName().replace("org.apache", "com.alibaba"));
+      loadDirectory(extensionClasses, DUBBO_DIRECTORY, type.getName());
+      loadDirectory(extensionClasses, DUBBO_DIRECTORY, type.getName().replace("org.apache", "com.alibaba"));
+      loadDirectory(extensionClasses, SERVICES_DIRECTORY, type.getName());
+      loadDirectory(extensionClasses, SERVICES_DIRECTORY, type.getName().replace("org.apache", "com.alibaba"));
+      return extensionClasses;
+  }
+  ```
+
+  ```java
+  private static final String SERVICES_DIRECTORY = "META-INF/services/";
+  
+  private static final String DUBBO_DIRECTORY = "META-INF/dubbo/";
+  
+  private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
+  ```
+
+  ![1560497310497](assets/1560497310497.png)
+
+  这些内容会被加载，当然项目中的也会被加载
+
+  ![1560497372159](assets/1560497372159.png)
+
+
+
+- `cacheDefaultExtensionName`
+
+- `createAdaptiveExtensionClass`
+
+  - 创建扩展点
+
+  ```java
+  private Class<?> createAdaptiveExtensionClass() {
+      String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
+      ClassLoader classLoader = findClassLoader();
+      org.apache.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+      return compiler.compile(code, classLoader);
+  }
+  ```
+
+---
 
