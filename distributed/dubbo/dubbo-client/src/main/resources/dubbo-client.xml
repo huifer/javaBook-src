@@ -5,15 +5,22 @@
   xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
 
   <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
-  <dubbo:application name="dubbo-client"  />
+  <dubbo:application name="dubbo-client"/>
 
   <dubbo:registry address="zookeeper://192.168.1.107:2181"/>
 
   <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
-  <dubbo:reference id="dubboHello" interface="com.huifer.dubbo.server.api.DubboHello" />
-  <dubbo:reference id="dubboHello2" interface="com.huifer.dubbo.server.api.DubboHello2" />
+  <dubbo:reference id="dubboHello" interface="com.huifer.dubbo.server.api.DubboHello"/>
+  <dubbo:reference id="dubboHello2" interface="com.huifer.dubbo.server.api.DubboHello2"/>
 
 
+  <dubbo:reference id="acac"
+    interface="com.huifer.dubbo.server.api.DubboVersion1"
+    version="2.0.0"
+    timeout="1"
+    mock="com.huifer.dubbo.client.mock.MockDemo"
+
+  />
 
 
 </beans>

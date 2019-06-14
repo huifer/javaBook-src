@@ -1,6 +1,7 @@
 package com.huifer.dubbo.client;
 
 import com.huifer.dubbo.server.api.DubboHello;
+import com.huifer.dubbo.server.api.DubboVersion1;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -17,8 +18,11 @@ public class HelloClient {
                 "dubbo-client.xml");
         DubboHello dubboHello = (DubboHello) context.getBean("dubboHello");
 
-        String helloDubbo = dubboHello.hello("hello dubbo");
-        System.out.println(helloDubbo);
+//        String helloDubbo = dubboHello.hello("hello dubbo");
+//        System.out.println(helloDubbo);
+
+        DubboVersion1 dv1 = (DubboVersion1) context.getBean("acac");
+        System.out.println(dv1.sayHelloV1("hello-dubbo"));
     }
 
 }

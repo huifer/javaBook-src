@@ -12,11 +12,24 @@
   <dubbo:protocol name="dubbo" port="20880"/>
 
   <!-- 声明需要暴露的服务接口 -->
-  <dubbo:service interface="com.huifer.dubbo.server.api.DubboHello" ref="dubboHello" protocol="dubbo"/>
-  <dubbo:service interface="com.huifer.dubbo.server.api.DubboHello2" ref="dubboHello2" protocol="hessian"/>
+  <dubbo:service interface="com.huifer.dubbo.server.api.DubboHello" ref="dubboHello"
+    protocol="dubbo,hessian"/>
+  <dubbo:service interface="com.huifer.dubbo.server.api.DubboHello2" ref="dubboHello2"
+    protocol="hessian"/>
 
   <!-- 和本地bean一样实现服务 id=server:ref-->
   <bean id="dubboHello" class="com.huifer.dubbo.server.provider.DubboHelloImpl"/>
   <bean id="dubboHello2" class="com.huifer.dubbo.server.provider.DubboHelloImpl2"/>
+
+
+  <dubbo:service interface="com.huifer.dubbo.server.api.DubboVersion1" ref="dv1" protocol="dubbo"
+    version="1.0.0"/>
+  <dubbo:service interface="com.huifer.dubbo.server.api.DubboVersion1" ref="dv2" protocol="dubbo"
+    version="2.0.0"/>
+
+
+  <bean id="dv1" class="com.huifer.dubbo.server.provider.DubboV1" />
+  <bean id="dv2" class="com.huifer.dubbo.server.provider.DubboV2"/>
+
 
 </beans>
