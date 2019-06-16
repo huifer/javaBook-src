@@ -224,3 +224,189 @@ public class Demo01 {
     }
 }
 ```
+
+
+
+### `collect`
+
+```java
+public class Dmo02 {
+    public static void main(String[] args) {
+        Stream<String> stringStream = Stream.of("a", "b", "c");
+        // 转换成string数组
+        // 方法引用
+        String[] strings = stringStream.toArray(String[]::new);
+
+        System.out.println(strings);
+
+        List<String> collect = Arrays.stream(strings).collect(Collectors.toList());
+
+
+        ArrayList<String> collect1 = Arrays.stream(strings).collect(
+                () -> new ArrayList<String>(), // 返回类型
+                (list, item) -> list.add(item), // 将item传入list中
+                (result, list) -> result.addAll(list) // 将list全部追加到result中返回
+        );
+
+        System.out.println(collect1);
+    }
+}
+
+```
+
+- `java.util.stream.Stream#collect(java.util.function.Supplier<R>, java.util.function.BiConsumer<R,? super T>, java.util.function.BiConsumer<R,R>)`
+
+  ```java
+  <R> R collect(Supplier<R> supplier, // 结果容器
+                BiConsumer<R, ? super T> accumulator, // 和结果容器相关联的一个函数，用来合并
+                BiConsumer<R, R> combiner// 结果返回
+                );
+  ```
+
+
+
+- `java.util.stream.Collectors#toList`
+
+  ```java
+  public static <T>
+  Collector<T, ?, List<T>> toList() {
+      return new CollectorImpl<>((Supplier<List<T>>) ArrayList::new, List::add,
+                                 (left, right) -> { left.addAll(right); return left; },
+                                 CH_ID);
+  }
+  ```
+
+  
+
+### `Collectors.toCollection`
+
+- 可用来做数据类型转换，也可以使用`toSet`这类方法
+
+```java
+public class Demo03 {
+    public static void main(String[] args) {
+        Stream<String> stringStream = Stream.of("a", "b", "c");
+        ArrayList<String> collect = stringStream.collect(Collectors.toCollection(ArrayList::new));
+HashSet<String> collect1 = stringStream.collect(Collectors.toCollection(HashSet::new));
+    }
+}
+```
+
+
+
+
+
+### `Optional`
+
+```java
+public class Demo04 {
+    public static void main(String[] args) {
+//        Stream<String> stringStream = Stream.generate(UUID.randomUUID()::toString);
+        Stream<String> stringStream = null;
+
+        stringStream.findFirst().get();
+
+        if (stringStream.findFirst().isPresent()) {
+            // TODO:.....
+        }
+        stringStream.findFirst().ifPresent(System.out::println);
+
+    }
+}
+```
+
+- Optional这个类存在一个判断是否为空，直接get可能存在`Exception in thread "main" java.lang.NullPointerException`异常，为了规避这个异常使用`ifPresent`方法进行判断在进行后续操作
+
+### `iterate` & `limit`
+
+- `iterate`无限流
+- `limit`限制次数
+
+```java
+public class Demo05 {
+    public static void main(String[] args) {
+        Stream.iterate(0, item -> item + 2).limit(10);
+    }
+}
+```
+
+### 流的关闭与使用
+
+- 下列代码存在什么问题？
+
+```java
+public class Demo05 {
+    public static void main(String[] args) {
+        Stream<Integer> integerStream = Stream.iterate(1, item -> item + 1).limit(10);
+        int sum = integerStream.filter(integer -> integer > 2).mapToInt(x -> x * 2).skip(2).limit(2).sum();
+        System.out.println(sum);
+        IntSummaryStatistics intSummaryStatistics = integerStream.filter(integer -> integer > 2).mapToInt(x -> x * 2).summaryStatistics();
+
+        System.out.println(intSummaryStatistics.getMin());
+    }
+}
+```
+
+- 再sum这一行结束后`integerStream`流被关闭了
+
+  - 重复使用一个流会抛出异常
+  - 流关闭会抛出异常
+
+  ```
+  32
+  Exception in thread "main" java.lang.IllegalStateException: stream has already been operated upon or closed
+  	at java.base/java.util.stream.AbstractPipeline.<init>(AbstractPipeline.java:203)
+  	at java.base/java.util.stream.ReferencePipeline.<init>(ReferencePipeline.java:94)
+  	at java.base/java.util.stream.ReferencePipeline$StatelessOp.<init>(ReferencePipeline.java:696)
+  	at java.base/java.util.stream.ReferencePipeline$2.<init>(ReferencePipeline.java:165)
+  	at java.base/java.util.stream.ReferencePipeline.filter(ReferencePipeline.java:164)
+  	at com.huifer.jdk.jdk8.stearm.Demo05.main(Demo05.java:17)
+  
+  ```
+
+  ```java
+  Stream<Integer> integerStream1 = integerStream.filter(i -> i > 2);
+  System.out.println(integerStream1);
+  Stream<Integer> distinct = integerStream1.distinct();
+  Stream<Integer> integerStream2 = distinct.filter(i -> 2 > 3);
+  System.out.println(integerStream2);
+  ```
+
+- 正确代码如下
+
+  ```java
+  public class Demo05 {
+      public static void main(String[] args) {
+          Stream<Integer> integerStream = Stream.iterate(1, item -> item + 1).limit(10);
+          IntSummaryStatistics intSummaryStatistics = integerStream.filter(integer -> integer > 2).mapToInt(x -> x * 2).summaryStatistics();
+  
+          System.out.println(intSummaryStatistics.getMin());
+      }
+  }
+  ```
+
+  上述代码存在删除了一部分原始的需求(求和操作) , 将两种或者多种进行多次分装函数
+
+### 流的中间操作
+
+- stream 的中间操作需要有一个终止操作才会有中间操作执行
+  - 中间操作判断：查看返回值是否为`stream`
+  - 终止操作
+    - collect
+    - foreach
+    - ...
+
+```java
+public class Demo06 {
+    public static void main(String[] args) {
+        Stream.of(1, 2, 3, 4).map(i -> {
+            System.out.println("中间方法调用");
+            return i;
+        }).collect(Collectors.toList());
+        
+
+//                .forEach(System.out::println);
+    }
+}
+```
+
