@@ -1413,50 +1413,56 @@ BaseService --> BaseServiceImpl2:发现
 >
 >             - `org.apache.dubbo.config.ServiceConfig#exportLocal`
 >
->               `org.apache.dubbo.common.extension.ExtensionLoader#createAdaptiveExtensionClass`中的具体export方法通过适配器的方式进行调用
+>            `org.apache.dubbo.common.extension.ExtensionLoader#createAdaptiveExtensionClass`中的具体export方法通过适配器的方式进行调用
 >
 >               - `org.apache.dubbo.registry.integration.RegistryProtocol#export`
->
+>     
 >                 - `final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);`方法后续调用链
->
+>     
 >                 - `org.apache.dubbo.registry.integration.RegistryProtocol#doLocalExport`
->
+>     
 >                   - `org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper#export`
 >                     - `org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper#export`
 >                       - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#export`
 >                         - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#openServer`
 >                           - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#createServer`
->
+>     
 >                 - ```java
->                   final Registry registry = getRegistry(originInvoker);
->                   ```
->
->                   后续调用链
->
+>                final Registry registry = getRegistry(originInvoker);
+>                ```
+>     
+>                后续调用链
+>     
 >                   - `org.apache.dubbo.registry.integration.RegistryProtocol#getRegistry`
->
+>     
 >                     - `org.apache.dubbo.registry.support.AbstractRegistryFactory#getRegistry`
->
+>     
 >                       - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry`
->
+>     
 >                         - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry`
->
+>     
 >                           - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#ZookeeperRegistry`
->
->                             ```java
->                             Registry registry = registryFactory.getRegistry(registryUrl);
->                             ```
->
->                             执行完成
->
+>     
+>                          ```java
+>                          Registry registry = registryFactory.getRegistry(registryUrl);
+>                          ```
+>     
+>                          执行完成
+>     
 >                             - `org.apache.dubbo.registry.support.FailbackRegistry#register`
 >                               - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#doRegister`创建节点
 >
->                   
->
->                   
->
->                   
+>           
+> ​     
+>           
+> ​     
+>           
+>           ​     
+
+```mermaid
+graph TD
+
+```
 
 
 
@@ -2097,3 +2103,109 @@ DubboInvoker-->InvokerInvocationHandler:result
 
 
 ```
+
+
+
+
+
+## 负载均衡
+
+`org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance`
+
+```java
+@Override
+protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+    String key = invokers.get(0).getUrl().getServiceKey() + "." + invocation.getMethodName();
+    //  每个接口的权重
+    ConcurrentMap<String, WeightedRoundRobin> map = methodWeightMap.get(key);
+    if (map == null) {
+        methodWeightMap.putIfAbsent(key, new ConcurrentHashMap<String, WeightedRoundRobin>());
+        map = methodWeightMap.get(key);
+    }
+    // 权重总和
+    int totalWeight = 0;
+    long maxCurrent = Long.MIN_VALUE;
+    long now = System.currentTimeMillis();
+    Invoker<T> selectedInvoker = null;
+    WeightedRoundRobin selectedWRR = null;
+    for (Invoker<T> invoker : invokers) {
+        String identifyString = invoker.getUrl().toIdentityString();
+        WeightedRoundRobin weightedRoundRobin = map.get(identifyString);
+        // 获取权重
+        int weight = getWeight(invoker, invocation);
+
+        if (weightedRoundRobin == null) {
+            weightedRoundRobin = new WeightedRoundRobin();
+            weightedRoundRobin.setWeight(weight);
+            map.putIfAbsent(identifyString, weightedRoundRobin);
+        }
+        if (weight != weightedRoundRobin.getWeight()) {
+            //weight changed
+            weightedRoundRobin.setWeight(weight);
+        }
+        long cur = weightedRoundRobin.increaseCurrent();
+        weightedRoundRobin.setLastUpdate(now);
+        if (cur > maxCurrent) {
+            maxCurrent = cur;
+            selectedInvoker = invoker;
+            selectedWRR = weightedRoundRobin;
+        }
+        totalWeight += weight;
+    }
+    if (!updateLock.get() && invokers.size() != map.size()) {
+        if (updateLock.compareAndSet(false, true)) {
+            try {
+                // copy -> modify -> update reference
+                ConcurrentMap<String, WeightedRoundRobin> newMap = new ConcurrentHashMap<String, WeightedRoundRobin>();
+                newMap.putAll(map);
+                Iterator<Entry<String, WeightedRoundRobin>> it = newMap.entrySet().iterator();
+                while (it.hasNext()) {
+                    Entry<String, WeightedRoundRobin> item = it.next();
+                    if (now - item.getValue().getLastUpdate() > RECYCLE_PERIOD) {
+                        it.remove();
+                    }
+                }
+                methodWeightMap.put(key, newMap);
+            } finally {
+                updateLock.set(false);
+            }
+        }
+    }
+    if (selectedInvoker != null) {
+        selectedWRR.sel(totalWeight);
+        return selectedInvoker;
+    }
+    // should not happen here
+    return invokers.get(0);
+}
+
+    protected static class WeightedRoundRobin {
+        // 权重值
+        private int weight;
+        // 当前权重值，随着使用次数而改变
+        private AtomicLong current = new AtomicLong(0);
+        // 最后一次使用事件
+        private long lastUpdate;
+        public int getWeight() {
+            return weight;
+        }
+        public void setWeight(int weight) {
+            this.weight = weight;
+            current.set(0);
+        }
+        public long increaseCurrent() {
+            return current.addAndGet(weight);
+        }
+        public void sel(int total) {
+            current.addAndGet(-1 * total);
+        }
+        public long getLastUpdate() {
+            return lastUpdate;
+        }
+        public void setLastUpdate(long lastUpdate) {
+            this.lastUpdate = lastUpdate;
+        }
+    }
+
+```
+
