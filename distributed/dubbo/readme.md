@@ -1,3 +1,5 @@
+
+
 # dubbo 分布服务治理
 
 ## dubbo是什么
@@ -926,4 +928,533 @@ BaseService --> BaseServiceImpl2:发现
         supportedApplicationListener = addApplicationListener(applicationContext, this);
     }
     ```
+    
+    - `InitializingBean`
+      - `org.springframework.beans.factory.InitializingBean#afterPropertiesSet`类初始化成功后做什么
+    - `DisposableBean`
+      - `org.springframework.beans.factory.DisposableBean#destroy`类销毁后做什么
+    - `ApplicationContextAware`
+      - ​	`org.springframework.context.ApplicationContextAware#setApplicationContext`容器初始化时设置application context
+    - `ApplicationListener`
+      - `org.springframework.context.ApplicationListener#onApplicationEvent`spring的监听事件，监听bean
+    - `BeanNameAware`
+      - `org.springframework.beans.factory.BeanNameAware#setBeanName`设置bean的名称
+    - `ApplicationEventPublisherAware`
+      - `org.springframework.context.ApplicationEventPublisherAware#setApplicationEventPublisher`spring的事件发布者
+  
+  
+  
+  - 加载流程图调用链见最后总结
+  
+  ```sequence
+  xml-->实体:DubboNamespaceHandler和DubboBeanDefinitionParser解析
+  实体-->ServerBean#afterPropertiesSet:初始化后执行afterPropertiesSet方法
+  ServerBean#afterPropertiesSet-->ServiceConfig#export:执行export方法
+  ServiceConfig#export-->ServiceConfig#doExport: 执行doExport
+  ServiceConfig#doExport-->ServiceConfig#doExportUrls:获取注册中心	
+  ServiceConfig#doExportUrls-->ServiceConfig#doExportUrlsFor1Protocol: 将配置文件中protocol转换成map，在由map转换成url...
+  ```
+  
+  
+  
+  - `doExportUrls`
+  
+    ```xml
+    <dubbo:registry address="zookeeper://192.168.1.107:2181"/>
+    ```
+  
+    ![1560731475666](assets/1560731475666.png)
+  
+  - `doExportUrlsFor1Protocol`
+  
+    ```java
+    private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs) {
+        // 本地服务
+        if (!SCOPE_REMOTE.equalsIgnoreCase(scope)) {
+            exportLocal(url);
+        }
+    }
+    
+    
+        private void exportLocal(URL url) {
+            URL local = URLBuilder.from(url)
+                    .setProtocol(LOCAL_PROTOCOL)
+                    .setHost(LOCALHOST_VALUE)
+                    .setPort(0)
+                    .build();
+            // proxyFactory获取一个Invoker对象添加到Exporter中
+            Exporter<?> exporter = protocol.export(
+                    proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+            exporters.add(exporter); 
+            logger.info("Export dubbo service " + interfaceClass.getName() + " to local registry url : " + local);
+        }
+    ```
+  
+    - map
+  
+      ![1560731550763](assets/1560731550763.png)
+  
+    - url
+  
+      ![1560731607034](assets/1560731607034.png)
+  
+  - ```java
+    Exporter<?> exporter = protocol.export(
+            proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+    ```
+  
+    - protocol
+  
+      ```java
+      private static final Protocol protocol = ExtensionLoader.getExtensionLoader(Protocol.class).getAdaptiveExtension();
+      ```
+  
+      ```java
+      public interface Protocol {}
+      ```
+  
+      `Protocol`是接口方法实现从哪来?`org.apache.dubbo.common.extension.ExtensionLoader#createAdaptiveExtensionClass`
+  
+      具体查看上文	
+  
+      ```java
+      private Class<?> createAdaptiveExtensionClass() {
+          String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
+          ClassLoader classLoader = findClassLoader();
+          org.apache.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+          return compiler.compile(code, classLoader);
+      }
+      ```
+  
+      ```java 
+      import org.apache.dubbo.common.extension.ExtensionLoader;
+      
+      public class Protocol$Adaptive implements org.apache.dubbo.rpc.Protocol {
+      
+          public void destroy() {
+              throw new UnsupportedOperationException(
+                      "The method public abstract void org.apache.dubbo.rpc.Protocol.destroy() of interface org.apache.dubbo.rpc.Protocol is not adaptive method!");
+          }
+      
+          public int getDefaultPort() {
+              throw new UnsupportedOperationException(
+                      "The method public abstract int org.apache.dubbo.rpc.Protocol.getDefaultPort() of interface org.apache.dubbo.rpc.Protocol is not adaptive method!");
+          }
+      
+          public org.apache.dubbo.rpc.Exporter export(org.apache.dubbo.rpc.Invoker arg0)
+                  throws org.apache.dubbo.rpc.RpcException {
+              if (arg0 == null) {
+                  throw new IllegalArgumentException("org.apache.dubbo.rpc.Invoker argument == null");
+              }
+              if (arg0.getUrl() == null) {
+                  throw new IllegalArgumentException(
+                          "org.apache.dubbo.rpc.Invoker argument getUrl() == null");
+              }
+              org.apache.dubbo.common.URL url = arg0.getUrl();
+              String extName = (url.getProtocol() == null ? "dubbo" : url.getProtocol());
+              if (extName == null) {
+                  throw new IllegalStateException(
+                          "Failed to get extension (org.apache.dubbo.rpc.Protocol) name from url (" + url
+                                  .toString() + ") use keys([protocol])");
+              }
+              org.apache.dubbo.rpc.Protocol extension = ExtensionLoader
+                      .getExtensionLoader(org.apache.dubbo.rpc.Protocol.class).getExtension(extName);
+              return extension.export(arg0);
+          }
+      
+          public org.apache.dubbo.rpc.Invoker refer(java.lang.Class arg0,
+                  org.apache.dubbo.common.URL arg1) throws org.apache.dubbo.rpc.RpcException {
+              if (arg1 == null) {
+                  throw new IllegalArgumentException("url == null");
+              }
+              org.apache.dubbo.common.URL url = arg1;
+              String extName = (url.getProtocol() == null ? "dubbo" : url.getProtocol());
+              if (extName == null) {
+                  throw new IllegalStateException(
+                          "Failed to get extension (org.apache.dubbo.rpc.Protocol) name from url (" + url
+                                  .toString() + ") use keys([protocol])");
+              }
+              org.apache.dubbo.rpc.Protocol extension = ExtensionLoader
+                      .getExtensionLoader(org.apache.dubbo.rpc.Protocol.class).getExtension(extName);
+              return extension.refer(arg0, arg1);
+          }
+      }
+      ```
+  
+      - 在服务注册阶段`  org.apache.dubbo.rpc.Protocol extension = ExtensionLoader.getExtensionLoader(org.apache.dubbo.rpc.Protocol.class).getExtension(extName);`具体为`org.apache.dubbo.registry.integration.RegistryProtocol`
+  
+    - `org.apache.dubbo.registry.integration.RegistryProtocol#export`
+  
+      ```java
+      @Override
+      public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
+          URL registryUrl = getRegistryUrl(originInvoker);
+          // url to export locally
+          URL providerUrl = getProviderUrl(originInvoker);
+      
+          // Subscribe the override data
+          // FIXME When the provider subscribes, it will affect the scene : a certain JVM exposes the service and call
+          //  the same service. Because the subscribed is cached key with the name of the service, it causes the
+          //  subscription information to cover.
+          final URL overrideSubscribeUrl = getSubscribedOverrideUrl(providerUrl);
+          final OverrideListener overrideSubscribeListener = new OverrideListener(overrideSubscribeUrl, originInvoker);
+          overrideListeners.put(overrideSubscribeUrl, overrideSubscribeListener);
+      
+          providerUrl = overrideUrlWithConfig(providerUrl, overrideSubscribeListener);
+          //export invoker
+          // 发布服务
+          final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
+      
+          // url to registry
+          final Registry registry = getRegistry(originInvoker);
+          final URL registeredProviderUrl = getRegisteredProviderUrl(providerUrl, registryUrl);
+          ProviderInvokerWrapper<T> providerInvokerWrapper = ProviderConsumerRegTable.registerProvider(originInvoker,
+                  registryUrl, registeredProviderUrl);
+          //to judge if we need to delay publish
+          boolean register = registeredProviderUrl.getParameter("register", true);
+          if (register) {
+              register(registryUrl, registeredProviderUrl);
+              providerInvokerWrapper.setReg(true);
+          }
+      
+          // Deprecated! Subscribe to override rules in 2.6.x or before.
+          registry.subscribe(overrideSubscribeUrl, overrideSubscribeListener);
+      
+          exporter.setRegisterUrl(registeredProviderUrl);
+          exporter.setSubscribeUrl(overrideSubscribeUrl);
+          //Ensure that a new exporter instance is returned every time export
+          return new DestroyableExporter<>(exporter);
+      }
+      ```
+  
+      ![1560732900992](assets/1560732900992.png)
+  
+      - `doLocalExport`
+  
+        ```java
+        private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker, URL providerUrl) {
+            String key = getCacheKey(originInvoker);
+        
+            return (ExporterChangeableWrapper<T>) bounds.computeIfAbsent(key, s -> {
+                Invoker<?> invokerDelegate = new InvokerDelegate<>(originInvoker, providerUrl);
+                return new ExporterChangeableWrapper<>((Exporter<T>) protocol.export(invokerDelegate), originInvoker);
+            });
+        }
+        ```
+  
+        `protocol.export(invokerDelegate), originInvoker);`又一次使用`Protocol$Adaptive`
+  
+        此时调用`DubboProtocol`
+  
+        - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#export`
+  
+          ```java
+          @Override
+          public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+              URL url = invoker.getUrl();
+          
+              // export service.
+              String key = serviceKey(url);
+              DubboExporter<T> exporter = new DubboExporter<T>(invoker, key, exporterMap);
+              exporterMap.put(key, exporter);
+          
+              //export an stub service for dispatching event
+              Boolean isStubSupportEvent = url.getParameter(STUB_EVENT_KEY, DEFAULT_STUB_EVENT);
+              Boolean isCallbackservice = url.getParameter(IS_CALLBACK_SERVICE, false);
+              if (isStubSupportEvent && !isCallbackservice) {
+                  String stubServiceMethods = url.getParameter(STUB_EVENT_METHODS_KEY);
+                  if (stubServiceMethods == null || stubServiceMethods.length() == 0) {
+                      if (logger.isWarnEnabled()) {
+                          logger.warn(new IllegalStateException("consumer [" + url.getParameter(INTERFACE_KEY) +
+                                  "], has set stubproxy support event ,but no stub methods founded."));
+                      }
+          
+                  } else {
+                      stubServiceMethodsMap.put(url.getServiceKey(), stubServiceMethods);
+                  }
+              }
+          
+              openServer(url);
+              optimizeSerialization(url);
+          
+              return exporter;
+          }
+          ```
+  
+        ![1560733610277](assets/1560733610277.png)
+  
+        - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#openServer`
+  
+          ```java
+          private void openServer(URL url) {
+              // find server.
+              String key = url.getAddress();
+              //client can export a service which's only for server to invoke
+              boolean isServer = url.getParameter(IS_SERVER_KEY, true);
+              if (isServer) {
+                  ExchangeServer server = serverMap.get(key);
+                  if (server == null) {
+                      synchronized (this) {
+                          server = serverMap.get(key);
+                          if (server == null) {
+                              serverMap.put(key, createServer(url)); // 创建server
+                          }
+                      }
+                  } else {
+                      // server supports reset, use together with override
+                      server.reset(url);
+                  }
+              }
+          }
+          ```
+  
+          > ```java
+          > final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
+          > ```
+          >
+          > 完成
+  
+    - `final Registry registry = getRegistry(originInvoker);`执行后注册到zookeeper中
+  
+      - `org.apache.dubbo.registry.integration.RegistryProtocol#getRegistry`
+  
+        ```java
+        private Registry getRegistry(final Invoker<?> originInvoker) {
+            URL registryUrl = getRegistryUrl(originInvoker);
+            return registryFactory.getRegistry(registryUrl);
+        }
+        
+        private URL getRegistryUrl(Invoker<?> originInvoker) {
+            URL registryUrl = originInvoker.getUrl();
+            if (REGISTRY_PROTOCOL.equals(registryUrl.getProtocol())) {
+                String protocol = registryUrl.getParameter(REGISTRY_KEY, DEFAULT_REGISTRY);
+                registryUrl = registryUrl.setProtocol(protocol).removeParameter(REGISTRY_KEY);
+            }
+            return registryUrl;
+        }
+        ```
+  
+        完成协议转换，此时这个url为zookeeper协议地址 ，并非所有的都转换为zookeeper，根据配置转换
+  
+        ```xml
+        <dubbo:registry address="zookeeper://192.168.1.107:2181"/>
+        ```
+  
+        ![1560735891744](assets/1560735891744.png)
+  
+        ` return registryFactory.getRegistry(registryUrl);` 其中的`registryFactory`就是`ZookeeperRegistryFactory`
+  
+        - `org.apache.dubbo.registry.support.AbstractRegistryFactory#getRegistry`
+  
+          ```java
+          @Override
+          public Registry getRegistry(URL url) {
+              url = URLBuilder.from(url)
+                      .setPath(RegistryService.class.getName())
+                      .addParameter(INTERFACE_KEY, RegistryService.class.getName())
+                      .removeParameters(EXPORT_KEY, REFER_KEY)
+                      .build();
+              String key = url.toServiceStringWithoutResolving();
+              // Lock the registry access process to ensure a single instance of the registry
+              LOCK.lock();
+              try {
+                  Registry registry = REGISTRIES.get(key);
+                  if (registry != null) {
+                      return registry;
+                  }
+                  //create registry by spi/ioc
+                  // 创建zookeeper Registry org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry
+                  registry = createRegistry(url);
+                  if (registry == null) {
+                      throw new IllegalStateException("Can not create registry " + url);
+                  }
+                  REGISTRIES.put(key, registry);
+                  return registry;
+              } finally {
+                  // Release the lock
+                  LOCK.unlock();
+              }
+          }
+          ```
+  
+          - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry`
+  
+            ```java
+            @Override
+            public Registry createRegistry(URL url) {
+                return new ZookeeperRegistry(url, zookeeperTransporter);
+            }
+            ```
+  
+            - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#ZookeeperRegistry`
+  
+              ```java
+              public ZookeeperRegistry(URL url, ZookeeperTransporter zookeeperTransporter) {
+                  super(url);
+                  if (url.isAnyHost()) {
+                      throw new IllegalStateException("registry address == null");
+                  }
+                  String group = url.getParameter(GROUP_KEY, DEFAULT_ROOT);
+                  if (!group.startsWith(PATH_SEPARATOR)) {
+                      group = PATH_SEPARATOR + group;
+                  }
+                  this.root = group;
+                  zkClient = zookeeperTransporter.connect(url);
+                  zkClient.addStateListener(state -> {
+                      if (state == StateListener.RECONNECTED) {
+                          try {
+                              recover();
+                          } catch (Exception e) {
+                              logger.error(e.getMessage(), e);
+                          }
+                      }
+                  });
+              }
+              ```
+  
+              通过zookeeper客户端连接
+  
+              此时`final Registry registry = getRegistry(originInvoker);`为`org.apache.dubbo.registry.zookeeper.ZookeeperRegistry`
+  
+              ![1560736446637](assets/1560736446637.png)
+  
+              ![1560736421596](assets/1560736421596.png)
+  
+          - `org.apache.dubbo.registry.integration.RegistryProtocol#register`
+  
+            ```java
+            boolean register = registeredProviderUrl.getParameter("register", true);
+            if (register) {
+                register(registryUrl, registeredProviderUrl);
+                providerInvokerWrapper.setReg(true);
+            }
+                public void register(URL registryUrl, URL registeredProviderUrl) {
+                    Registry registry = registryFactory.getRegistry(registryUrl);
+                    registry.register(registeredProviderUrl);
+                }
+            
+            ```
+  
+            - `org.apache.dubbo.registry.support.FailbackRegistry#register`
+  
+              `ZookeeperRegistry`的父类`org.apache.dubbo.registry.support.FailbackRegistry`方法
+  
+              ```java
+              @Override
+              public void register(URL url) {
+                  super.register(url);
+                  removeFailedRegistered(url);
+                  removeFailedUnregistered(url);
+                  try {
+                      // Sending a registration request to the server side
+                      	// 注册
+                      doRegister(url);
+                  } catch (Exception e) {
+                      Throwable t = e;
+              
+                      // If the startup detection is opened, the Exception is thrown directly.
+                      boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
+                              && url.getParameter(Constants.CHECK_KEY, true)
+                              && !CONSUMER_PROTOCOL.equals(url.getProtocol());
+                      boolean skipFailback = t instanceof SkipFailbackWrapperException;
+                      if (check || skipFailback) {
+                          if (skipFailback) {
+                              t = t.getCause();
+                          }
+                          throw new IllegalStateException("Failed to register " + url + " to registry " + getUrl().getAddress() + ", cause: " + t.getMessage(), t);
+                      } else {
+                          logger.error("Failed to register " + url + ", waiting for retry, cause: " + t.getMessage(), t);
+                      }
+              
+                      // Record a failed registration request to a failed list, retry regularly
+                      addFailedRegistered(url);
+                  }
+              }
+              ```
+  
+              - `doRegister`方法由`org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#doRegister`实现
+  
+                ```java
+                @Override
+                public void doRegister(URL url) {
+                    try {
+                        zkClient.create(toUrlPath(url), url.getParameter(DYNAMIC_KEY, true));
+                    } catch (Throwable e) {
+                        throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
+                    }
+                }
+                ```
+  
+                - 创建节点
+
+
+
+
+
+
+
+### 总结
+
+- 调用链
+
+  ![](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo-export.jpg)
+
+> - `org.apache.dubbo.config.spring.ServiceBean`
+>
+>   - `org.apache.dubbo.config.spring.ServiceBean#afterPropertiesSet`
+>
+>     - `org.apache.dubbo.config.ServiceConfig#export`
+>
+>       - `org.apache.dubbo.config.ServiceConfig#doExport`
+>
+>         - `org.apache.dubbo.config.ServiceConfig#doExportUrls`
+>
+>           - `org.apache.dubbo.config.ServiceConfig#doExportUrlsFor1Protocol`
+>
+>             - `org.apache.dubbo.config.ServiceConfig#exportLocal`
+>
+>               `org.apache.dubbo.common.extension.ExtensionLoader#createAdaptiveExtensionClass`中的具体export方法通过适配器的方式进行调用
+>
+>               - `org.apache.dubbo.registry.integration.RegistryProtocol#export`
+>
+>                 - `final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);`方法后续调用链
+>
+>                 - `org.apache.dubbo.registry.integration.RegistryProtocol#doLocalExport`
+>
+>                   - `org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper#export`
+>                     - `org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper#export`
+>                       - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#export`
+>                         - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#openServer`
+>                           - `org.apache.dubbo.rpc.protocol.dubbo.DubboProtocol#createServer`
+>
+>                 - ```java
+>                   final Registry registry = getRegistry(originInvoker);
+>                   ```
+>
+>                   后续调用链
+>
+>                   - `org.apache.dubbo.registry.integration.RegistryProtocol#getRegistry`
+>
+>                     - `org.apache.dubbo.registry.support.AbstractRegistryFactory#getRegistry`
+>
+>                       - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry`
+>
+>                         - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistryFactory#createRegistry`
+>
+>                           - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#ZookeeperRegistry`
+>
+>                             ```java
+>                             Registry registry = registryFactory.getRegistry(registryUrl);
+>                             ```
+>
+>                             执行完成
+>
+>                             - `org.apache.dubbo.registry.support.FailbackRegistry#register`
+>                               - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#doRegister`创建节点
+>
+>                   
+>
+>                   
+>
+>                   
 
