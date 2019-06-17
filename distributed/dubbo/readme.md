@@ -1458,3 +1458,642 @@ BaseService --> BaseServiceImpl2:发现
 >
 >                   
 
+
+
+## 客户端调用解析
+
+- 配置
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans        http://www.springframework.org/schema/beans/spring-beans-4.3.xsd        http://dubbo.apache.org/schema/dubbo        http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
+  
+    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
+    <dubbo:application name="dubbo-client"/>
+  
+    <dubbo:registry address="zookeeper://192.168.1.107:2181"/>
+  
+    <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
+    <dubbo:reference id="dubboHello" interface="com.huifer.dubbo.server.api.DubboHello"/>
+    <dubbo:reference id="dubboHello2" interface="com.huifer.dubbo.server.api.DubboHello2"/>
+  
+  
+    <dubbo:reference id="acac"
+      interface="com.huifer.dubbo.server.api.DubboVersion1"
+      version="2.0.0"
+      timeout="1"
+      mock="com.huifer.dubbo.client.mock.MockDemo"
+  
+    />
+  
+  
+  </beans>
+  ```
+
+- reference
+
+  ```xml
+  <dubbo:reference id="dubboHello" interface="com.huifer.dubbo.server.api.DubboHello"/>
+  ```
+
+  ```xml
+  <xsd:element name="reference" type="referenceType">
+      <xsd:annotation>
+          <xsd:documentation><![CDATA[ Reference service config ]]></xsd:documentation>
+          <xsd:appinfo>
+              <tool:annotation>
+                  <tool:exports type="org.apache.dubbo.config.ReferenceConfig"/>
+              </tool:annotation>
+          </xsd:appinfo>
+      </xsd:annotation>
+  </xsd:element>
+  ```
+
+  - `org.apache.dubbo.config.spring.ReferenceBean`
+
+    ![1560739764564](assets/1560739764564.png)
+
+    - `org.apache.dubbo.config.spring.ReferenceBean#afterPropertiesSet`
+
+      - `org.apache.dubbo.config.spring.ReferenceBean#getObject`
+
+        - `org.apache.dubbo.config.ReferenceConfig#get`
+
+          - `org.apache.dubbo.config.ReferenceConfig#init`
+
+            ```java
+            ref = createProxy(map);
+            ```
+
+            ![1560740233267](assets/1560740233267.png)
+
+  - `org.apache.dubbo.config.ReferenceConfig#createProxy`
+
+    ```java
+    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
+    private T createProxy(Map<String, String> map) {
+        if (shouldJvmRefer(map)) {
+            URL url = new URL(LOCAL_PROTOCOL, LOCALHOST_VALUE, 0, interfaceClass.getName()).addParameters(map);
+            invoker = REF_PROTOCOL.refer(interfaceClass, url);
+            if (logger.isInfoEnabled()) {
+                logger.info("Using injvm service " + interfaceClass.getName());
+            }
+        } else {
+            urls.clear(); // reference retry init will add url to urls, lead to OOM
+            if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
+                String[] us = SEMICOLON_SPLIT_PATTERN.split(url);
+                if (us != null && us.length > 0) {
+                    for (String u : us) {
+                        URL url = URL.valueOf(u);
+                        if (StringUtils.isEmpty(url.getPath())) {
+                            url = url.setPath(interfaceName);
+                        }
+                        if (REGISTRY_PROTOCOL.equals(url.getProtocol())) {
+                            urls.add(url.addParameterAndEncoded(REFER_KEY, StringUtils.toQueryString(map)));
+                        } else {
+                            urls.add(ClusterUtils.mergeUrl(url, map));
+                        }
+                    }
+                }
+            } else { // assemble URL from register center's configuration
+                // if protocols not injvm checkRegistry
+                // 通过注册中心来注册
+                if (!LOCAL_PROTOCOL.equalsIgnoreCase(getProtocol())){
+                    checkRegistry();
+                    List<URL> us = loadRegistries(false);
+                    if (CollectionUtils.isNotEmpty(us)) {
+                        for (URL u : us) {
+                            URL monitorUrl = loadMonitor(u);
+                            if (monitorUrl != null) {
+                                map.put(MONITOR_KEY, URL.encode(monitorUrl.toFullString()));
+                            }
+                            urls.add(u.addParameterAndEncoded(REFER_KEY, StringUtils.toQueryString(map)));
+                        }
+                    }
+                    if (urls.isEmpty()) {
+                        throw new IllegalStateException("No such any registry to reference " + interfaceName + " on the consumer " + NetUtils.getLocalHost() + " use dubbo version " + Version.getVersion() + ", please config <dubbo:registry address=\"...\" /> to your spring config.");
+                    }
+                }
+            }
+    
+            if (urls.size() == 1) {
+                invoker = REF_PROTOCOL.refer(interfaceClass, urls.get(0));
+            } else {
+                List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();
+                URL registryURL = null;
+                for (URL url : urls) {
+                    invokers.add(REF_PROTOCOL.refer(interfaceClass, url));
+                    if (REGISTRY_PROTOCOL.equals(url.getProtocol())) {
+                        registryURL = url; // use last registry url
+                    }
+                }
+                if (registryURL != null) { // registry url is available
+                    // use RegistryAwareCluster only when register's CLUSTER is available
+                    URL u = registryURL.addParameter(CLUSTER_KEY, RegistryAwareCluster.NAME);
+                    // The invoker wrap relation would be: RegistryAwareClusterInvoker(StaticDirectory) -> FailoverClusterInvoker(RegistryDirectory, will execute route) -> Invoker
+                    invoker = CLUSTER.join(new StaticDirectory(u, invokers));
+                } else { // not a registry url, must be direct invoke.
+                    invoker = CLUSTER.join(new StaticDirectory(invokers));
+                }
+            }
+        }
+    
+        if (shouldCheck() && !invoker.isAvailable()) {
+            throw new IllegalStateException("Failed to check the status of the service " + interfaceName + ". No provider available for the service " + (group == null ? "" : group + "/") + interfaceName + (version == null ? "" : ":" + version) + " from the url " + invoker.getUrl() + " to the consumer " + NetUtils.getLocalHost() + " use dubbo version " + Version.getVersion());
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Refer dubbo service " + interfaceClass.getName() + " from url " + invoker.getUrl());
+        }
+        /**
+         * @since 2.7.0
+         * ServiceData Store
+         */
+        MetadataReportService metadataReportService = null;
+        if ((metadataReportService = getMetadataReportService()) != null) {
+            URL consumerURL = new URL(CONSUMER_PROTOCOL, map.remove(REGISTER_IP_KEY), 0, map.get(INTERFACE_KEY), map);
+            metadataReportService.publishConsumer(consumerURL);
+        }
+        // create service proxy
+        return (T) PROXY_FACTORY.getProxy(invoker);
+    }
+    ```
+
+    - `List<URL> us = loadRegistries(false);`
+
+      `org.apache.dubbo.config.AbstractInterfaceConfig#loadRegistries`
+
+    ```java
+    protected List<URL> loadRegistries(boolean provider) {
+        // check && override if necessary
+        List<URL> registryList = new ArrayList<URL>();
+        if (CollectionUtils.isNotEmpty(registries)) {
+            for (RegistryConfig config : registries) {
+                String address = config.getAddress();
+                if (StringUtils.isEmpty(address)) {
+                    address = ANYHOST_VALUE;
+                }
+                if (!RegistryConfig.NO_AVAILABLE.equalsIgnoreCase(address)) {
+                    Map<String, String> map = new HashMap<String, String>();
+                    appendParameters(map, application);
+                    appendParameters(map, config);
+                    map.put(PATH_KEY, RegistryService.class.getName());
+                    appendRuntimeParameters(map);
+                    if (!map.containsKey(PROTOCOL_KEY)) {
+                        map.put(PROTOCOL_KEY, DUBBO_PROTOCOL);
+                    }
+                    List<URL> urls = UrlUtils.parseURLs(address, map);
+    
+                    for (URL url : urls) {
+                        url = URLBuilder.from(url)
+                                .addParameter(REGISTRY_KEY, url.getProtocol())
+                                .setProtocol(REGISTRY_PROTOCOL)
+                                .build();
+                        if ((provider && url.getParameter(REGISTER_KEY, true))
+                                || (!provider && url.getParameter(SUBSCRIBE_KEY, true))) {
+                            registryList.add(url);
+                        }
+                    }
+                }
+            }
+        }
+        return registryList;
+    }
+    ```
+
+    `protected List<RegistryConfig> registries;`内部变量
+
+    ![1560740663364](assets/1560740663364.png)
+
+    
+
+  - `URL monitorUrl = loadMonitor(u);`
+
+    `org.apache.dubbo.config.AbstractInterfaceConfig#loadMonitor`
+
+    ```java
+    protected URL loadMonitor(URL registryURL) {
+        checkMonitor();
+        Map<String, String> map = new HashMap<String, String>();
+        map.put(INTERFACE_KEY, MonitorService.class.getName());
+        appendRuntimeParameters(map);
+        //set ip
+        String hostToRegistry = ConfigUtils.getSystemProperty(DUBBO_IP_TO_REGISTRY);
+        if (StringUtils.isEmpty(hostToRegistry)) {
+            hostToRegistry = NetUtils.getLocalHost();
+        } else if (NetUtils.isInvalidLocalHost(hostToRegistry)) {
+            throw new IllegalArgumentException("Specified invalid registry ip from property:" +
+                    DUBBO_IP_TO_REGISTRY + ", value:" + hostToRegistry);
+        }
+        map.put(REGISTER_IP_KEY, hostToRegistry);
+        appendParameters(map, monitor);
+        appendParameters(map, application);
+        String address = monitor.getAddress();
+        String sysaddress = System.getProperty("dubbo.monitor.address");
+        if (sysaddress != null && sysaddress.length() > 0) {
+            address = sysaddress;
+        }
+        if (ConfigUtils.isNotEmpty(address)) {
+            if (!map.containsKey(PROTOCOL_KEY)) {
+                if (getExtensionLoader(MonitorFactory.class).hasExtension(LOGSTAT_PROTOCOL)) {
+                    map.put(PROTOCOL_KEY, LOGSTAT_PROTOCOL);
+                } else {
+                    map.put(PROTOCOL_KEY, DUBBO_PROTOCOL);
+                }
+            }
+            return UrlUtils.parseURL(address, map); // 返回协议地址
+        } else if (REGISTRY_PROTOCOL.equals(monitor.getProtocol()) && registryURL != null) {
+            return URLBuilder.from(registryURL)
+                    .setProtocol(DUBBO_PROTOCOL)
+                    .addParameter(PROTOCOL_KEY, REGISTRY_PROTOCOL)
+                    .addParameterAndEncoded(REFER_KEY, StringUtils.toQueryString(map))
+                    .build(); //返回协议地址
+        }
+        return null;
+    }
+    ```
+
+  - `invoker = REF_PROTOCOL.refer(interfaceClass, urls.get(0));`
+
+    `org.apache.dubbo.registry.integration.RegistryProtocol#refer`
+
+    ```java
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+        url = URLBuilder.from(url)
+                .setProtocol(url.getParameter(REGISTRY_KEY, DEFAULT_REGISTRY))
+                .removeParameter(REGISTRY_KEY)
+                .build();
+        Registry registry = registryFactory.getRegistry(url);
+        if (RegistryService.class.equals(type)) {
+            return proxyFactory.getInvoker((T) registry, type, url);
+        }
+    
+        // group="a,b" or group="*"
+        Map<String, String> qs = StringUtils.parseQueryString(url.getParameterAndDecoded(REFER_KEY));
+        String group = qs.get(GROUP_KEY);
+        if (group != null && group.length() > 0) {
+            if ((COMMA_SPLIT_PATTERN.split(group)).length > 1 || "*".equals(group)) {
+                return doRefer(getMergeableCluster(), registry, type, url);
+            }
+        }
+        return doRefer(cluster, registry, type, url);
+    }
+    ```
+
+    ![1560741497096](assets/1560741497096.png)
+
+    此时的url为zookeeper协议
+
+  - `org.apache.dubbo.registry.integration.RegistryProtocol#doRefer`
+
+  ```java
+  private <T> Invoker<T> doRefer(Cluster cluster, Registry registry, Class<T> type, URL url) {
+      RegistryDirectory<T> directory = new RegistryDirectory<T>(type, url);
+      directory.setRegistry(registry);
+      directory.setProtocol(protocol);
+      // all attributes of REFER_KEY
+      Map<String, String> parameters = new HashMap<String, String>(directory.getUrl().getParameters());
+      URL subscribeUrl = new URL(CONSUMER_PROTOCOL, parameters.remove(REGISTER_IP_KEY), 0, type.getName(), parameters);
+      if (!ANY_VALUE.equals(url.getServiceInterface()) && url.getParameter(REGISTER_KEY, true)) {
+          directory.setRegisteredConsumerUrl(getRegisteredConsumerUrl(subscribeUrl, url));
+          registry.register(directory.getRegisteredConsumerUrl());
+      }
+      directory.buildRouterChain(subscribeUrl);
+      directory.subscribe(subscribeUrl.addParameter(CATEGORY_KEY,
+              PROVIDERS_CATEGORY + "," + CONFIGURATORS_CATEGORY + "," + ROUTERS_CATEGORY));
+  
+      Invoker invoker = cluster.join(directory);
+      ProviderConsumerRegTable.registerConsumer(invoker, url, subscribeUrl, directory);
+      return invoker;
+  }
+  ```
+
+  ![1560741601282](assets/1560741601282.png)
+
+- `org.apache.dubbo.rpc.cluster.Cluster`
+
+  ```java
+  @SPI(FailoverCluster.NAME) // failover
+  public interface Cluster {
+  
+      /**
+       * Merge the directory invokers to a virtual invoker.
+       *
+       * @param <T>
+       * @param directory
+       * @return cluster invoker
+       * @throws RpcException
+       */
+      @Adaptive
+      <T> Invoker<T> join(Directory<T> directory) throws RpcException;
+  
+  }
+  ```
+
+  ![1560741753126](assets/1560741753126.png)
+
+- `org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker`
+
+  ```java
+  public AbstractClusterInvoker(Directory<T> directory, URL url) {
+      if (directory == null) {
+          throw new IllegalArgumentException("service directory == null");
+      }
+  
+      this.directory = directory;
+      //sticky: invoker.isAvailable() should always be checked before using when availablecheck is true.
+      this.availablecheck = url.getParameter(CLUSTER_AVAILABLE_CHECK_KEY, DEFAULT_CLUSTER_AVAILABLE_CHECK);
+  }
+  ```
+
+  ![1560742289076](assets/1560742289076.png)
+
+
+
+- `return (T) PROXY_FACTORY.getProxy(invoker);`
+
+  ![1560743065013](assets/1560743065013.png)
+
+  - PROXY_FACTORY是什么？
+
+  ```java
+  package com.huifer.dubbo.client;
+  
+  import org.apache.dubbo.common.extension.ExtensionLoader;
+  
+  public class ProxyFactory$Adaptive implements org.apache.dubbo.rpc.ProxyFactory {
+  
+      public java.lang.Object getProxy(org.apache.dubbo.rpc.Invoker arg0)
+              throws org.apache.dubbo.rpc.RpcException {
+          if (arg0 == null) {
+              throw new IllegalArgumentException("org.apache.dubbo.rpc.Invoker argument == null");
+          }
+          if (arg0.getUrl() == null) {
+              throw new IllegalArgumentException(
+                      "org.apache.dubbo.rpc.Invoker argument getUrl() == null");
+          }
+          org.apache.dubbo.common.URL url = arg0.getUrl();
+          String extName = url.getParameter("proxy", "javassist");
+          if (extName == null) {
+              throw new IllegalStateException(
+                      "Failed to get extension (org.apache.dubbo.rpc.ProxyFactory) name from url ("
+                              + url.toString() + ") use keys([proxy])");
+          }
+          org.apache.dubbo.rpc.ProxyFactory extension = ExtensionLoader
+                  .getExtensionLoader(org.apache.dubbo.rpc.ProxyFactory.class).getExtension(extName);
+          return extension.getProxy(arg0);
+      }
+  
+      public java.lang.Object getProxy(org.apache.dubbo.rpc.Invoker arg0, boolean arg1)
+              throws org.apache.dubbo.rpc.RpcException {
+          if (arg0 == null) {
+              throw new IllegalArgumentException("org.apache.dubbo.rpc.Invoker argument == null");
+          }
+          if (arg0.getUrl() == null) {
+              throw new IllegalArgumentException(
+                      "org.apache.dubbo.rpc.Invoker argument getUrl() == null");
+          }
+          org.apache.dubbo.common.URL url = arg0.getUrl();
+          String extName = url.getParameter("proxy", "javassist");
+          if (extName == null) {
+              throw new IllegalStateException(
+                      "Failed to get extension (org.apache.dubbo.rpc.ProxyFactory) name from url ("
+                              + url.toString() + ") use keys([proxy])");
+          }
+          org.apache.dubbo.rpc.ProxyFactory extension = ExtensionLoader
+                  .getExtensionLoader(org.apache.dubbo.rpc.ProxyFactory.class).getExtension(extName);
+          return extension.getProxy(arg0, arg1);
+      }
+  
+      public org.apache.dubbo.rpc.Invoker getInvoker(java.lang.Object arg0, java.lang.Class arg1,
+              org.apache.dubbo.common.URL arg2) throws org.apache.dubbo.rpc.RpcException {
+          if (arg2 == null) {
+              throw new IllegalArgumentException("url == null");
+          }
+          org.apache.dubbo.common.URL url = arg2;
+          String extName = url.getParameter("proxy", "javassist");
+          if (extName == null) {
+              throw new IllegalStateException(
+                      "Failed to get extension (org.apache.dubbo.rpc.ProxyFactory) name from url ("
+                              + url.toString() + ") use keys([proxy])");
+          }
+          org.apache.dubbo.rpc.ProxyFactory extension = ExtensionLoader
+                  .getExtensionLoader(org.apache.dubbo.rpc.ProxyFactory.class).getExtension(extName);
+          return extension.getInvoker(arg0, arg1, arg2);
+      }
+  }
+  ```
+
+- `org.apache.dubbo.rpc.proxy.wrapper.StubProxyFactoryWrapper#getProxy(org.apache.dubbo.rpc.Invoker<T>)`
+
+  ```java
+  @Override
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public <T> T getProxy(Invoker<T> invoker) throws RpcException {
+      T proxy = proxyFactory.getProxy(invoker);
+      if (GenericService.class != invoker.getInterface()) {
+          URL url = invoker.getUrl();
+          String stub = url.getParameter(STUB_KEY, url.getParameter(LOCAL_KEY));
+          if (ConfigUtils.isNotEmpty(stub)) {
+              Class<?> serviceType = invoker.getInterface();
+              if (ConfigUtils.isDefault(stub)) {
+                  if (url.hasParameter(STUB_KEY)) {
+                      stub = serviceType.getName() + "Stub";
+                  } else {
+                      stub = serviceType.getName() + "Local";
+                  }
+              }
+              try {
+                  Class<?> stubClass = ReflectUtils.forName(stub);
+                  if (!serviceType.isAssignableFrom(stubClass)) {
+                      throw new IllegalStateException("The stub implementation class " + stubClass.getName() + " not implement interface " + serviceType.getName());
+                  }
+                  try {
+                      Constructor<?> constructor = ReflectUtils.findConstructor(stubClass, serviceType);
+                      proxy = (T) constructor.newInstance(new Object[]{proxy});
+                      //export stub service
+                      URLBuilder urlBuilder = URLBuilder.from(url);
+                      if (url.getParameter(STUB_EVENT_KEY, DEFAULT_STUB_EVENT)) {
+                          urlBuilder.addParameter(STUB_EVENT_METHODS_KEY, StringUtils.join(Wrapper.getWrapper(proxy.getClass()).getDeclaredMethodNames(), ","));
+                          urlBuilder.addParameter(IS_SERVER_KEY, Boolean.FALSE.toString());
+                          try {
+                              export(proxy, (Class) invoker.getInterface(), urlBuilder.build());
+                          } catch (Exception e) {
+                              LOGGER.error("export a stub service error.", e);
+                          }
+                      }
+                  } catch (NoSuchMethodException e) {
+                      throw new IllegalStateException("No such constructor \"public " + stubClass.getSimpleName() + "(" + serviceType.getName() + ")\" in stub implementation class " + stubClass.getName(), e);
+                  }
+              } catch (Throwable t) {
+                  LOGGER.error("Failed to create stub implementation class " + stub + " in consumer " + NetUtils.getLocalHost() + " use dubbo version " + Version.getVersion() + ", cause: " + t.getMessage(), t);
+                  // ignore
+              }
+          }
+      }
+      return proxy;
+  }
+  ```
+
+
+
+- proxy相关类以及方法
+
+  - `org.apache.dubbo.rpc.proxy.javassist.JavassistProxyFactory#getInvoker`
+
+  - `org.apache.dubbo.rpc.proxy.wrapper.StubProxyFactoryWrapper#getInvoker`
+
+  - `org.apache.dubbo.rpc.support.MockInvoker#getInvoker`
+
+  - `org.apache.dubbo.rpc.support.MockInvoker#invoke`
+
+  - `org.apache.dubbo.rpc.proxy.InvokerInvocationHandler#invoke`
+
+    ![1560750628969](assets/1560750628969.png)
+
+
+
+- `org.apache.dubbo.registry.integration.RegistryProtocol#doRefer`追溯
+
+  ```java
+  directory.subscribe(subscribeUrl.addParameter(CATEGORY_KEY,
+          PROVIDERS_CATEGORY + "," + CONFIGURATORS_CATEGORY + "," + ROUTERS_CATEGORY));
+  ```
+
+  - `org.apache.dubbo.registry.support.FailbackRegistry#subscribe`
+
+    ```java
+    @Override
+    public void subscribe(URL url, NotifyListener listener) {
+        super.subscribe(url, listener);
+        removeFailedSubscribed(url, listener);
+        try {
+            // Sending a subscription request to the server side
+            // 向服务器订阅 org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#doSubscribe 实现
+            doSubscribe(url, listener);
+        } catch (Exception e) {
+            Throwable t = e;
+    
+            List<URL> urls = getCacheUrls(url);
+            if (CollectionUtils.isNotEmpty(urls)) {
+                notify(url, listener, urls);
+                logger.error("Failed to subscribe " + url + ", Using cached list: " + urls + " from cache file: " + getUrl().getParameter(FILE_KEY, System.getProperty("user.home") + "/dubbo-registry-" + url.getHost() + ".cache") + ", cause: " + t.getMessage(), t);
+            } else {
+                // If the startup detection is opened, the Exception is thrown directly.
+                boolean check = getUrl().getParameter(Constants.CHECK_KEY, true)
+                        && url.getParameter(Constants.CHECK_KEY, true);
+                boolean skipFailback = t instanceof SkipFailbackWrapperException;
+                if (check || skipFailback) {
+                    if (skipFailback) {
+                        t = t.getCause();
+                    }
+                    throw new IllegalStateException("Failed to subscribe " + url + ", cause: " + t.getMessage(), t);
+                } else {
+                    logger.error("Failed to subscribe " + url + ", waiting for retry, cause: " + t.getMessage(), t);
+                }
+            }
+    
+            // Record a failed registration request to a failed list, retry regularly
+            addFailedSubscribed(url, listener);
+        }
+    }
+    ```
+
+    - `org.apache.dubbo.registry.zookeeper.ZookeeperRegistry#doSubscribe`
+
+- `org.apache.dubbo.registry.integration.RegistryDirectory#refreshInvoker`
+
+  1. 如果传入的invoker列表不是空的，这意味着它是最新的invoker列表
+
+  2. 如果传入的invokerUrl列表是空的，这意味着该规则只是一个覆盖规则或路由
+
+     url转换成invoker
+
+  ```java
+  Map<String, Invoker<T>> newUrlInvokerMap = toInvokers(invokerUrls);// Translate url list to Invoker map
+  ```
+
+  ![1560752140621](assets/1560752140621.png)
+
+
+
+
+
+
+
+
+
+### 总结
+
+- 调用链
+
+  ![](http://dubbo.apache.org/docs/zh-cn/dev/sources/images/dubbo-refer.jpg)
+
+  > - `org.apache.dubbo.config.spring.ReferenceBean#afterPropertiesSet`
+  >
+  >   - `org.apache.dubbo.config.spring.ReferenceBean#getObject`
+  >
+  >     - `org.apache.dubbo.config.ReferenceConfig#get`
+  >
+  >       - `org.apache.dubbo.config.ReferenceConfig#init`
+  >
+  >         - `org.apache.dubbo.config.ReferenceConfig#createProxy`
+  >
+  >           - 注册中心方式`org.apache.dubbo.config.AbstractInterfaceConfig#loadRegistries`
+  >
+  >             - `org.apache.dubbo.config.AbstractInterfaceConfig#loadMonitor`
+  >
+  >           - `org.apache.dubbo.registry.integration.RegistryProtocol#refer`
+  >
+  >             - `org.apache.dubbo.registry.integration.RegistryProtocol#refer`
+  >
+  >               - `org.apache.dubbo.registry.integration.RegistryProtocol#doRefer`
+  >
+  >                 - `org.apache.dubbo.rpc.cluster.support.FailoverCluster#join`
+  >
+  >                   - `org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker`
+  >                     - `org.apache.dubbo.rpc.cluster.support.FailoverClusterInvoker#FailoverClusterInvoker`
+  >                       - `org.apache.dubbo.rpc.cluster.support.AbstractClusterInvoker#AbstractClusterInvoker(org.apache.dubbo.rpc.cluster.Directory<T>, org.apache.dubbo.common.URL)`
+  >
+  >                 - `org.apache.dubbo.registry.integration.RegistryDirectory#subscribe`
+  >
+  >                   - `org.apache.dubbo.registry.integration.RegistryDirectory#subscribe`
+  >
+  >                     - `com.alibaba.dubbo.registry.support.FailbackRegistry#subscribe(com.alibaba.dubbo.common.URL, com.alibaba.dubbo.registry.NotifyListener)`
+  >
+  >                       
+  >
+  >             - `org.apache.dubbo.rpc.proxy.wrapper.StubProxyFactoryWrapper#getProxy(org.apache.dubbo.rpc.Invoker<T>)`
+
+```sequence
+InvokerInvocationHandler-->MockInvoker:invoke()
+MockInvoker-->AbstractClusterInvoker:invoke()
+AbstractClusterInvoker-->AbstractDirectory:list获取
+AbstractDirectory-->RegistryDirectory:doList()方法
+
+
+RegistryDirectory-->AbstractDirectory:返回invokers
+AbstractDirectory-->AbstractClusterInvoker:invokers获取
+
+
+AbstractClusterInvoker-->FailoverClusterInvoker:doInvoke()
+
+FailoverClusterInvoker--> MockInvokersSelector:select()
+MockInvokersSelector-->AbstractLoadBanance:doSelect()
+AbstractLoadBanance--> RandomLoadBanalce:random
+RandomLoadBanalce-->AbstractLoadBanance:random
+AbstractLoadBanance-->MockInvokersSelector:invoke
+MockInvokersSelector-->FailoverClusterInvoker:invoke
+FailoverClusterInvoker-->AbstractProxyInvoker:invoke
+AbstractProxyInvoker-->DubboInvoker:doinvoke
+
+
+DubboInvoker-->InvokerInvocationHandler:result
+
+
+
+```
