@@ -909,19 +909,19 @@ public void syncSendPacket(final Command command, final AsyncCallback onComplete
 ```java
 @Override
 public Message receive() throws JMSException {
-    checkClosed();
-    checkMessageListener();
+    checkClosed();// 检查unconsumedMessages是否关闭  
+    checkMessageListener();// 检查是否有其他消费者使用了消息监听器
 
-    sendPullCommand(0);
-    MessageDispatch md = dequeue(-1);
+    sendPullCommand(0);// 如果预取数为0，则主动向JMS服务器发送拉取消息的报文  
+    MessageDispatch md = dequeue(-1); // 从unconsumedMessages取出一个消息  
     if (md == null) {
         return null;
     }
 
-    beforeMessageIsConsumed(md);
-    afterMessageIsConsumed(md, false);
+    beforeMessageIsConsumed(md); 
+    afterMessageIsConsumed(md, false);// 给JMS服务器发送接收消息的应答报文  
 
-    return createActiveMQMessage(md);
+    return createActiveMQMessage(md);// 取出消息副本并返回  
 }
 
     protected void checkMessageListener() throws JMSException {
@@ -952,6 +952,207 @@ public Message receive() throws JMSException {
   ```
 
   后续代码和消息发送相同
+
+- `MessageDispatch md = dequeue(-1);`
+
+```java
+private MessageDispatch dequeue(long timeout) throws JMSException {
+    try {
+        long deadline = 0;
+        if (timeout > 0) {
+            deadline = System.currentTimeMillis() + timeout;
+        }
+        while (true) {
+            // 获取消息
+            MessageDispatch md = unconsumedMessages.dequeue(timeout);
+            if (md == null) {
+                if (timeout > 0 && !unconsumedMessages.isClosed()) {
+                    timeout = Math.max(deadline - System.currentTimeMillis(), 0);
+                } else {
+                    if (failureError != null) {
+                        throw JMSExceptionSupport.create(failureError);
+                    } else {
+                        return null;
+                    }
+                }
+            } else if (md.getMessage() == null) {
+                return null;
+            } else if (consumeExpiredMessage(md)) {
+                LOG.debug("{} received expired message: {}", getConsumerId(), md);
+                beforeMessageIsConsumed(md);
+                afterMessageIsConsumed(md, true);
+                if (timeout > 0) {
+                    timeout = Math.max(deadline - System.currentTimeMillis(), 0);
+                }
+                sendPullCommand(timeout);
+            } else if (redeliveryExceeded(md)) {
+                LOG.debug("{} received with excessive redelivered: {}", getConsumerId(), md);
+                posionAck(md, "Dispatch[" + md.getRedeliveryCounter() + "] to " + getConsumerId() + " exceeds redelivery policy limit:" + redeliveryPolicy);
+                if (timeout > 0) {
+                    timeout = Math.max(deadline - System.currentTimeMillis(), 0);
+                }
+                sendPullCommand(timeout);
+            } else {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(getConsumerId() + " received message: " + md);
+                }
+                return md;
+            }
+        }
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw JMSExceptionSupport.create(e);
+    }
+}
+```
+
+- `MessageDispatch md = unconsumedMessages.dequeue(timeout);`
+
+  消息队列中取值
+
+- 消息接收后
+
+```java
+beforeMessageIsConsumed(md);
+afterMessageIsConsumed(md, false);
+```
+
+​	延迟确认
+
+```mermaid
+graph TD
+consumer.receive --> a(CurrentPrefetchSize == 0 </br> unconsumedMessages!=null)
+a--yes--> Pull消息
+Pull消息-->transport
+transport-->activemq
+
+a--no--> dequeue
+dequeue--> 消息队列空
+消息队列空--yes--> block
+消息队列空--no--> 获取消息
+获取消息--> 添加到delivered队列
+添加到delivered队列--> messageack
+messageack--> activemq
+```
+
+
+
+## ~~unconsumedMessages~~
+
+- `org.apache.activemq.ActiveMQMessageConsumer#sendPullCommand`
+
+```java
+protected void sendPullCommand(long timeout) throws JMSException {
+    clearDeliveredList();
+    if (info.getCurrentPrefetchSize() == 0 && unconsumedMessages.isEmpty()) {
+        MessagePull messagePull = new MessagePull();
+        messagePull.configure(info);
+        messagePull.setTimeout(timeout);
+        session.asyncSendPacket(messagePull);
+    }
+}
+```
+
+- 由来
+
+  `TcpTransport`类图
+
+  ![1560843074018](assets/1560843074018.png)
+
+  - `org.apache.activemq.ActiveMQConnectionFactory#createActiveMQConnection(java.lang.String, java.lang.String)`
+
+    - `org.apache.activemq.util.ServiceSupport#start`
+
+      ```java
+      public void start() throws Exception {
+          if (started.compareAndSet(false, true)) {
+              boolean success = false;
+              stopped.set(false);
+              try {
+                  preStart();
+                  doStart();
+                  success = true;
+              } finally {
+                  started.set(success);
+              }
+              for(ServiceListener l:this.serviceListeners) {
+                  l.started(this);
+              }
+          }
+      }
+      ```
+
+      - `org.apache.activemq.transport.tcp.TcpTransport#doStart`
+
+        - `org.apache.activemq.transport.TransportThreadSupport#doStart`
+
+          ```java
+          protected void doStart() throws Exception {
+              runner = new Thread(null, this, "ActiveMQ Transport: " + toString(), stackSize);
+              runner.setDaemon(daemon);
+              runner.start();
+          }
+          ```
+
+        - `org.apache.activemq.transport.tcp.TcpTransport#run`
+
+          ```java
+          @Override
+          public void run() {
+              LOG.trace("TCP consumer thread for " + this + " starting");
+              this.runnerThread=Thread.currentThread();
+              try {
+                  while (!isStopped()) {
+                      doRun();
+                  }
+              } catch (IOException e) {
+                  stoppedLatch.get().countDown();
+                  onException(e);
+              } catch (Throwable e){
+                  stoppedLatch.get().countDown();
+                  IOException ioe=new IOException("Unexpected error occurred: " + e);
+                  ioe.initCause(e);
+                  onException(ioe);
+              }finally {
+                  stoppedLatch.get().countDown();
+              }
+          }
+          ```
+
+          真正执行如上代码
+
+        - `org.apache.activemq.transport.tcp.TcpTransport#doRun`
+
+          ```java
+          protected void doRun() throws IOException {
+              try {
+                  Object command = readCommand();
+                  doConsume(command);
+              } catch (SocketTimeoutException e) {
+              } catch (InterruptedIOException e) {
+              }
+          }
+          
+          protected Object readCommand() throws IOException {
+              return wireFormat.unmarshal(dataIn);
+          }
+          ```
+
+        - `org.apache.activemq.transport.TransportSupport#doConsume`
+
+          ```java
+          public void doConsume(Object command) {
+              if (command != null) {
+                  if (transportListener != null) {
+                      transportListener.onCommand(command);
+                  } else {
+                      LOG.error("No transportListener available to process inbound command: " + command);
+                  }
+              }
+          }
+          ```
+
+- 
 
 
 

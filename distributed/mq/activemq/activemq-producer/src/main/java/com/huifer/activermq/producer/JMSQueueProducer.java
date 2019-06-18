@@ -27,8 +27,12 @@ public class JMSQueueProducer {
         Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
         Queue testQueue = session.createQueue("testQueue");
         MessageProducer producer = session.createProducer(testQueue);
-        TextMessage message = session.createTextMessage("hello activemq");
-        producer.send(message);
+        for (int i = 0; i < 1000; i++) {
+
+            TextMessage message = session.createTextMessage("hello activemq");
+            producer.send(message);
+        }
+
         session.commit();
         session.close();
         connection.close();
