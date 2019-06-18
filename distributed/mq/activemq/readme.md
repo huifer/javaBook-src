@@ -1152,7 +1152,48 @@ protected void sendPullCommand(long timeout) throws JMSException {
           }
           ```
 
-- 
+
+
+
+
+
+## 重发机制
+
+- 消息什么时候重发
+
+  - 事务会话，`session.commit()` 消费端宕机，调用`session.rollback()`
+
+  - 非事务性会话 ACK_MODE==CLIENT_ACKNOWLEDGE
+
+    ```JAVA
+    Session createSession(boolean transacted, int acknowledgeMode)
+        throws JMSException;
+    
+    public interface Session extends Runnable {
+    
+        static final int AUTO_ACKNOWLEDGE = 1;
+    
+        static final int CLIENT_ACKNOWLEDGE = 2;
+    
+        static final int DUPS_OK_ACKNOWLEDGE = 3;
+    
+        static final int SESSION_TRANSACTED = 0;
+    }
+    ```
+
+- 最大重试次数`DEFAULT_MAXIMUM_REDELIVERIES`&最大拖延时间`NO_MAXIMUM_REDELIVERIES`
+
+  ```java
+  public class RedeliveryPolicy extends DestinationMapEntry implements Cloneable, Serializable {
+  
+      public static final int NO_MAXIMUM_REDELIVERIES = -1;
+      public static final int DEFAULT_MAXIMUM_REDELIVERIES = 6;
+  }
+  ```
+
+
+
+
 
 
 
