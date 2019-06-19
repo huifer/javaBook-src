@@ -20,7 +20,9 @@ public class KafkaProducerDemo extends Thread {
     public KafkaProducerDemo(String topic) {
         Properties properties = new Properties();
         // 连接到那一台kafka 可以填写多个用","分割
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.57.1:9092");
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092");
+        //
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo-java");
         properties.put(ProducerConfig.ACKS_CONFIG, "-1");
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
