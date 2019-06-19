@@ -532,3 +532,9 @@ microservice-core/spring-application/target/generated-sources/
 /distributed/dubbo/dubbo-server/server-api/target
 /distributed/dubbo/dubbo-server/server-provider/target
 
+/distributed/mq/activemq/target
+/distributed/mq/activemq/activemq-producer/target
+/distributed/mq/activemq/activemq-receiver/target
+/distributed/mq/spring-boot-kafka-producer/target
+/distributed/mq/springboot-kafka-demo/consumer/target
+/distributed/mq/springboot-kafka-demo/producer/target
