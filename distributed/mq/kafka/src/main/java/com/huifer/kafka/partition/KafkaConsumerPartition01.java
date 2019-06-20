@@ -42,10 +42,13 @@ public class KafkaConsumerPartition01 extends Thread {
 
     public static void main(String[] args) {
         new KafkaConsumerPartition01("partitions-test").start();
+        System.out.println((("KafkaConsumerDemo-java".hashCode()) % 50));
+
     }
 
     @Override
     public void run() {
+
         while (true) {
             ConsumerRecords<Integer, String> poll = kafkaConsumer.poll(1000);
             for (ConsumerRecord<Integer, String> record : poll) {

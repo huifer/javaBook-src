@@ -1567,6 +1567,24 @@ while (true) {
 
 ## offset
 
+> kafka消费者在对应分区上已经消费的消息数【位置】
+
+- 查看offset
+
+```
+ ls /brokers/topics/__consumer_offsets/partitions
+```
+
+- 默认50个分区
+- 定位consumer_group在那个分区中
+  - `group_id.hashcode() % 分区数（50）`
+
+```shell
+kafka-console-consumer.sh --topic __consumer_offsets --partition 20 --bootstrap-server 192.168.1.106:9092,192.168.1.107:9092,192.168.1.108:9092 --formatter "kafka.coordinator.group.GroupMetadataManager\$OffsetsMessageFormatter"
+
+```
+
+![1560998717331](assets/1560998717331.png)
 
 
 
@@ -1576,14 +1594,15 @@ while (true) {
 
 
 
+## 其他
 
+```
+ERROR Fatal error during KafkaServer startup. Prepare to shutdown (kafka.server.KafkaServer)
+kafka.zookeeper.ZooKeeperClientTimeoutException: Timed out waiting for connection while in state: CONNECTING
 
+```
 
-
-
-
-
-
+![1561003078457](assets/1561003078457.png)
 
 
 
