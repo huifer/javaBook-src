@@ -982,3 +982,626 @@ public class ProucerController {
 
 ## 分区策略
 
+- 创建多个分区 `3个`
+
+```shell
+sh bin/kafka-topics.sh --create --zookeeper 192.168.1.108:2181 --replication-factor=1 --partitions 3 --topic partitions-test
+```
+
+### 自定义分区策略
+
+```java
+public class MyPartition implements Partitioner {
+
+    private Random random = new Random();
+
+    @Override
+    public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes,
+            Cluster cluster) {
+        // 获取分区列表
+        List<PartitionInfo> partitionInfos = cluster.partitionsForTopic(topic);
+        int partitionNum = 0;
+        if (key == null) {
+            partitionNum = random.nextInt(partitionInfos.size());
+        } else {
+            partitionNum = Math.abs((key.hashCode()) % partitionInfos.size());
+
+        }
+        System.out.println("key ->" + key);
+        System.out.println("value ->" + value);
+        System.out.println("partitionNumb->" + partitionNum);
+        return partitionNum;
+    }
+
+    @Override
+    public void close() {
+
+    }
+
+    @Override
+    public void configure(Map<String, ?> configs) {
+
+    }
+}
+```
+
+
+
+### 默认分区策略
+
+- **hash取模**
+
+```java
+public class DefaultPartitioner implements Partitioner {
+
+    private final ConcurrentMap<String, AtomicInteger> topicCounterMap = new ConcurrentHashMap<>();
+
+    public void configure(Map<String, ?> configs) {}
+
+    /**
+     * Compute the partition for the given record.
+     *
+     * @param topic The topic name
+     * @param key The key to partition on (or null if no key)
+     * @param keyBytes serialized key to partition on (or null if no key)
+     * @param value The value to partition on or null
+     * @param valueBytes serialized value to partition on or null
+     * @param cluster The current cluster metadata
+     */
+    public int partition(String topic, Object key, byte[] keyBytes, Object value, byte[] valueBytes, Cluster cluster) {
+        List<PartitionInfo> partitions = cluster.partitionsForTopic(topic);
+        int numPartitions = partitions.size();
+        if (keyBytes == null) {
+            int nextValue = nextValue(topic);
+            List<PartitionInfo> availablePartitions = cluster.availablePartitionsForTopic(topic);
+            if (availablePartitions.size() > 0) {
+                int part = Utils.toPositive(nextValue) % availablePartitions.size();
+                return availablePartitions.get(part).partition();
+            } else {
+                // no partitions are available, give a non-available partition
+                return Utils.toPositive(nextValue) % numPartitions;
+            }
+        } else {
+            // hash the keyBytes to choose a partition
+            return Utils.toPositive(Utils.murmur2(keyBytes)) % numPartitions;
+        }
+    }
+
+    private int nextValue(String topic) {
+        AtomicInteger counter = topicCounterMap.get(topic);
+        if (null == counter) {
+            counter = new AtomicInteger(ThreadLocalRandom.current().nextInt());
+            AtomicInteger currentCounter = topicCounterMap.putIfAbsent(topic, counter);
+            if (currentCounter != null) {
+                counter = currentCounter;
+            }
+        }
+        return counter.getAndIncrement();
+    }
+
+    public void close() {}
+
+}
+```
+
+## 分区分配策略
+
+### 消费端的partition
+
+- 通过`org.apache.kafka.common.TopicPartition`初始化可以指定消费哪一个partition的内容
+
+```java
+TopicPartition topicPartition = new TopicPartition(topic, 0);
+kafkaConsumer.assign(Arrays.asList(topicPartition));
+```
+
+
+
+前期准备3个consumer率先启动并且**group_id 相同**
+
+```java
+public class KafkaConsumerPartition01 extends Thread {
+
+    private final KafkaConsumer kafkaConsumer;
+    private final String topic;
+
+    public KafkaConsumerPartition01(String topic) {
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092");
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "KafkaConsumerDemo-java");
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        properties.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.IntegerDeserializer");
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringDeserializer");
+
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        kafkaConsumer = new KafkaConsumer<>(properties);
+        kafkaConsumer.subscribe(Collections.singletonList(topic));
+
+        this.topic = topic;
+
+    }
+
+    public static void main(String[] args) {
+        new KafkaConsumerPartition01("partitions-test").start();
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            ConsumerRecords<Integer, String> poll = kafkaConsumer.poll(1000);
+            for (ConsumerRecord<Integer, String> record : poll) {
+                System.out.println("partition：" + record.partition() + "接收消息：" + record.value());
+            }
+
+        }
+    }
+
+}
+```
+
+- Consumer03
+
+![1560990192015](assets/1560990192015.png)
+
+- Consumer02
+
+![1560990199054](assets/1560990199054.png)
+
+- Consumer01
+
+![1560990205701](assets/1560990205701.png)
+
+
+
+可以发现每一个consumer只读取了一个partition中的内容。**当消费者数量>分区数量，多余的消费者将收不到消息**。**当消费者数量<分区数量，有一个消费者会消费多个分区**。**当消费者数量=分区数量，每一个消费者消费一个分区的消息**
+
+### `RoundRobinAssignor`
+
+```java
+/**
+ * The round robin assignor lays out all the available partitions and all the available consumers. It
+ * then proceeds to do a round robin assignment from partition to consumer. If the subscriptions of all consumer
+ * instances are identical, then the partitions will be uniformly distributed. (i.e., the partition ownership counts
+ * will be within a delta of exactly one across all consumers.)
+ *
+ * For example, suppose there are two consumers C0 and C1, two topics t0 and t1, and each topic has 3 partitions,
+ * resulting in partitions t0p0, t0p1, t0p2, t1p0, t1p1, and t1p2.
+ *
+ * The assignment will be:
+ * C0: [t0p0, t0p2, t1p1]
+ * C1: [t0p1, t1p0, t1p2]
+ *
+ * When subscriptions differ across consumer instances, the assignment process still considers each
+ * consumer instance in round robin fashion but skips over an instance if it is not subscribed to
+ * the topic. Unlike the case when subscriptions are identical, this can result in imbalanced
+ * assignments. For example, we have three consumers C0, C1, C2, and three topics t0, t1, t2,
+ * with 1, 2, and 3 partitions, respectively. Therefore, the partitions are t0p0, t1p0, t1p1, t2p0,
+ * t2p1, t2p2. C0 is subscribed to t0; C1 is subscribed to t0, t1; and C2 is subscribed to t0, t1, t2.
+ *
+ * Tha assignment will be:
+ * C0: [t0p0]
+ * C1: [t1p0]
+ * C2: [t1p1, t2p0, t2p1, t2p2]
+ */
+```
+
+> - **消费者以及订阅主题的分区按照字典序排序，通过轮询方式将分区分配给消费者**
+> - 如果所有消费者的订阅实例是相同的，那么分区将均匀分布。消费者为C0,C1，订阅主题t0和t1,每个主题存在三个分区，设分区标识 t0p0, t0p1, t0p2, t1p0, t1p1, t1p2，分配结果如下
+>   - C0:[t0p0, t0p2, t1p1]
+>   - C1:[t0p1, t1p0, t1p2]
+>
+> - 如果所有消费者的订阅实例是不同的，那么分区将不是均匀分布。消费者为C0,C1,C2,主题为t0,t1,t2,每个主题存在1,2,3分区，设分区标识t0p0,t1p0,t1p1,t2p0,t2p1,t2p2，分配结果如下
+>   - C0: [t0p0]
+>   - C1: [t1p0]
+>   - C2: [t1p1, t2p0, t2p1, t2p2]
+
+
+
+
+
+
+
+### `RangeAssignor`
+
+
+
+```java
+/**
+ * The range assignor works on a per-topic basis. For each topic, we lay out the available partitions in numeric order
+ * and the consumers in lexicographic order. We then divide the number of partitions by the total number of
+ * consumers to determine the number of partitions to assign to each consumer. If it does not evenly
+ * divide, then the first few consumers will have one extra partition.
+ *
+ * For example, suppose there are two consumers C0 and C1, two topics t0 and t1, and each topic has 3 partitions,
+ * resulting in partitions t0p0, t0p1, t0p2, t1p0, t1p1, and t1p2.
+ *
+ * The assignment will be:
+ * C0: [t0p0, t0p1, t1p0, t1p1]
+ * C1: [t0p2, t1p2]
+ */
+```
+
+> - **分区总数整除消费者数量结果称为跨度，分区按照跨度进行平均分配**
+> - 消费者为C0,C1 ， 订阅主题为t0,t1，每个主题有三个分区，设分区标识t0p0, t0p1, t0p2, t1p0, t1p1,t1p2，分配结果如下
+>   - C0: [t0p0, t0p1, t1p0, t1p1]
+>   - C1: [t0p2, t1p2]
+
+
+
+
+
+### `StickyAssignor`
+
+```java
+/**
+ * <p>The sticky assignor serves two purposes. First, it guarantees an assignment that is as balanced as possible, meaning either:
+ * <ul>
+ * <li>the numbers of topic partitions assigned to consumers differ by at most one; or</li>
+ * <li>each consumer that has 2+ fewer topic partitions than some other consumer cannot get any of those topic partitions transferred to it.</li>
+ * </ul>
+ * Second, it preserved as many existing assignment as possible when a reassignment occurs. This helps in saving some of the
+ * overhead processing when topic partitions move from one consumer to another.</p>
+ *
+ * <p>Starting fresh it would work by distributing the partitions over consumers as evenly as possible. Even though this may sound similar to
+ * how round robin assignor works, the second example below shows that it is not.
+ * During a reassignment it would perform the reassignment in such a way that in the new assignment
+ * <ol>
+ * <li>topic partitions are still distributed as evenly as possible, and</li>
+ * <li>topic partitions stay with their previously assigned consumers as much as possible.</li>
+ * </ol>
+ * Of course, the first goal above takes precedence over the second one.</p>
+ *
+ * <p><b>Example 1.</b> Suppose there are three consumers <code>C0</code>, <code>C1</code>, <code>C2</code>,
+ * four topics <code>t0,</code> <code>t1</code>, <code>t2</code>, <code>t3</code>, and each topic has 2 partitions,
+ * resulting in partitions <code>t0p0</code>, <code>t0p1</code>, <code>t1p0</code>, <code>t1p1</code>, <code>t2p0</code>,
+ * <code>t2p1</code>, <code>t3p0</code>, <code>t3p1</code>. Each consumer is subscribed to all three topics.
+ *
+ * The assignment with both sticky and round robin assignors will be:
+ * <ul>
+ * <li><code>C0: [t0p0, t1p1, t3p0]</code></li>
+ * <li><code>C1: [t0p1, t2p0, t3p1]</code></li>
+ * <li><code>C2: [t1p0, t2p1]</code></li>
+ * </ul>
+ *
+ * Now, let's assume <code>C1</code> is removed and a reassignment is about to happen. The round robin assignor would produce:
+ * <ul>
+ * <li><code>C0: [t0p0, t1p0, t2p0, t3p0]</code></li>
+ * <li><code>C2: [t0p1, t1p1, t2p1, t3p1]</code></li>
+ * </ul>
+ *
+ * while the sticky assignor would result in:
+ * <ul>
+ * <li><code>C0 [t0p0, t1p1, t3p0, t2p0]</code></li>
+ * <li><code>C2 [t1p0, t2p1, t0p1, t3p1]</code></li>
+ * </ul>
+ * preserving all the previous assignments (unlike the round robin assignor).
+ *</p>
+ * <p><b>Example 2.</b> There are three consumers <code>C0</code>, <code>C1</code>, <code>C2</code>,
+ * and three topics <code>t0</code>, <code>t1</code>, <code>t2</code>, with 1, 2, and 3 partitions respectively.
+ * Therefore, the partitions are <code>t0p0</code>, <code>t1p0</code>, <code>t1p1</code>, <code>t2p0</code>,
+ * <code>t2p1</code>, <code>t2p2</code>. <code>C0</code> is subscribed to <code>t0</code>; <code>C1</code> is subscribed to
+ * <code>t0</code>, <code>t1</code>; and <code>C2</code> is subscribed to <code>t0</code>, <code>t1</code>, <code>t2</code>.
+ *
+ * The round robin assignor would come up with the following assignment:
+ * <ul>
+ * <li><code>C0 [t0p0]</code></li>
+ * <li><code>C1 [t1p0]</code></li>
+ * <li><code>C2 [t1p1, t2p0, t2p1, t2p2]</code></li>
+ * </ul>
+ *
+ * which is not as balanced as the assignment suggested by sticky assignor:
+ * <ul>
+ * <li><code>C0 [t0p0]</code></li>
+ * <li><code>C1 [t1p0, t1p1]</code></li>
+ * <li><code>C2 [t2p0, t2p1, t2p2]</code></li>
+ * </ul>
+ *
+ * Now, if consumer <code>C0</code> is removed, these two assignors would produce the following assignments.
+ * Round Robin (preserves 3 partition assignments):
+ * <ul>
+ * <li><code>C1 [t0p0, t1p1]</code></li>
+ * <li><code>C2 [t1p0, t2p0, t2p1, t2p2]</code></li>
+ * </ul>
+ *
+ * Sticky (preserves 5 partition assignments):
+ * <ul>
+ * <li><code>C1 [t1p0, t1p1, t0p0]</code></li>
+ * <li><code>C2 [t2p0, t2p1, t2p2]</code></li>
+ * </ul>
+ *</p>
+ * <h3>Impact on <code>ConsumerRebalanceListener</code></h3>
+ * The sticky assignment strategy can provide some optimization to those consumers that have some partition cleanup code
+ * in their <code>onPartitionsRevoked()</code> callback listeners. The cleanup code is placed in that callback listener
+ * because the consumer has no assumption or hope of preserving any of its assigned partitions after a rebalance when it
+ * is using range or round robin assignor. The listener code would look like this:
+ * <pre>
+ * {@code
+ * class TheOldRebalanceListener implements ConsumerRebalanceListener {
+ *
+ *   void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+ *     for (TopicPartition partition: partitions) {
+ *       commitOffsets(partition);
+ *       cleanupState(partition);
+ *     }
+ *   }
+ *
+ *   void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+ *     for (TopicPartition partition: partitions) {
+ *       initializeState(partition);
+ *       initializeOffset(partition);
+ *     }
+ *   }
+ * }
+ * }
+ * </pre>
+ *
+ * As mentioned above, one advantage of the sticky assignor is that, in general, it reduces the number of partitions that
+ * actually move from one consumer to another during a reassignment. Therefore, it allows consumers to do their cleanup
+ * more efficiently. Of course, they still can perform the partition cleanup in the <code>onPartitionsRevoked()</code>
+ * listener, but they can be more efficient and make a note of their partitions before and after the rebalance, and do the
+ * cleanup after the rebalance only on the partitions they have lost (which is normally not a lot). The code snippet below
+ * clarifies this point:
+ * <pre>
+ * {@code
+ * class TheNewRebalanceListener implements ConsumerRebalanceListener {
+ *   Collection<TopicPartition> lastAssignment = Collections.emptyList();
+ *
+ *   void onPartitionsRevoked(Collection<TopicPartition> partitions) {
+ *     for (TopicPartition partition: partitions)
+ *       commitOffsets(partition);
+ *   }
+ *
+ *   void onPartitionsAssigned(Collection<TopicPartition> assignment) {
+ *     for (TopicPartition partition: difference(lastAssignment, assignment))
+ *       cleanupState(partition);
+ *
+ *     for (TopicPartition partition: difference(assignment, lastAssignment))
+ *       initializeState(partition);
+ *
+ *     for (TopicPartition partition: assignment)
+ *       initializeOffset(partition);
+ *
+ *     this.lastAssignment = assignment;
+ *   }
+ * }
+ * }
+ * </pre>
+ *
+ * Any consumer that uses sticky assignment can leverage this listener like this:
+ * <code>consumer.subscribe(topics, new TheNewRebalanceListener());</code>
+ *
+ */
+```
+
+
+
+> `StickyAssignor`目的
+>
+> 1. 分配平均
+> 2. 分配结果尽可能的与上一次的分配结果相同
+>    1. 如果两者发生冲突，第一目标优先于第二目标
+
+
+
+
+
+#### 例1
+
+> 假设有三个消费者C0 ,C1 ,C2，四个主题t0, t1, t2, t3，每个主题有2个分区，分区标识t0p0, t0p1, t1p0, t1p1, t2p0，t2p1、t3p0 t3p1。每个消费者都订阅了这三个主题。
+
+
+
+- `StickyAssignor` 和`RoundRobinAssignor`分区结果都是:
+  1. C0: [t0p0, t1p1, t3p0]
+  2. C1: [t0p1, t2p0, t3p1]
+  3. C2 [t1p0, t2p1]
+
+- 假设C1消费者被删除
+  - `RoundRobinAssignor`分区结果
+    1. C0: [t0p0, t1p0, t2p0, t3p0]
+    2. C2: [t0p1, t1p1, t2p1, t3p1]
+  - `StickyAssignor` 分区结果
+    1. C0 [t0p0, t1p1, t3p0, t2p0]
+    2. C2 [t1p0, t2p1, t0p1, t3p1]
+
+
+
+#### 例2
+
+> 有三个消费者C0, C1, C2，三个主题t0、t1、t2，分别有1、2、3个分区，分区标识t0p0, t1p0, t1p1, t2p0，
+>
+> t2p1 t2p2。C0被订阅为t0，C1订阅给t0, t1，C2订阅了t0 t1 t2。
+
+
+
+- `RoundRobinAssignor`分区结果
+  1. C0 [t0p0]
+  2. C1 [t1p0]
+  3. C2 [t1p1, t2p0, t2p1, t2p2]
+- `StickyAssignor`分区结果
+  1. C0 [t0p0]
+  2. C1 [t1p0 t1p1]
+  3. C2 [t2p0, t2p1, t2p2]
+
+- 假设C0消费者被删除
+  - `RoundRobinAssignor`分区结果
+    1. C1 [t0p0 t1p1]
+    2. C2 [t1p0, t2p0, t2p1, t2p2]
+  - `StickyAssignor`分区结果
+    1. C1 [t1p0, t1p1, t0p0]
+    2. C2 [t2p0, t2p1, t2p2]
+
+
+
+
+
+
+
+
+
+## Rebalance
+
+### 触发条件
+
+1. 新的消费者加入Consumer Group
+2. 消费者从Consumer Group中下线
+   1. 主动下线
+   2. 心跳检测判断下线
+3. 订阅主题分区发送改变
+4. `unsubscribe()`取消对摸一个主题的订阅
+
+ 
+
+
+
+### rebalance过程
+
+- Join
+  - `org.apache.kafka.clients.consumer.internals.AbstractCoordinator#sendJoinGroupRequest`
+- Sync
+  - `org.apache.kafka.clients.consumer.internals.AbstractCoordinator#sendSyncGroupRequest`
+
+#### join
+
+> - `org.apache.kafka.clients.consumer.internals.AbstractCoordinator#sendJoinGroupRequest`
+>   - `org.apache.kafka.clients.consumer.internals.AbstractCoordinator.JoinGroupResponseHandler`
+>     - `org.apache.kafka.clients.consumer.internals.AbstractCoordinator#onJoinLeader`
+>     - `org.apache.kafka.clients.consumer.internals.AbstractCoordinator#onJoinFollower`
+
+- 提交信息
+
+```java
+        JoinGroupRequest.Builder requestBuilder = new JoinGroupRequest.Builder(
+                groupId,
+                this.sessionTimeoutMs,
+                this.generation.memberId,
+                protocolType(),
+                metadata()).setRebalanceTimeout(this.rebalanceTimeoutMs);
+```
+
+- 返回信息
+
+  - leader
+
+    ```java
+    private RequestFuture<ByteBuffer> onJoinLeader(JoinGroupResponse joinResponse) {
+        try {
+            // perform the leader synchronization and send back the assignment for the group
+            Map<String, ByteBuffer> groupAssignment = performAssignment(joinResponse.leaderId(), joinResponse.groupProtocol(),
+                    joinResponse.members());
+    
+            SyncGroupRequest.Builder requestBuilder =
+                    new SyncGroupRequest.Builder(groupId, generation.generationId, generation.memberId, groupAssignment);
+            log.debug("Sending leader SyncGroup to coordinator {}: {}", this.coordinator, requestBuilder);
+            return sendSyncGroupRequest(requestBuilder);
+        } catch (RuntimeException e) {
+            return RequestFuture.failure(e);
+        }
+    }
+    ```
+
+  - follower
+
+    ```java
+    private RequestFuture<ByteBuffer> onJoinFollower() {
+        // send follower's sync group with an empty assignment
+        SyncGroupRequest.Builder requestBuilder =
+                new SyncGroupRequest.Builder(groupId, generation.generationId, generation.memberId,
+                        Collections.<String, ByteBuffer>emptyMap());
+        log.debug("Sending follower SyncGroup to coordinator {}: {}", this.coordinator, requestBuilder);
+        return sendSyncGroupRequest(requestBuilder);
+    }
+    ```
+
+```sequence
+consumer1 --> coordinator: join group
+consumer2 --> coordinator:join group
+coordinator--> consumer1: 你是leader,【leaderId,groupProtocol,members】
+coordinator--> consumer2: 你是follower，【groupId, generation.generationId, generation.memberId】
+
+
+
+
+```
+
+#### Sync
+
+> - `org.apache.kafka.common.requests.SyncGroupRequest`
+
+在`org.apache.kafka.clients.consumer.internals.AbstractCoordinator#onJoinLeader`和`org.apache.kafka.clients.consumer.internals.AbstractCoordinator#onJoinFollower`方法中调用
+
+
+
+
+
+#### 流程图
+
+- 入口
+
+```java
+while (true) {
+    ConsumerRecords<Integer, String> poll = kafkaConsumer.poll(1000);
+    for (ConsumerRecord<Integer, String> record : poll) {
+        System.out.println("接收消息：" + record.value());
+    }
+
+}
+```
+
+
+
+![](assets/1222875_20181019144711265_1345821003.png)
+
+![](assets/1222875_20180907172453138_1802996303.png)
+
+- 图片来自: <https://www.cnblogs.com/benfly/p/9605976.html>
+
+
+
+
+
+## offset
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
