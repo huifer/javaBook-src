@@ -538,4 +538,5 @@ microservice-core/spring-application/target/generated-sources/
 /distributed/mq/spring-boot-kafka-producer/target
 /distributed/mq/springboot-kafka-demo/consumer/target
 /distributed/mq/springboot-kafka-demo/producer/target
+/distributed/mq/rabbitmq/target
 /netty/target
