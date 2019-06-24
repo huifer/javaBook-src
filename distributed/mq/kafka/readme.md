@@ -492,6 +492,36 @@ public ConfigDef define(String name, Type type, Importance importance, String do
 | **key.serializer**   | ProducerConfig#KEY_SERIALIZER_CLASS_CONFIG   | 消息记录key的序列化类。     | CLASS    | 从`org.apache.kafka.common.serialization`下选择 |
 | **value.serializer** | ProducerConfig#VALUE_SERIALIZER_CLASS_CONFIG | 消息记录中value的序列化类。 | CLASS    | 从`org.apache.kafka.common.serialization`下选择 |
 
+### 必要配置
+
+1. `bootstrap.servers`
+2. `key.serializer`
+3. `value.serializer`
+
+### 重要配置
+
+- acks
+  - 该参数指定分区中必须要有多少个副本来接受这条消息
+- max.request.size
+  - 生产者能发送消息的最大数量
+- retries和retry.backoff.ms
+  - retries生产者重试次数
+  - retry.backoff.ms重试时间间隔
+- compression.type
+  - 消息的压缩方式
+- connections.max.idle.ms
+  - 在多久后关闭限制连接
+- linger.ms
+  - 生产者发送ProducerBatch之前等待更多消息加入ProducerBatch的时间
+- receive.buffer.bytes
+  - socket接收消息的缓冲区
+- send.buffer.bytes
+  - socket发送消息的缓冲区
+- request.timeout.ms
+  - 生产者等待请求响应的最长时间
+
+
+
 
 
 ### 生产者属性`ProducerRecord`
@@ -536,21 +566,250 @@ public ConfigDef define(String name, Type type, Importance importance, String do
 
   
 
-### 必要配置
-
-1. `bootstrap.servers`
-2. `key.serializer`
-3. `value.serializer`
 
 
+### 序列化
+
+- `org.apache.kafka.common.serialization.Serializer`
+
+  ```java
+  public interface Serializer<T> extends Closeable {
+   	// 配置当前类
+      void configure(Map<String, ?> configs, boolean isKey);
+  	// 序列化操作
+      byte[] serialize(String topic, T data);
+  	// 可以不重写方法内容，重写需要保证幂等性
+      @Override
+      void close(); 
+  }
+  ```
+  
+- POJO
+
+  ```java
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public class Student {
+      private String name;
+      private Integer age;
+      private String teacherName;
+  
+  }
+  ```
+
+  
+
+- 自定义POJO的序列化
+
+```java
+public class StudentSerializer implements Serializer<Student> {
+
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+
+    }
+
+    @Override
+    public byte[] serialize(String topic, Student data) {
+        if (data == null) {
+            return null;
+        }
+        byte[] name, age, teacherName;
+        try {
+            if (data.getName() != null) {
+                name = data.getName().getBytes(StandardCharsets.UTF_8);
+            } else {
+                name = new byte[0];
+            }
+
+            if (data.getTeacherName() != null) {
+                teacherName = data.getTeacherName().getBytes(StandardCharsets.UTF_8);
+            } else {
+                teacherName = new byte[0];
+            }
+
+            if (data.getAge() != null && data.getAge() > 0) {
+                Integer dataAge = data.getAge();
+                age = new byte[]{
+                        (byte) (dataAge >>> 24),
+                        (byte) (dataAge >>> 16),
+                        (byte) (dataAge >>> 8),
+                        dataAge.byteValue()
+                };
+            } else {
+                age = new byte[0];
+            }
+
+            ByteBuffer buffer = ByteBuffer
+                    .allocate(4 + 4 + name.length + teacherName.length + age.length);
+            buffer.putInt(name.length);
+            buffer.put(name);
+            buffer.putInt(teacherName.length);
+            buffer.put(teacherName);
+            buffer.putInt(age.length);
+            buffer.put(age);
+            return buffer.array();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+    @Override
+    public void close() {
+
+    }
+}
+```
+
+### 生产者拦截器
+
+- `org.apache.kafka.clients.producer.ProducerInterceptor`
+
+```java
+public interface ProducerInterceptor<K, V> extends Configurable {
+  
+    public ProducerRecord<K, V> onSend(ProducerRecord<K, V> record);
+
+    public void onAcknowledgement(RecordMetadata metadata, Exception exception);
+ 
+    public void close();
+}
+
+```
+
+- `onSend`
+
+  该方法在`org.apache.kafka.clients.producer.KafkaProducer#send(ProducerRecord)`和`org.apache.kafka.clients.producer.KafkaProducer#send(ProducerRecord, Callback)`之后被调用，可以对key 、value进行定制，但是不建议这么操作，如果需要请确认key和value的关联性
+
+- `onAcknowledgement`
+
+  当发送到服务器的消息被确认时，或者在发送到服务器之前失败时会调用该方法。
+
+- `close`
+
+  拦截器关闭时进行资源清理操作
+
+#### 自定义拦截器
+
+```java
+public class MyInterceptor implements ProducerInterceptor {
+
+    private volatile long successCount = 0;
+    private volatile long errorCount = 0;
+
+    @Override
+    public void configure(Map<String, ?> configs) {
+
+    }
+
+    @Override
+    public ProducerRecord onSend(ProducerRecord record) {
+        String newValue = "prefix -" + record.value();
+        return new ProducerRecord<>(
+                record.topic(),
+                record.partition(),
+                record.timestamp(),
+                record.key(),
+                newValue,
+                record.headers()
+        );
+    }
+
+    @Override
+    public void onAcknowledgement(RecordMetadata metadata, Exception exception) {
+        if (exception == null) {
+            successCount += 1;
+        } else {
+            errorCount += 1;
+        }
+    }
+
+    @Override
+    public void close() {
+        double ratio = (double) successCount / (successCount + errorCount);
+        System.out.println("消息发送成功率 = " + (ratio * 100) + "%");
+    }
+}
+```
+
+
+
+```java
+public class StandAloneKafkaProducer extends Thread {
+
+    private final KafkaProducer<Integer, String> producer;
+    private final String topic;
+
+    public StandAloneKafkaProducer(String topic) {
+        Properties properties = new Properties();
+        // 连接到那一台kafka 可以填写多个用","分割
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "192.168.1.106:9092");
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo-java");
+        properties.put(ProducerConfig.ACKS_CONFIG, "-1");
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.IntegerSerializer");// 序列化手段
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringSerializer");// 序列化手段
+        properties.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, MyInterceptor.class.getName());
+
+        this.producer = new KafkaProducer<Integer, String>(properties);
+        this.topic = topic;
+    }
+
+    public static void main(String[] args) {
+
+        StandAloneKafkaProducer test = new StandAloneKafkaProducer("interceptor");
+        test.start();
+
+    }
+
+    @Override
+    public void run() {
+        int n = 0;
+        while (n < 10) {
+            String msg = "msg_" + n;
+            n++;
+            System.out.println("发送消息" + msg);
+            producer.send(new ProducerRecord<Integer, String>(topic, msg));
+        }
+        producer.close();
+
+    }
+
+}
+```
 
 
 
 
 
-## 消费端
 
-### 消费端配置`ConsumerConfig`
+
+### producer 执行过程
+
+```sequence
+
+KafkaProducer --> 拦截器:ProducerInterceptors
+拦截器--> 序列化器:Serializer
+序列化器--> 分区器:Partitioner
+
+```
+
+
+
+
+
+
+
+## 消费者
+
+### 消费者配置`ConsumerConfig`
 
 
 
@@ -768,6 +1027,191 @@ public ConfigDef define(String name, Type type, Importance importance, String do
 | value.deserializer      | ConsumerConfig#VALUE_DESERIALIZER_CLASS_CONFIG | 实现了Deserializer的value的反序列化类                        | CLASS    |        |
 | auto.offset.reset       | ConsumerConfig#AUTO_OFFSET_RESET_CONFIG        | 当kafka的初始偏移量没了，或者当前的偏移量不存在的情况下，应该怎么办？下面有几种策略：earliest（将偏移量自动重置为最初的值）、latest（自动将偏移量置为最新的值）、none（如果在消费者组中没有发现前一个偏移量，就向消费者抛出一个异常）、anything else（向消费者抛出异常） | STRING   | latest |
 
+### 必要参数
+
+1. bootstrap.servers
+2. group.id
+3. key.deserializer
+4. value.deserializer
+
+### 重要参数
+
+- fetch.min.bytes
+  - 消费者调用poll可以从kafka拉取的最小数据量
+- fetch.max.bytes
+  - 消费者调用poll可以从kafka拉取的最大数据量
+- fetch.max.wait.ms
+  - 用于配置从服务器中读取数据最长的等待时间。
+- max.partition.fetch.bytes
+  - 每个分区返回给消费者的最大数据量
+- max.poll.records
+  - 消费者在一次拉取请求中能够拉取的最大消息数量
+- connections.max.idle.ms
+  - 在多久后关闭限制连接
+- exclude.internal.topics
+  - `__consumer_offsets`和`__transaction_state`是否公开给消费者
+- receive.buffer.bytes
+  - socket接收消息的缓冲区
+- send.buffer.bytes
+  - socket发送消息的缓冲区
+- request.timeout.ms
+  - 消费者等待请求响应的最长时间
+- metadata.max.age.ms
+  - 元数据过期时间
+- reconnect.backoff.ms
+  - 到主机的重试时间间隔
+- retry.backoff.ms
+  - 到主题的重试时间间隔
+- isolation.level
+  - 事务隔离级别
+
+### 消费者属性`KafkaConsumer`
+
+```java
+public class KafkaConsumer<K, V> implements Consumer<K, V> {
+
+    private static final long NO_CURRENT_THREAD = -1L;
+    private static final AtomicInteger CONSUMER_CLIENT_ID_SEQUENCE = new AtomicInteger(1);
+    private static final String JMX_PREFIX = "kafka.consumer";
+    static final long DEFAULT_CLOSE_TIMEOUT_MS = 30 * 1000;
+
+    // Visible for testing
+    final Metrics metrics;
+
+    private final Logger log;
+    private final String clientId;
+    private final ConsumerCoordinator coordinator;
+    private final Deserializer<K> keyDeserializer;
+    private final Deserializer<V> valueDeserializer;
+    private final Fetcher<K, V> fetcher;
+    private final ConsumerInterceptors<K, V> interceptors;
+
+    private final Time time;
+    private final ConsumerNetworkClient client;
+    private final SubscriptionState subscriptions;
+    private final Metadata metadata;
+    private final long retryBackoffMs;
+    private final long requestTimeoutMs;
+    private volatile boolean closed = false;
+    private List<PartitionAssignor> assignors;
+
+    // currentThread holds the threadId of the current thread accessing KafkaConsumer
+    // and is used to prevent multi-threaded access
+    private final AtomicLong currentThread = new AtomicLong(NO_CURRENT_THREAD);
+    // refcount is used to allow reentrant access by the thread who has acquired currentThread
+    private final AtomicInteger refcount = new AtomicInteger(0);
+
+}
+```
+
+
+
+| 属性                        | 含义                 |
+| --------------------------- | -------------------- |
+| NO_CURRENT_THREAD           |                      |
+| CONSUMER_CLIENT_ID_SEQUENCE | ~~客户端client.id~~  |
+| JMX_PREFIX                  | 前缀                 |
+| DEFAULT_CLOSE_TIMEOUT_MS    | 默认关闭超时时间     |
+| metrics                     |                      |
+| log                         |                      |
+| clientId                    | client.id            |
+| coordinator                 | 协调器               |
+| keyDeserializer             | key反序列化          |
+| valueDeserializer           | value反序列化        |
+| fetcher                     |                      |
+| interceptors                | 拦截器               |
+| time                        |                      |
+| client                      |                      |
+| subscriptions               | 订阅内容             |
+| metadata                    | 元数据               |
+| retryBackoffMs              | 到主机的重试时间间隔 |
+| requestTimeoutMs            | 到主题的重试时间间隔 |
+| closed                      |                      |
+| assignors                   |                      |
+| currentThread               |                      |
+| refcount                    |                      |
+
+
+
+### 订阅
+
+- `org.apache.kafka.clients.consumer.KafkaConsumer#subscribe`
+
+  直接传入主题名称(`topic`)
+
+### 反序列化
+
+- `org.apache.kafka.common.serialization.Deserializer`
+
+```java
+public interface Deserializer<T> extends Closeable {
+
+ 	// 配置当前类
+    void configure(Map<String, ?> configs, boolean isKey);
+	// 反序列化操作
+    T deserialize(String topic, byte[] data);
+
+    @Override
+    void close();
+}
+
+```
+
+
+
+```java
+public class StudentDeserializer implements Deserializer<Student> {
+
+    @Override
+    public void configure(Map configs, boolean isKey) {
+
+    }
+
+    @Override
+    public Student deserialize(String topic, byte[] data) {
+        if (data == null) {
+            return null;
+        }
+        if (data.length < 8) {
+            throw new SerializationException(
+                    "Size of data received by IntegerDeserializer is not 8");
+        }
+        ByteBuffer wrap = ByteBuffer.wrap(data);
+        String name, teacherName;
+
+        int namelen,  teacherlen;
+        namelen = wrap.getInt();
+        byte[] nameBytes = new byte[namelen];
+        wrap.get(nameBytes);
+
+        teacherlen = wrap.getInt();
+        byte[] teacherBytes = new byte[teacherlen];
+        wrap.get(teacherBytes);
+
+        try {
+            name = new String(nameBytes, "UTF-8");
+            teacherName = new String(teacherBytes, "UTF-8");
+            return new Student(name,  teacherName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void close() {
+
+    }
+}
+
+```
+
+- 消费端与生产端详见`com.huifer.kafka.serializer`
+
+
+
+
+
 
 
 
@@ -852,231 +1296,6 @@ public class KafkaProducerAysncDemo extends Thread {
     }
 }
 ```
-
-
-
-## spring-boot 整合
-
-### 消息提供端
-
-- `application.properties`
-
-  ```properties
-  server.port=8999
-  
-  
-  
-  kafka.producer.bootstrap-servers=192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092
-  kafka.producer.client.id=spring-boot-kafka-demo
-  kafka.producer.acks=-1
-  kafka.producer.key.serializer=org.apache.kafka.common.serialization.IntegerSerializer
-  kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
-  ```
-
-- KafkaProducerConfig
-
-  ```java
-  package com.huifer.springboot.kafka.producer.bean;
-  
-  import java.util.HashMap;
-  import java.util.Map;
-  import org.apache.kafka.clients.producer.ProducerConfig;
-  import org.springframework.beans.factory.annotation.Value;
-  import org.springframework.context.annotation.Bean;
-  import org.springframework.context.annotation.Configuration;
-  import org.springframework.kafka.annotation.EnableKafka;
-  import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-  import org.springframework.kafka.core.KafkaTemplate;
-  import org.springframework.kafka.core.ProducerFactory;
-  
-  /**
-   * <p>Title : KafkaProducerConfig </p>
-   * <p>Description : kafka producer config</p>
-   *
-   * @author huifer
-   * @date 2019-06-19
-   */
-  @Configuration
-  @EnableKafka
-  public class KafkaProducerConfig {
-  
-      @Value("${kafka.producer.bootstrap-servers}")
-      private String BOOTSTRAP_SERVERS;
-      @Value("${kafka.producer.client.id}")
-      private String CLIENT_ID;
-      @Value("${kafka.producer.acks}")
-      private String ACKS;
-      @Value("${kafka.producer.key.serializer}")
-      private String KEY_SERIALIZER;
-      @Value("${kafka.producer.value.serializer}")
-      private String VALUE_SERIALIZER;
-  
-      public Map<String, Object> config() {
-          Map<String, Object> conf = new HashMap<>();
-          conf.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-          conf.put(ProducerConfig.CLIENT_ID_CONFIG, CLIENT_ID);
-          conf.put(ProducerConfig.ACKS_CONFIG, ACKS);
-          conf.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KEY_SERIALIZER);
-          conf.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, VALUE_SERIALIZER);
-          return conf;
-      }
-  
-      public ProducerFactory<Object, Object> producerFactory() {
-          return new DefaultKafkaProducerFactory<>(config());
-      }
-  
-      @Bean
-      public KafkaTemplate<Object, Object> kafkaTemplate() {
-          return new KafkaTemplate<>(producerFactory());
-      }
-  
-  }
-  ```
-
-- 测试类
-
-  ```java
-  package com.huifer.springboot.kafka.producer.bean;
-  
-  import org.apache.kafka.clients.producer.ProducerRecord;
-  import org.junit.Test;
-  import org.junit.runner.RunWith;
-  import org.springframework.beans.factory.annotation.Autowired;
-  import org.springframework.boot.test.context.SpringBootTest;
-  import org.springframework.kafka.core.KafkaTemplate;
-  import org.springframework.test.context.junit4.SpringRunner;
-  import org.springframework.util.concurrent.ListenableFuture;
-  
-  @RunWith(SpringRunner.class)
-  @SpringBootTest
-  public class KafkaProducerConfigTest {
-      @Autowired
-      private KafkaTemplate kafkaTemplate;
-  
-      @Test
-      public void testSend() {
-          ListenableFuture send = kafkaTemplate
-                  .send(new ProducerRecord<String, String>("hello-spring-boot-kafka", "hhh"));
-          System.out.println(send);
-      }
-  }
-  
-  ```
-
-
-
-### 消息消费端
-
-- `application.properties`
-
-```properties
-server.port=9000
-
-
-
-kafka.consumer.bootstrap-servers=192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092
-kafka.consumer.group.id=spring-boot-kafka-consumer
-kafka.consumer.enable.auto.commit=true
-kafka.consumer.auto.commit.interval.ms=1000
-kafka.consumer.key.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
-kafka.consumer.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
-kafka.consumer.auto.offset.reset=earliest
-
-```
-
-- `MessageListener`
-
-  ```java
-  public class KafkaConsumerMessageListener {
-  
-      @KafkaListener(topics = {"hello-spring-boot-kafka"})
-      public void listen(ConsumerRecord<?, ?> record) {
-          System.out.println("key = " + record.key() + "\t" + "value = " + record.value());
-      }
-  
-  }
-  ```
-
-- `KafkaCounsumerConfig`
-
-  ```java
-  @Configuration
-  @EnableKafka
-  public class KafkaConsumerConfig {
-  
-      @Value("${kafka.consumer.bootstrap-servers}")
-      private String bootstrap_servers;
-      @Value("${kafka.consumer.group.id}")
-      private String group_id;
-      @Value("${kafka.consumer.enable.auto.commit}")
-      private String enable_auto_commit;
-      @Value("${kafka.consumer.auto.commit.interval.ms}")
-      private String auto_commit_interval_ms;
-      @Value("${kafka.consumer.key.deserializer}")
-      private String key_deserializer;
-      @Value("${kafka.consumer.value.deserializer}")
-      private String value_deserializer;
-      @Value("${kafka.consumer.auto.offset.reset}")
-      private String reset;
-  
-      public Map config() {
-          Map<String, Object> conf = new HashMap<>();
-          conf.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers);
-          conf.put(ConsumerConfig.GROUP_ID_CONFIG, group_id);
-          conf.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, enable_auto_commit);
-          conf.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, auto_commit_interval_ms);
-          conf.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, key_deserializer);
-          conf.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, value_deserializer);
-          conf.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, reset);
-          return conf;
-      }
-  
-  
-      public ConsumerFactory<Object, Object> consumerFactory() {
-          return new DefaultKafkaConsumerFactory<>(config());
-      }
-  
-      @Bean
-      public KafkaConsumerMessageListener listener() {
-          return new KafkaConsumerMessageListener();
-      }
-  
-      @Bean
-      public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
-          ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-          factory.setConsumerFactory(consumerFactory());
-          factory.getContainerProperties().setPollTimeout(1500);
-          return factory;
-      }
-  
-  
-  }
-  ```
-
-
-
-### 测试
-
-```java
-@RestController
-public class ProucerController {
-
-    @Autowired
-    private KafkaTemplate kafkaTemplate;
-
-    @GetMapping("/test")
-    public String sendMsg() {
-        kafkaTemplate.send("hello-spring-boot-kafka", "hello");
-        return "ok";
-    }
-
-}
-```
-
-![1560934027226](assets/1560934027226.png)
-
-
-
 
 
 
@@ -1688,6 +1907,230 @@ kafka-console-consumer.sh --topic __consumer_offsets --partition 20 --bootstrap-
 ```
 
 ![1560998717331](assets/1560998717331.png)
+
+
+
+
+
+## spring-boot 整合
+
+### 消息提供端
+
+- `application.properties`
+
+  ```properties
+  server.port=8999
+  
+  
+  kafka.producer.bootstrap-servers=192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092
+  kafka.producer.client.id=spring-boot-kafka-demo
+  kafka.producer.acks=-1
+  kafka.producer.key.serializer=org.apache.kafka.common.serialization.IntegerSerializer
+  kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+  ```
+  
+- KafkaProducerConfig
+
+  ```java
+  package com.huifer.springboot.kafka.producer.bean;
+  
+  import java.util.HashMap;
+  import java.util.Map;
+  import org.apache.kafka.clients.producer.ProducerConfig;
+  import org.springframework.beans.factory.annotation.Value;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.kafka.annotation.EnableKafka;
+  import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+  import org.springframework.kafka.core.KafkaTemplate;
+  import org.springframework.kafka.core.ProducerFactory;
+  
+  /**
+   * <p>Title : KafkaProducerConfig </p>
+   * <p>Description : kafka producer config</p>
+   *
+   * @author huifer
+   * @date 2019-06-19
+   */
+  @Configuration
+  @EnableKafka
+  public class KafkaProducerConfig {
+  
+      @Value("${kafka.producer.bootstrap-servers}")
+      private String BOOTSTRAP_SERVERS;
+      @Value("${kafka.producer.client.id}")
+      private String CLIENT_ID;
+      @Value("${kafka.producer.acks}")
+      private String ACKS;
+      @Value("${kafka.producer.key.serializer}")
+      private String KEY_SERIALIZER;
+      @Value("${kafka.producer.value.serializer}")
+      private String VALUE_SERIALIZER;
+  
+      public Map<String, Object> config() {
+          Map<String, Object> conf = new HashMap<>();
+          conf.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+          conf.put(ProducerConfig.CLIENT_ID_CONFIG, CLIENT_ID);
+          conf.put(ProducerConfig.ACKS_CONFIG, ACKS);
+          conf.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KEY_SERIALIZER);
+          conf.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, VALUE_SERIALIZER);
+          return conf;
+      }
+  
+      public ProducerFactory<Object, Object> producerFactory() {
+          return new DefaultKafkaProducerFactory<>(config());
+      }
+  
+      @Bean
+      public KafkaTemplate<Object, Object> kafkaTemplate() {
+          return new KafkaTemplate<>(producerFactory());
+      }
+  
+  }
+  ```
+
+- 测试类
+
+  ```java
+  package com.huifer.springboot.kafka.producer.bean;
+  
+  import org.apache.kafka.clients.producer.ProducerRecord;
+  import org.junit.Test;
+  import org.junit.runner.RunWith;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.boot.test.context.SpringBootTest;
+  import org.springframework.kafka.core.KafkaTemplate;
+  import org.springframework.test.context.junit4.SpringRunner;
+  import org.springframework.util.concurrent.ListenableFuture;
+  
+  @RunWith(SpringRunner.class)
+  @SpringBootTest
+  public class KafkaProducerConfigTest {
+      @Autowired
+      private KafkaTemplate kafkaTemplate;
+  
+      @Test
+      public void testSend() {
+          ListenableFuture send = kafkaTemplate
+                  .send(new ProducerRecord<String, String>("hello-spring-boot-kafka", "hhh"));
+          System.out.println(send);
+      }
+  }
+  
+  ```
+
+
+
+### 消息消费端
+
+- `application.properties`
+
+```properties
+server.port=9000
+
+
+
+kafka.consumer.bootstrap-servers=192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092
+kafka.consumer.group.id=spring-boot-kafka-consumer
+kafka.consumer.enable.auto.commit=true
+kafka.consumer.auto.commit.interval.ms=1000
+kafka.consumer.key.deserializer=org.apache.kafka.common.serialization.IntegerDeserializer
+kafka.consumer.value.deserializer=org.apache.kafka.common.serialization.StringDeserializer
+kafka.consumer.auto.offset.reset=earliest
+
+```
+
+- `MessageListener`
+
+  ```java
+  public class KafkaConsumerMessageListener {
+  
+      @KafkaListener(topics = {"hello-spring-boot-kafka"})
+      public void listen(ConsumerRecord<?, ?> record) {
+          System.out.println("key = " + record.key() + "\t" + "value = " + record.value());
+      }
+  
+  }
+  ```
+
+- `KafkaCounsumerConfig`
+
+  ```java
+  @Configuration
+  @EnableKafka
+  public class KafkaConsumerConfig {
+  
+      @Value("${kafka.consumer.bootstrap-servers}")
+      private String bootstrap_servers;
+      @Value("${kafka.consumer.group.id}")
+      private String group_id;
+      @Value("${kafka.consumer.enable.auto.commit}")
+      private String enable_auto_commit;
+      @Value("${kafka.consumer.auto.commit.interval.ms}")
+      private String auto_commit_interval_ms;
+      @Value("${kafka.consumer.key.deserializer}")
+      private String key_deserializer;
+      @Value("${kafka.consumer.value.deserializer}")
+      private String value_deserializer;
+      @Value("${kafka.consumer.auto.offset.reset}")
+      private String reset;
+  
+      public Map config() {
+          Map<String, Object> conf = new HashMap<>();
+          conf.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap_servers);
+          conf.put(ConsumerConfig.GROUP_ID_CONFIG, group_id);
+          conf.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, enable_auto_commit);
+          conf.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, auto_commit_interval_ms);
+          conf.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, key_deserializer);
+          conf.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, value_deserializer);
+          conf.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, reset);
+          return conf;
+      }
+  
+  
+      public ConsumerFactory<Object, Object> consumerFactory() {
+          return new DefaultKafkaConsumerFactory<>(config());
+      }
+  
+      @Bean
+      public KafkaConsumerMessageListener listener() {
+          return new KafkaConsumerMessageListener();
+      }
+  
+      @Bean
+      public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
+          ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+          factory.setConsumerFactory(consumerFactory());
+          factory.getContainerProperties().setPollTimeout(1500);
+          return factory;
+      }
+  
+  
+  }
+  ```
+
+
+
+### 测试
+
+```java
+@RestController
+public class ProucerController {
+
+    @Autowired
+    private KafkaTemplate kafkaTemplate;
+
+    @GetMapping("/test")
+    public String sendMsg() {
+        kafkaTemplate.send("hello-spring-boot-kafka", "hello");
+        return "ok";
+    }
+
+}
+```
+
+![1560934027226](assets/1560934027226.png)
+
 
 
 
