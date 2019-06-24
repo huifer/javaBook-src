@@ -1,4 +1,19 @@
-# 数据类型kafka
+# kafka
+
+## Kafka特性
+
+1. 消息持久化
+2. 高吞吐量
+3. 扩展性
+4. 多客户端支持
+5. 流处理Kafka Streams
+6. 安全机制
+   1. SSL & SASL 
+   2. zookeeper连接身份校验
+   3. 通讯时数据加密
+   4. 客户端读写权限认证
+7. 数据备份
+8. 轻量级
 
 ## 基础模型
 
@@ -128,15 +143,15 @@ java -Xms128M -Xmx256M -Xss1024K -XX:PermSize=128m -XX:MaxPermSize=256m -cp ./Ka
 
 ## 术语
 
-### 消息生产者
+### 消息生产者produce
 
 > 英文：produce，消息的产生源头，负责生产消息并发送给Kafka
 
-### 消息消费者
+### 消息消费者Consumer
 
 > 英文：Consumer，消息的使用方，负责消费Kafka服务器上的消息
 
-### 主题
+### 主题Topic
 
 > 英文：Topic，由用户定义并配置Kafka服务器，用于建立生产者和消息者之间的订阅关系。
 
@@ -144,7 +159,7 @@ java -Xms128M -Xmx256M -Xss1024K -XX:PermSize=128m -XX:MaxPermSize=256m -cp ./Ka
 
 > 生产者发送消息到指定的主题(Topic)，消息消费者从这个主题(Topic)下消费消息(获取)
 
-### 消息分区
+### 消息分区Partition
 
 > 英文：Partition，一个Topic下分多个分区。
 
@@ -152,7 +167,7 @@ java -Xms128M -Xmx256M -Xss1024K -XX:PermSize=128m -XX:MaxPermSize=256m -cp ./Ka
 
 > Kafka的服务器，用户存储消息，Kafka集群中的一台或堕胎服务器统称Broker
 
-### 消费者分组
+### 消费者分组Group
 
 > 英文：Group，用户归组同类消费者，在Kafka中，多个消费者可以消费共同一个主题(Topic)下的消息，每个消费者消费其中的消息，这些消费者组成一个分组，并且拥有一个分组名称。
 
@@ -162,9 +177,33 @@ java -Xms128M -Xmx256M -Xss1024K -XX:PermSize=128m -XX:MaxPermSize=256m -cp ./Ka
 
 
 
+### 消息头
+
+#### v0
+
+| crc   | 版本号 | 属性  | key长度 | key   | value长度 | value   |
+| ----- | ------ | ----- | ------- | ----- | --------- | ------- |
+| 4子节 | 1子节  | 1子节 | 4子节   | key值 | 4子节     | value值 |
+
+#### v1
+
+| crc   | 版本号 | 属性  | 时间戳 | key长度 | key   | value长度 | value   |
+| ----- | ------ | ----- | ------ | ------- | ----- | --------- | ------- |
+| 4子节 | 1子节  | 1子节 | 8子节  | 4子节   | key值 | 4子节     | value值 |
+
+#### v2
+
+| 消息总长 | 属性  | 时间戳   | 位移增量 | key长度  | key   | value长度 | value   | header个数 | headers  |
+| -------- | ----- | -------- | -------- | -------- | ----- | --------- | ------- | ---------- | -------- |
+| 可变长度 | 1子节 | 可变长度 | 可变长度 | 可变长度 | key值 | 可变长度  | value值 | 可变长度   | header值 |
+
+Zig-zag算法
 
 
-## kafka-clients
+
+
+
+## 依赖
 
 ```xml
 <dependency>
@@ -174,7 +213,7 @@ java -Xms128M -Xmx256M -Xss1024K -XX:PermSize=128m -XX:MaxPermSize=256m -cp ./Ka
 </dependency>
 ```
 
-### KafkaProducer
+## Kafka简单案例
 
 - 两种初始化方式均需要传入一个配置
 
@@ -244,6 +283,8 @@ public class KafkaProducerDemo extends Thread {
 }
 ```
 
+
+
 - 服务消费端
 
   ```java
@@ -285,7 +326,11 @@ public class KafkaProducerDemo extends Thread {
   }
   ```
 
-## `ProducerConfig`
+
+
+## 生产者
+
+### 生产者配置 `ProducerConfig`
 
 - `org.apache.kafka.clients.producer.ProducerConfig`
 - 相关文档:<http://kafka.apache.org/documentation.html#producerconfigs>
@@ -447,7 +492,65 @@ public ConfigDef define(String name, Type type, Importance importance, String do
 | **key.serializer**   | ProducerConfig#KEY_SERIALIZER_CLASS_CONFIG   | 消息记录key的序列化类。     | CLASS    | 从`org.apache.kafka.common.serialization`下选择 |
 | **value.serializer** | ProducerConfig#VALUE_SERIALIZER_CLASS_CONFIG | 消息记录中value的序列化类。 | CLASS    | 从`org.apache.kafka.common.serialization`下选择 |
 
-## `ConsumerConfig`
+
+
+### 生产者属性`ProducerRecord`
+
+- `org.apache.kafka.clients.producer.ProducerRecord`
+
+- 以下是一个`ProducerRecord`实例化代码
+
+  ```java
+      public ProducerRecord(String topic, V value) {
+          this(topic, null, null, null, value, null);
+      }
+  
+  		    public ProducerRecord(String topic, Integer partition, Long timestamp, K key, V value, Iterable<Header> headers) {
+          if (topic == null)
+              throw new IllegalArgumentException("Topic cannot be null.");
+          if (timestamp != null && timestamp < 0)
+              throw new IllegalArgumentException(
+                      String.format("Invalid timestamp: %d. Timestamp should always be non-negative or null.", timestamp));
+          if (partition != null && partition < 0)
+              throw new IllegalArgumentException(
+                      String.format("Invalid partition: %d. Partition number should always be non-negative or null.", partition));
+          this.topic = topic;
+          this.partition = partition;
+          this.key = key;
+          this.value = value;
+          this.timestamp = timestamp;
+          this.headers = new RecordHeaders(headers);
+      }
+  ```
+
+  初始化内容为
+
+  | 属性名    | 类型    | 含义             |
+  | --------- | ------- | ---------------- |
+  | topic     | String  | 主题             |
+  | partition | Integer | 消息分区id       |
+  | headers   | Headers | 消息头           |
+  | key       | K       | 键               |
+  | value     | V       | 值               |
+  | timestamp | Long    | 消息初始化时间戳 |
+
+  
+
+### 必要配置
+
+1. `bootstrap.servers`
+2. `key.serializer`
+3. `value.serializer`
+
+
+
+
+
+
+
+## 消费端
+
+### 消费端配置`ConsumerConfig`
 
 
 
