@@ -2389,6 +2389,99 @@ log.dirs=/tmp/kafka-logs
 
 ```
 
+### 目录结构
+
+  > - topic主题
+  >   - partition分区
+  >     - replica副本
+  >       - log日志
+  >         - *.log日志文件
+  >         - *.index offset索引
+  >         - *.timeindex时间戳索引
+  >         - other
+  >
+  > ![1561447381875](assets/1561447381875.png)
+
+### 通过index文件搜索
+
+通过命令行查看offset相关内容
+
+```shell
+ bin/kafka-dump-log.sh --files /tmp/kafka-logs/tco-0/00000000000000000000.index 
+```
+
+![1561447585365](assets/1561447585365.png)
+
+通过命令行将log输出
+
+```powershell
+bin/kafka-dump-log.sh --files /tmp/kafka-logs/tco-0/00000000000000000000.log 
+
+```
+
+![1561447738437](assets/1561447738437.png)
+
+
+
+- index文件输出
+
+  ```
+    Index offset: 4492, log offset: 4400
+    Index offset: 4373, log offset: 4276
+    Index offset: 4195, log offset: 4088
+    Index offset: 3979, log offset: 3967
+    Index offset: 3867, log offset: 3800
+    Index offset: 3779, log offset: 3672
+    Index offset: 3597, log offset: 3498
+    Index offset: 3387, log offset: 3279
+    Index offset: 3147, log offset: 3134
+    Index offset: 3058, log offset: 3000
+    Index offset: 2968, log offset: 2874
+    Index offset: 2779, log offset: 2683
+  
+  ```
+
+- log文件输出
+
+  ```
+  position: 110016 CreateTime: 1561424119179 size: 557 magic: 2 compresscodec: NONE crc: 1628884454 isvalid: true
+  baseOffset: 3796 lastOffset: 3799 count: 4 baseSequence: -1 lastSequence: -1 producerId: -1 producerEpoch: -1 partitionLeaderEpoch: 0 isTransactional: false isControl: false position: 110573 CreateTime: 1561424119180 size: 185 magic: 2 compresscodec: NONE crc: 1967255189 isvalid: true
+  
+  baseOffset: 3800 lastOffset: 3867 count: 68 baseSequence: -1 lastSequence: -1 producerId: -1 producerEpoch: -1 partitionLeaderEpoch: 0 isTransactional: false isControl: false 
+  
+  
+  
+  position: 110758 CreateTime: 1561424156833 size: 2206 magic: 2 compresscodec: NONE crc: 3499972562 isvalid: true
+  baseOffset: 3868 lastOffset: 3966 count: 99 baseSequence: -1 lastSequence: -1 producerId: -1 producerEpoch: -1 partitionLeaderEpoch: 0 isTransactional: false isControl: false position: 112964 CreateTime: 1561424156841 size: 3167 magic: 2 compresscodec: NONE crc: 1637648493 isvalid: true
+  baseOffset: 3967 lastOffset: 3979 count: 13 baseSequence: -1 lastSequence: -1 producerId: -1 producerEpoch: -1 partitionLeaderEpoch: 0 isTransactional: false isControl: false position: 116131 CreateTime: 1561424156842 size: 460 magic: 2 compresscodec: NONE crc: 974433962 isvalid: true
+  ```
+
+  
+
+- 从中不难发现 index文件中的`log offset`和log文件中的`baseOffset`对应，`Index offset`和`lastOffset`对应。依靠这个即可找到消息
+
+
+
+
+
+
+
+### 通过timeindex文件搜索
+
+```shell
+bin/kafka-run-class.sh kafka.tools.DumpLogSegments --files /tmp/kafka-logs/tco-0/00000000000000000000.timeindex --print-data-log
+```
+
+![1561449176100](assets/1561449176100.png)
+
+- 通过时间戳以及offset进行日志查询
+
+  笔者没有办法通过offset进行查找
+
+![1561449436838](assets/1561449436838.png)
+
+
+
 ### 压缩
 
 配置参数
@@ -2441,6 +2534,55 @@ bin/kafka-dump-log.sh --files /tmp/kafka-logs/tco-0/00000000000000000000.index
   - 恰好一次，每条消息只会被传输一次
 
 `transactional.id`事务id  ,`enable.idempotence`。
+
+#### 幂等
+
+`enable.idempotence`默认false，设置为true启动幂等
+
+#### producer事务
+
+```java
+public class Transaction01 {
+
+    public static void main(String[] args) {
+        Properties properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "192.168.1.106:9092");
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo-java");
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                IntegerSerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class.getName());
+        properties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "transaction-01");
+
+        KafkaProducer<Integer, String> producer = new KafkaProducer<Integer, String>(properties);
+
+        // 初始化事务
+        producer.initTransactions();
+        // 开启事务
+        producer.beginTransaction();
+
+        try {
+            for (int i = 0; i < 10; i++) {
+                ProducerRecord<Integer, String> record1 = new ProducerRecord<>("hello-transaction",
+                        "msg1");
+                producer.send(record1);
+            }
+            // 提交事务
+            producer.commitTransaction();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 终止事务
+            producer.abortTransaction();
+        } finally {
+            producer.close();
+
+        }
+
+    }
+
+}
+```
 
 
 
