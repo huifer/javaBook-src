@@ -6,13 +6,13 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
 /**
- * <p>Title : MyInterceptor </p>
+ * <p>Title : MyProducerInterceptor </p>
  * <p>Description : </p>
  *
  * @author huifer
  * @date 2019-06-24
  */
-public class MyInterceptor implements ProducerInterceptor {
+public class MyProducerInterceptor implements ProducerInterceptor {
 
     private volatile long successCount = 0;
     private volatile long errorCount = 0;

@@ -1067,6 +1067,8 @@ KafkaProducer --> 拦截器:ProducerInterceptors
 
 ### 消费者属性`KafkaConsumer`
 
+- `org.apache.kafka.clients.consumer.KafkaConsumer`
+
 ```java
 public class KafkaConsumer<K, V> implements Consumer<K, V> {
 
@@ -1207,6 +1209,110 @@ public class StudentDeserializer implements Deserializer<Student> {
 ```
 
 - 消费端与生产端详见`com.huifer.kafka.serializer`
+
+### 消息处理
+
+- `org.apache.kafka.clients.consumer.KafkaConsumer#poll`
+
+- 返回值`org.apache.kafka.clients.consumer.ConsumerRecord` 
+
+  ```java
+  public class ConsumerRecord<K, V> {
+      public static final long NO_TIMESTAMP = RecordBatch.NO_TIMESTAMP;
+      public static final int NULL_SIZE = -1;
+      public static final int NULL_CHECKSUM = -1;
+  
+      private final String topic;
+      private final int partition;
+      private final long offset;
+      private final long timestamp;
+      private final TimestampType timestampType;
+      private final int serializedKeySize;
+      private final int serializedValueSize;
+      private final Headers headers;
+      private final K key;
+      private final V value;
+  
+      private volatile Long checksum;
+      }
+  ```
+
+
+
+
+
+### 消费者拦截器
+
+- `org.apache.kafka.clients.consumer.ConsumerInterceptor`
+
+  ```JAVA
+  public interface ConsumerInterceptor<K, V> extends Configurable {
+  
+      public ConsumerRecords<K, V> onConsume(ConsumerRecords<K, V> records);
+  
+      public void onCommit(Map<TopicPartition, OffsetAndMetadata> offsets);
+  
+      public void close();
+  }
+  ```
+
+- 过滤发送时间与接收时间相差10秒的消息
+
+  ```java
+  public class MyConsumerInterceptor implements ConsumerInterceptor {
+  
+  
+      public static final long MISSING_TIME = 10 * 1000;
+  
+      @Override
+      public void configure(Map<String, ?> configs) {
+  
+      }
+  
+      @Override
+      public ConsumerRecords onConsume(ConsumerRecords records) {
+          long startTime = System.currentTimeMillis();
+          Map<TopicPartition, List<ConsumerRecord<Integer, String>>> newRecords = new HashMap<>();
+          for (Object partition : records.partitions()) {
+              TopicPartition tp = (TopicPartition) partition;
+  
+              List<ConsumerRecord<Integer, String>> tpRecords = records.records(tp);
+              List<ConsumerRecord<Integer, String>> newTpRecords = new ArrayList<>();
+              for (ConsumerRecord<Integer, String> record : tpRecords) {
+                  if (startTime - record.timestamp() < MISSING_TIME) {
+                      newTpRecords.add(record);
+                  }
+              }
+              if (!newTpRecords.isEmpty()) {
+                  newRecords.put(tp, newTpRecords);
+              }
+              return new ConsumerRecords(newRecords);
+  
+  
+          }
+          return null;
+      }
+  
+      @Override
+      public void onCommit(Map offsets) {
+          offsets.forEach((k, v) -> {
+              System.out.println(k + ":" + v);
+          });
+  
+      }
+  
+      @Override
+      public void close() {
+  
+      }
+  }
+  ```
+
+- 代码查看`com.huifer.kafka.interceptor`
+
+
+
+
 
 
 
