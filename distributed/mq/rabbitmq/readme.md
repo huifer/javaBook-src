@@ -30,7 +30,6 @@ source /etc/profile
   ```
 
   ```
-  dpkg: error: requested operation requires superuser privilege
   root_h1@root:~/rabbitmq$ sudo dpkg -i esl-erlang_22.0.3-1_ubuntu_xenial_amd64.deb 
   Selecting previously unselected package esl-erlang.
   dpkg: considering removing erlang-base in favour of esl-erlang ...

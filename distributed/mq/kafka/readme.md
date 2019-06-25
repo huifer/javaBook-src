@@ -2522,6 +2522,14 @@ bin/kafka-dump-log.sh --files /tmp/kafka-logs/tco-0/00000000000000000000.index
 | ------------------- | ------ | ---------------------------------- | ---- |
 | log.retention.bytes | -1     | -1无穷大，删除日志前日志的最大大小 | long |
 
+
+
+
+
+
+
+
+
 ## 事务
 
 官方文档：http://kafka.apache.org/22/documentation.html#semantics
@@ -2585,6 +2593,12 @@ public class Transaction01 {
 ```
 
 
+
+## 副本机制
+
+> 在kafka中每一个分区都可以有n个副本(默认为一个)。
+
+todo: 不知道怎么说
 
 
 
