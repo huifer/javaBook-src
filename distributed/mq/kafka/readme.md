@@ -1310,101 +1310,462 @@ public class StudentDeserializer implements Deserializer<Student> {
 
 - 代码查看`com.huifer.kafka.interceptor`
 
+### KafkaConsumer多线程实现
+
+> ​	The Kafka consumer is NOT thread-safe. All network I/O happens in the thread of the application making the call. It is the responsibility of the user to ensure that multi-threaded access is properly synchronized. Un-synchronized access will result in ConcurrentModificationException.
+
+- KafkaConsumer是线程不安全的，需要保证多线程同步，不同步抛出异常`ConcurrentModificationException`
+
+- 下文为一个异常代码
+
+  ```java
+  package com.huifer.kafka.thread;
+  
+  import com.huifer.kafka.utils.KafkaConsumerInit;
+  import java.util.Collections;
+  import java.util.concurrent.atomic.AtomicBoolean;
+  import org.apache.kafka.clients.consumer.ConsumerRecord;
+  import org.apache.kafka.clients.consumer.ConsumerRecords;
+  import org.apache.kafka.clients.consumer.KafkaConsumer;
+  import org.apache.kafka.common.errors.WakeupException;
+  
+  public class KafkaConsumerRunnerError implements Runnable {
+  
+      private final AtomicBoolean closed = new AtomicBoolean(false);
+      private final KafkaConsumer consumer;
+      private final String top;
+  
+      public KafkaConsumerRunnerError(KafkaConsumer consumer, String top) {
+          this.consumer = consumer;
+          this.top = top;
+      }
+  
+      public static void main(String[] args) {
+  
+          KafkaConsumer kafkaConsumer = new KafkaConsumer<>(KafkaConsumerInit.conf());
+  
+          for (int i = 0; i < 3; i++) {
+              new Thread(new KafkaConsumerRunnerError(kafkaConsumer, "tttt"), "thread-" + i).start();
+          }
+      }
+  
+      @Override
+      public void run() {
+          try {
+  
+              consumer.subscribe(Collections.singleton(this.top));
+              while (!closed.get()) {
+                  ConsumerRecords<Integer, String> poll = consumer.poll(1000);
+                  if (poll.isEmpty()) {
+  
+                      for (ConsumerRecord<Integer, String> record : poll) {
+                          System.out
+                                  .println(Thread.currentThread().getName() + " 接收消息：" + record
+                                          .value());
+                      }
+                  }
+              }
+          } catch (WakeupException e) {
+              if (!closed.get()) {
+                  throw e;
+              }
+          } finally {
+              consumer.close();
+          }
+      }
+  
+  }
+  
+  ```
+
+- 解决方案1
+
+  ```java
+  public class KafkaConsumerThread01 {
+  
+      public static void main(String[] args) {
+          int threadNum = 3;
+  
+          for (int i = 0; i < threadNum; i++) {
+  
+              new KafkaConsumerThread(KafkaConsumerInit.conf(), "tttt").start();
+  
+          }
+  
+      }
+  
+      public static class KafkaConsumerThread extends Thread {
+  
+          private KafkaConsumer consumer;
+  
+          public KafkaConsumerThread(Properties properties, String topic) {
+              consumer = new KafkaConsumer(properties);
+              consumer.subscribe(Collections.singletonList(topic));
+          }
+  
+          @Override
+          public void run() {
+              try {
+  
+                  while (true) {
+                      System.out.println("准备处理消息");
+                      ConsumerRecords<Integer, String> records = consumer.poll(1000);
+                      for (ConsumerRecord<Integer, String> record : records) {
+                          System.out
+                                  .println(Thread.currentThread().getName() + " --->" + record
+                                          .value());
+                      }
+                  }
+              } catch (Exception e) {
+                  e.printStackTrace();
+  
+              } finally {
+                  consumer.close();
+              }
+          }
+      }
+  
+  
+  }
+  ```
+
+- 解决方案2
+
+  ```java
+  public class KafkaConsumerThread02 {
+  
+      public static void main(String[] args) {
+          int threadNum = 3;
+  
+          for (int i = 0; i < threadNum; i++) {
+  
+              new KafkaConsumerThread(KafkaConsumerInit.conf(), "tttt", threadNum).start();
+  
+          }
+  
+      }
+  
+      /**
+       * consumer 线程
+       */
+      public static class KafkaConsumerThread extends Thread {
+  
+          private KafkaConsumer consumer;
+  
+          private ExecutorService executorService;
+          private int threadNumber;
+  
+          public KafkaConsumerThread(Properties properties, String topic, int threadNumber) {
+              this.threadNumber = threadNumber;
+              this.executorService = new ThreadPoolExecutor(this.threadNumber, this.threadNumber, 0L,
+                      TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1000),
+                      new ThreadPoolExecutor.CallerRunsPolicy());
+  
+              this.consumer = new KafkaConsumer(properties);
+              this.consumer.subscribe(Collections.singletonList(topic));
+          }
+  
+          @Override
+          public void run() {
+              try {
+  
+                  while (true) {
+                      System.out.println("准备处理消息");
+                      ConsumerRecords<Integer, String> records = consumer.poll(1000);
+                      executorService.submit(new RecordsHandler(records));
+                  }
+              } catch (Exception e) {
+                  e.printStackTrace();
+  
+              } finally {
+                  consumer.close();
+              }
+          }
+  
+          /**
+           * 消息处理类
+           */
+          private class RecordsHandler implements Runnable {
+  
+              public final ConsumerRecords<Integer, String> records;
+  
+              public RecordsHandler(
+                      ConsumerRecords<Integer, String> records) {
+                  this.records = records;
+              }
+  
+              @Override
+              public void run() {
+                  for (ConsumerRecord<Integer, String> record : records) {
+                      System.out.println(Thread.currentThread().getName() + "===>" + record.value());
+                  }
+  
+              }
+          }
+      }
+  
+  }
+  ```
+
+  
+
+### consumer心跳检测
+
+- `org.apache.kafka.clients.consumer.internals.Heartbeat`
+
+- `org.apache.kafka.clients.consumer.internals.AbstractCoordinator.HeartbeatResponseHandler`
+
+  ```java
+      private class HeartbeatResponseHandler extends CoordinatorResponseHandler<HeartbeatResponse, Void> {
+          @Override
+          public void handle(HeartbeatResponse heartbeatResponse, RequestFuture<Void> future) {
+              sensors.heartbeatLatency.record(response.requestLatencyMs());
+              Errors error = heartbeatResponse.error();
+              if (error == Errors.NONE) {
+                  log.debug("Received successful Heartbeat response");
+                  future.complete(null);
+              } else if (error == Errors.COORDINATOR_NOT_AVAILABLE
+                      || error == Errors.NOT_COORDINATOR) {
+                  log.debug("Attempt to heartbeat since coordinator {} is either not started or not valid.",
+                          coordinator());
+                  coordinatorDead();
+                  future.raise(error);
+              } else if (error == Errors.REBALANCE_IN_PROGRESS) {
+                  log.debug("Attempt to heartbeat failed since group is rebalancing");
+                  requestRejoin();
+                  future.raise(Errors.REBALANCE_IN_PROGRESS);
+              } else if (error == Errors.ILLEGAL_GENERATION) {
+                  log.debug("Attempt to heartbeat failed since generation {} is not current", generation.generationId);
+                  resetGeneration();
+                  future.raise(Errors.ILLEGAL_GENERATION);
+              } else if (error == Errors.UNKNOWN_MEMBER_ID) {
+                  log.debug("Attempt to heartbeat failed for since member id {} is not valid.", generation.memberId);
+                  resetGeneration();
+                  future.raise(Errors.UNKNOWN_MEMBER_ID);
+              } else if (error == Errors.GROUP_AUTHORIZATION_FAILED) {
+                  future.raise(new GroupAuthorizationException(groupId));
+              } else {
+                  future.raise(new KafkaException("Unexpected error in heartbeat response: " + error.message()));
+              }
+          }
+      }
+  
+  ```
+
+  
+
+## 主题
+
+### 主题参数
+
+官方文档：http://kafka.apache.org/documentation.html#topicconfigs
+
+如需变更修改`vim config/server.properties`
+
+### 创建主题
+
+#### 相关配置参数
+
+| 参数                      | 默认值 | 含义                                                     |
+| ------------------------- | :----- | -------------------------------------------------------- |
+| auto.create.topics.enable | true   | 当生产者创建一个不存在的主题发送消息时会自动创建这个主题 |
+| num.partitions            | 1      | 创建分区数                                               |
+
+**不建议将auto.create.topics.enable设置为true**
+
+#### 命令行创建
+
+```shell
+bin/kafka-topics.sh --create --bootstrap-server 192.168.1.106:9092 --replication-factor 1 --partitions 1 --topic testCreateTopic
 
 
+bin/kafka-topics.sh --create --bootstrap-server 192.168.1.106:9092 --replication-factor 1 --partitions 4 --topic testCreateTopicPF
 
+```
 
+![1561429109275](assets/1561429109275.png)
 
+#### 文件命名规则
 
+主题名称+分区号(从0开始增加)
 
+#### zookeeper 存储结构
 
+![1561429274885](assets/1561429274885.png)
 
+#### describe查看主题信息
 
-
-
-
-
-## 异步发送消息和同步发送消息
-
-```java
-public class KafkaProducerAysncDemo extends Thread {
-
-    private final KafkaProducer<Integer, String> producer;
-    private final String topic;
-    private final boolean isAysnc;
-
-    public KafkaProducerAysncDemo(String topic, boolean isAysnc) {
-
-        Properties properties = new Properties();
-        // 连接到那一台kafka 可以填写多个用","分割
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                "192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092");
-        //
-        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo-java");
-        properties.put(ProducerConfig.ACKS_CONFIG, "-1");
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                "org.apache.kafka.common.serialization.IntegerSerializer");// 序列化手段
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                "org.apache.kafka.common.serialization.StringSerializer");// 序列化手段
-        this.producer = new KafkaProducer<Integer, String>(properties);
-        this.topic = topic;
-        this.isAysnc = isAysnc;
-    }
-
-    public static void main(String[] args) {
-
-        KafkaProducerAysncDemo test = new KafkaProducerAysncDemo("test", true);
-        test.start();
-
-    }
-
-    @Override
-    public void run() {
-        int n = 0;
-        while (n < 50) {
-            String msg = "msg_" + n;
-            System.out.println("发送消息" + msg);
-
-            if (isAysnc) {
-
-                producer.send(new ProducerRecord<Integer, String>(topic, msg), new Callback() {
-                    @Override
-                    public void onCompletion(RecordMetadata metadata, Exception exception) {
-                        if (metadata != null) {
-                            System.out.println("异步-offset : " + metadata.offset());
-                            System.out.println("异步-partition : " + metadata.partition());
-                        }
-                    }
-                });
-
-            } else {
-                try {
-                    RecordMetadata metadata = producer.send(new ProducerRecord<>(topic, msg))
-                            .get();
-                    System.out.println("同步-offset : " + metadata.offset());
-                    System.out.println("同步-partition : " + metadata.partition());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            n++;
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-}
+```shell
+bin/kafka-topics.sh --bootstrap-server 192.168.1.106:9092 --describe --topic testCreateTopic
 ```
 
 
 
+![1561429373878](assets/1561429373878.png)
+
+![1561429511892](assets/1561429511892.png)
+
+- topic：主题名称
+- partition：分区号
+- leader：对应的brokerid
+- replicas：副本分配情况
+- isr：AR集合，其中数字标识brokerid
+
+#### 命名规则
+
+> 1. **不使用“__”双下划线开头**
+> 2. **使用大小写字母，数字，“.”，“-”，“_”组成**
+> 3. **长度不超过249**
+
+### 删除主题
+
+#### 命令行删除
+
+```shell
+bin/kafka-topics.sh  --bootstrap-server 192.168.1.106:9092 --delete -topic testCreateTopic
+```
+
+
+
+### 修改主题
+
+### 命令行修改
+
+```shell
+bin/kafka-topics.sh --alter --bootstrap-server 192.168.1.106:9092 --partitions 10 --topic testCreateTopicPF
+```
+
+
+
+![1561430480975](assets/1561430480975.png)
+
+**分区只能增加不能减少**
+
+- 修改参数配置使用如下脚本
+
+  ```shell
+  bin/kafka-topics.sh --alter --bootstrap-server 192.168.1.106:9092  --topic testCreateTopicPF --config 参数名=值
+  ```
+
+  
+
+- 删除配置使用
+
+  ```shell
+  bin/kafka-topics.sh --alter --bootstrap-server 192.168.1.106:9092  --topic testCreateTopicPF --delete-config 参数名
+  ```
+
+  
+
+
+
+
+
+### 查看主题
+
+#### 查看单个主题信息
+
+```shell
+bin/kafka-topics.sh --bootstrap-server 192.168.1.106:9092 --describe --topic testCreateTopic
+```
+
+![1561429373878](assets/1561429373878.png)
+
+#### 查看主题列表
+
+```shell
+ bin/kafka-topics.sh --bootstrap-server 192.168.1.106:9092 -list
+```
+
+![1561430931057](assets/1561430931057.png)
+
+
+
+### KafkaAdminClient
+
+- 前文都是以命令行形式创建下面使用一个第三方工具
+
+```java
+public class KafkaAdminTopicUtils {
+
+    public static void main(String[] args) {
+//        createTopic("192.168.1.106:9092", "test-admin-topic");
+        describeTopic("192.168.1.106:9092", "test-admin-topic");
+//        deleteTopic("192.168.1.106:9092", "test-admin-topic");
+    }
+
+
+    public static void deleteTopic(String server, String topic) {
+        Properties properties = new Properties();
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, server);
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+        AdminClient client = AdminClient.create(properties);
+        DeleteTopicsResult deleteTopicsResult = client.deleteTopics(Collections.singleton(topic));
+        try {
+            deleteTopicsResult.all().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            client.close();
+        }
+    }
+
+
+    /**
+     * 创建主题
+     */
+    public static void createTopic(String server, String topic) {
+        Properties properties = new Properties();
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, server);
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+        AdminClient client = AdminClient.create(properties);
+
+        // 分区数，副本因子
+        NewTopic newTopic = new NewTopic(topic, 4, (short) 1);
+
+        CreateTopicsResult topics = client.createTopics(Collections.singleton(newTopic));
+        try {
+
+            Void aVoid = topics.all().get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            client.close();
+        }
+    }
+
+
+    /**
+     * 查看topic的相关信息
+     */
+    public static void describeTopic(String server, String topic) {
+        Properties properties = new Properties();
+        properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                server);
+        properties.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+
+        AdminClient client = AdminClient.create(properties);
+        DescribeTopicsResult describeTopicsResult = client
+                .describeTopics(Collections.singleton(topic));
+        try {
+            Map<String, TopicDescription> stringTopicDescriptionMap = describeTopicsResult.all()
+                    .get();
+            TopicDescription topicDescription = stringTopicDescriptionMap.get(topic);
+            stringTopicDescriptionMap.forEach((k,v)->{
+                System.out.println(k + " : " + v);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            client.close();
+        }
+    }
+
+
+}
+```
 
 
 
@@ -1870,8 +2231,6 @@ public class KafkaConsumerPartition01 extends Thread {
 
 
 
-
-
 ## Rebalance
 
 ### 触发条件
@@ -2013,6 +2372,77 @@ kafka-console-consumer.sh --topic __consumer_offsets --partition 20 --bootstrap-
 ```
 
 ![1560998717331](assets/1560998717331.png)
+
+
+
+## 日志
+
+### 存放位置
+
+```shell
+vim config/server.properties 
+
+
+
+# A comma separated list of directories under which to store log files
+log.dirs=/tmp/kafka-logs
+
+```
+
+### 压缩
+
+配置参数
+
+`compression.type`
+
+值
+
+`uncompressed, zstd, lz4, snappy, gzip, producer`
+
+**uncompressed表示不压缩**
+
+### 日志命令行
+
+```shell
+bin/kafka-dump-log.sh --files /tmp/kafka-logs/tco-0/00000000000000000000.index 
+```
+
+
+
+![1561443279117](assets/1561443279117.png)
+
+
+
+### 删除日志
+
+#### 基于时间
+
+| 参数                  | 默认值 | 含义                                 | 类型 |
+| --------------------- | ------ | ------------------------------------ | ---- |
+| log.retention.hours   | 168    | 删除日志文件之前保留日志文件的小时数 | int  |
+| log.retention.minutes | null   | 删除日志文件之前保留日志文件的分钟数 | int  |
+| log.retention.ms      | null   | 删除日志文件之前保留日志文件的毫秒数 | long |
+
+#### 基于日志大小
+
+| 参数                | 默认值 | 含义                               | 类型 |
+| ------------------- | ------ | ---------------------------------- | ---- |
+| log.retention.bytes | -1     | -1无穷大，删除日志前日志的最大大小 | long |
+
+## 事务
+
+官方文档：http://kafka.apache.org/22/documentation.html#semantics
+
+- *At most once*—Messages may be lost but are never redelivered.
+  - 至多一次，消息会丢失，但是不会重复传输
+- *At least once*—Messages are never lost but may be redelivered.
+  - 至少一次，消息不会丢失，但是会重复传输
+- *Exactly once*—this is what people actually want, each message is delivered once and only once.
+  - 恰好一次，每条消息只会被传输一次
+
+`transactional.id`事务id  ,`enable.idempotence`。
+
+
 
 
 
@@ -2256,6 +2686,88 @@ kafka.zookeeper.ZooKeeperClientTimeoutException: Timed out waiting for connectio
 
 ![1561003078457](assets/1561003078457.png)
 
+
+
+
+
+## 异步发送消息和同步发送消息
+
+```java
+public class KafkaProducerAysncDemo extends Thread {
+
+    private final KafkaProducer<Integer, String> producer;
+    private final String topic;
+    private final boolean isAysnc;
+
+    public KafkaProducerAysncDemo(String topic, boolean isAysnc) {
+
+        Properties properties = new Properties();
+        // 连接到那一台kafka 可以填写多个用","分割
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                "192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092");
+        //
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo-java");
+        properties.put(ProducerConfig.ACKS_CONFIG, "-1");
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.IntegerSerializer");// 序列化手段
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                "org.apache.kafka.common.serialization.StringSerializer");// 序列化手段
+        this.producer = new KafkaProducer<Integer, String>(properties);
+        this.topic = topic;
+        this.isAysnc = isAysnc;
+    }
+
+    public static void main(String[] args) {
+
+        KafkaProducerAysncDemo test = new KafkaProducerAysncDemo("test", true);
+        test.start();
+
+    }
+
+    @Override
+    public void run() {
+        int n = 0;
+        while (n < 50) {
+            String msg = "msg_" + n;
+            System.out.println("发送消息" + msg);
+
+            if (isAysnc) {
+
+                producer.send(new ProducerRecord<Integer, String>(topic, msg), new Callback() {
+                    @Override
+                    public void onCompletion(RecordMetadata metadata, Exception exception) {
+                        if (metadata != null) {
+                            System.out.println("异步-offset : " + metadata.offset());
+                            System.out.println("异步-partition : " + metadata.partition());
+                        }
+                    }
+                });
+
+            } else {
+                try {
+                    RecordMetadata metadata = producer.send(new ProducerRecord<>(topic, msg))
+                            .get();
+                    System.out.println("同步-offset : " + metadata.offset());
+                    System.out.println("同步-partition : " + metadata.partition());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            n++;
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+}
+```
 
 
 
