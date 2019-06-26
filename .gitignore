@@ -543,3 +543,4 @@ microservice-core/spring-application/target/generated-sources/
 /distributed/mq/kafka-integration/kafka-log4j/target
 /distributed/mq/kafka-integration/kafka-flume/target
 /netty/target
+/spring-session/target
