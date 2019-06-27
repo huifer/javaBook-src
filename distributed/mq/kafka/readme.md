@@ -2602,6 +2602,269 @@ todo: 不知道怎么说
 
 
 
+## 过期时间
+
+过期时间·： 当前时间-发送消息的事件 ，当前时间与发送消息时间的差值小于一个预设值这条消息就属于过期。在发送消息时需要传输一个值 **消息的过期时间**。
+
+本文实例：超过预设时间消费者不能看到这个消息
+
+`org.apache.kafka.clients.producer.ProducerRecord#ProducerRecord(java.lang.String, java.lang.Integer, java.lang.Long, K, V, java.lang.Iterable<org.apache.kafka.common.header.Header>)`
+
+通过`org.apache.kafka.common.header.Header`来进行消息头传输
+
+```java
+public class TTLHeader implements Header {
+
+    /**
+     * 超时时间 : 秒
+     */
+    private long ttl;
+
+    public TTLHeader(long ttl) {
+        this.ttl = ttl;
+    }
+
+    @Override
+    public String key() {
+        return "ttl";
+    }
+
+    @Override
+    public byte[] value() {
+        long rs = this.ttl;
+        return BytesUtils.long2byte(rs);
+    }
+}
+
+```
+
+
+
+- ByteUtils
+
+  ```java
+  public class BytesUtils {
+  
+      public static void main(String[] args) {
+          long i = 22L;
+          byte[] bytes = long2byte(i);
+          long l = byte2long(bytes);
+          System.out.println(l);
+  
+          int ii = 10;
+          byte[] bytes1 = int2byte(ii);
+          int i1 = byte2int(bytes1);
+          System.out.println(i1);
+      }
+  
+      public static byte[] long2byte(Long ms) {
+          byte[] buffer = new byte[8];
+          for (int i = 0; i < 8; i++) {
+              int offset = 64 - (i + 1) * 8;
+              buffer[i] = (byte) ((ms >> offset) & 0xff);
+          }
+          return buffer;
+      }
+  
+      public static long byte2long(byte[] bytes) {
+          long value = 0;
+          for (int i = 0; i < 8; i++) {
+              value <<= 8;
+              value |= (bytes[i] & 0xff);
+          }
+          return value;
+      }
+  
+      public static int byte2int(byte[] bytes) {
+          return (bytes[0] & 0xff) << 24
+                  | (bytes[1] & 0xff) << 16
+                  | (bytes[2] & 0xff) << 8
+                  | (bytes[3] & 0xff);
+      }
+  
+      public static byte[] int2byte(int num) {
+          byte[] bytes = new byte[4];
+          bytes[0] = (byte) ((num >> 24) & 0xff);
+          bytes[1] = (byte) ((num >> 16) & 0xff);
+          bytes[2] = (byte) ((num >> 8) & 0xff);
+          bytes[3] = (byte) (num & 0xff);
+          return bytes;
+      }
+  
+  }
+  
+  ```
+
+- produce
+
+  ```java
+  public class Producer {
+  
+      public static void main(String[] args) {
+          Properties properties = new Properties();
+          properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                  "192.168.1.106:9092");
+          properties.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaProducerDemo-java");
+          properties.put(ProducerConfig.ACKS_CONFIG, "-1");
+          properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                  "org.apache.kafka.common.serialization.IntegerSerializer");
+          properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                  "org.apache.kafka.common.serialization.StringSerializer");
+          KafkaProducer<Integer, String> producer = new KafkaProducer<>(properties);
+  
+          String topic = "ttl";
+  
+          ProducerRecord<Integer, String> rec1 = new ProducerRecord<>(topic, 0,
+                  System.currentTimeMillis(), null, "正常消息",
+                  new RecordHeaders().add(new RecordHeader("ttl",
+                          BytesUtils.long2byte(20L))));
+  
+          ProducerRecord<Integer, String> rec2 = new ProducerRecord<>(topic, 0,
+                  System.currentTimeMillis() - 5 * 1000, null, "超时消息1",
+                  new RecordHeaders().add(new RecordHeader("ttl",
+                          BytesUtils.long2byte(5L))));
+  
+          ProducerRecord<Integer, String> rec3 = new ProducerRecord<>(topic, 0,
+                  System.currentTimeMillis() - 5 * 1000, null, "超时消息2",
+                  new RecordHeaders().add(new TTLHeader(5)));
+  
+          producer.send(rec1);
+          producer.send(rec2);
+          producer.send(rec3);
+          producer.close();
+      }
+  
+  
+  }
+  ```
+
+- 消息发出去了消费者需要接收并且过滤这些超时的消息，通过`org.apache.kafka.clients.consumer.ConsumerInterceptor#onConsume`方法来完成
+
+  ```java
+  public class TTLConsumerInterceptor implements ConsumerInterceptor<Integer, String> {
+  
+      @Override
+      public ConsumerRecords<Integer, String> onConsume(ConsumerRecords<Integer, String> records) {
+          long now = System.currentTimeMillis();
+  
+          Map<TopicPartition, List<ConsumerRecord<Integer, String>>> newRecords
+                  = new HashMap<>();
+  
+          for (TopicPartition tp : records.partitions()) {
+              List<ConsumerRecord<Integer, String>> tpRecords = records.records(tp);
+              List<ConsumerRecord<Integer, String>> newTpRecords = new ArrayList<>();
+              for (ConsumerRecord<Integer, String> record : tpRecords) {
+                  Headers headers = record.headers();
+                  long ttl = -1;
+                  for (Header header : headers) {
+                      if ("ttl".equalsIgnoreCase(header.key())) {
+                          ttl = BytesUtils.byte2long(header.value());
+                      }
+                  }
+                  if (ttl > 0 && now - record.timestamp() <= ttl * 1000) {
+                      System.out.println("正常消息:\t" + record.value());
+                      newTpRecords.add(record);
+                  } else {
+                      System.out.println("超时消息 ,不接收:\t" + record.value());
+  //                    newTpRecords.add(record);
+                  }
+              }
+              if (!newTpRecords.isEmpty()) {
+                  newRecords.put(tp, newTpRecords);
+              }
+          }
+          return new ConsumerRecords<Integer, String>(newRecords);
+      }
+  
+      @Override
+      public void onCommit(Map<TopicPartition, OffsetAndMetadata> offsets) {
+  
+      }
+  
+      @Override
+      public void close() {
+  
+      }
+  
+      @Override
+      public void configure(Map<String, ?> configs) {
+  
+      }
+  }
+  ```
+
+- consumer
+
+  ```java
+  public class Consumer {
+  
+      public static void main(String[] args) {
+          Properties props = new Properties();
+          props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                  StringDeserializer.class.getName());
+          props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                  StringDeserializer.class.getName());
+          props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.106:9092");
+          props.put(ConsumerConfig.GROUP_ID_CONFIG, "ttl-group");
+          props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                  TTLConsumerInterceptor.class.getName());
+  
+          KafkaConsumer<Integer, String> consumer = new KafkaConsumer<>(props);
+          consumer.subscribe(Collections.singletonList("ttl"));
+  
+          while (true) {
+              ConsumerRecords<Integer, String> records = consumer.poll(1000);
+              for (ConsumerRecord<Integer, String> record : records) {
+                  System.out
+                          .println(record.partition() + ":" + record.offset() + ":" + record.value());
+              }
+          }
+  
+      }
+  
+  }
+  ```
+
+  
+
+
+
+
+
+
+
+
+
+
+
+## 延迟队列(定时任务？)
+
+- producer发送一条消息给consumer，等待这个延迟时间后进行消费。
+
+```sequence
+A -->B: 十分钟后开机
+B--> 开机: 等待十分钟
+```
+
+
+
+```sequence
+producer --> kafka: 延时队列
+kafka--> kafka : 进行延时操作
+consumer--> kafka: 请求
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## spring-boot 整合
