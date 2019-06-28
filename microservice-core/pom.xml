@@ -12,6 +12,7 @@
     <module>webflux</module>
 		<module>spring-boot-redis-demo</module>
     <module>email-task</module>
+    <module>spring-boot-mysql</module>
   </modules>
   <parent>
     <groupId>org.springframework.boot</groupId>

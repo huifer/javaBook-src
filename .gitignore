@@ -526,7 +526,7 @@ microservice-core/spring-application/target/generated-sources/
 /microservice-core/webflux/target/
 /microservice-core/spring-boot-redis-demo/target
 /microservice-core/email-task/target
-
+/microservice-core/spring-boot-mysql/target
 /distributed/kafka/target/
 /distributed/zookeeper/target/
 /distributed/java-rmi/target/
