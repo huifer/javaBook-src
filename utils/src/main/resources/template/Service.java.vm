@@ -1,0 +1,65 @@
+package ${package}.service;
+
+import ${package}.entity.${className}Entity;
+import ${package}.service.${className}Mapper;
+import java.util.Map;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+/**
+ *
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@Service
+public class ${className}Service {
+
+	@Autowired
+	private ${className}Mapper ${classname}Mapper;
+
+	/**
+    * 列表
+    */
+	public List<${className}Entity> findAll() {
+		List<${className}Entity> ${classname}s = ${classname}Mapper.findAll();
+		return ${classname}s
+	}
+
+
+	/**
+	* 信息
+    */
+	public ${className}Entity ${classname} selectById(${pk.attrType}  ${pk.attrname}) {
+		${className}Entity ${classname} = ${classname}Mapper.selectById(${pk.attrname});
+		return ${classname};
+	}
+
+	/**
+    * 保存
+    */
+	public ${className}Entity insert(${className}Entity ${classname}) {
+		${className}Entity ${classname} = ${classname}Mapper.insert(${classname});
+		return ${classname}
+	}
+
+	/**
+	* 修改
+	*/
+	public ${className}Entity updateAllColumnById(${className}Entity ${classname}) {
+		${className}Entity ${classname} = ${classname}Mapper.updateAllColumnById(${classname});
+		return ${classname}
+	}
+
+	/**
+    * 删除
+    */
+	public void deleteBathIds(${pk.attrType}[] ${pk.attrname}s) {
+		${classname}Mapper.deleteBatchIds(Arrays.asList(${pk.attrname}s));
+	}
+
+
+}
+
