@@ -24,6 +24,8 @@
     <module>cloud-stream</module>
     <module>cloud-stream-server</module>
     <module>cloud-bus</module>
+    <module>eureka-server</module>
+    <module>eureka-client</module>
   </modules>
 
   <properties>
