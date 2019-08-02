@@ -22,4 +22,7 @@ public class IdMetaFactory {
 		return null;
 	}
 
+	private IdMetaFactory() {
+		throw new IllegalStateException("Utility class");
+	}
 }

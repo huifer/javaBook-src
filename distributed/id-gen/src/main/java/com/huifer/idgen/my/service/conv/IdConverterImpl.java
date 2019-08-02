@@ -36,7 +36,7 @@ public class IdConverterImpl implements IdConverter {
 	protected long doConverter(Id id, IdMeta idMeta) {
 		long res = 0;
 		res |= id.getMachine();
-		res |= id.getSeq() << idMeta.getSeqBitsStartPos();
+		res |= id.getSeq() << idMeta.getMachineBits();
 		res |= id.getTime() << idMeta.getTimeBitsStartPos();
 		res |= id.getGenMethod() << idMeta.getGenMethodBitsStartPos();
 		res |= id.getType() << idMeta.getTypeBitsStartPos();
@@ -47,7 +47,7 @@ public class IdConverterImpl implements IdConverter {
 	protected Id doConvert(long id, IdMeta idMeta) {
 		Id res = new Id();
 		res.setMachine(id & idMeta.getMachineBitsMask());
-		res.setSeq((id >>> idMeta.getSeqBitsStartPos()) & idMeta.getSeqBitsMask());
+		res.setSeq((id >>> idMeta.getMachineBits()) & idMeta.getSeqBitsMask());
 		res.setTime((id >>> idMeta.getTimeBitsStartPos()) & idMeta.getTimeBitsMask());
 		res.setGenMethod((id >>> idMeta.getGenMethodBitsStartPos()) & idMeta.getGenMethodBitsMask());
 		res.setType((id >>> idMeta.getTypeBitsStartPos()) & idMeta.getTypeBitsMask());

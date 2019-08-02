@@ -1,10 +1,11 @@
 package com.huifer.idgen.my.service.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author: wang
@@ -12,6 +13,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class IpUtils {
+
+	private IpUtils() {
+		throw new IllegalStateException("Utility class");
+	}
 
 	public static String getHostIp() {
 		String ip = null;

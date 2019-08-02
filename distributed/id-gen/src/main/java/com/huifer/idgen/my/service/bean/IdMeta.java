@@ -47,10 +47,6 @@ public class IdMeta {
 		this.seqBits = seqBits;
 	}
 
-	public long getSeqBitsStartPos() {
-		return machineBits;
-	}
-
 	public long getSeqBitsMask() {
 		return -1L ^ -1L << seqBits;
 	}

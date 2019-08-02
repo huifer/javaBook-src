@@ -7,8 +7,9 @@ import com.huifer.idgen.my.service.conv.IdConverter;
 import com.huifer.idgen.my.service.conv.IdConverterImpl;
 import com.huifer.idgen.my.service.factory.IdMetaFactory;
 import com.huifer.idgen.my.service.provider.MachineIdProvider;
-import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Date;
 
 /**
  * @author: wang
@@ -55,7 +56,7 @@ public abstract class AbstractIdService implements GenIdService {
 			} else if (this.idMeta.getTimeBits() == 40) {
 				this.type = 0L;
 			} else {
-				throw new RuntimeException("时间位在30-40之间");
+				throw new IdGenException("时间位在30-40之间");
 			}
 		}
 		this.idConverter = new IdConverterImpl(this.idMeta);
@@ -96,10 +97,10 @@ public abstract class AbstractIdService implements GenIdService {
 	}
 
 	public long makeId(long version, long type, long genMethod, long time, long seq, long machine) {
-		IdType idType = IdType.parse(type);
-		Id id = new Id(machine, seq, time, genMethod, type, version);
-		IdConverter idConverter = new IdConverterImpl(idType);
-		return idConverter.converter(id);
+		IdType _idType = IdType.parse(type);
+		Id _id = new Id(machine, seq, time, genMethod, type, version);
+		IdConverter _idConverter = new IdConverterImpl(_idType);
+		return _idConverter.converter(_id);
 	}
 
 	public Date transTime(long time) {

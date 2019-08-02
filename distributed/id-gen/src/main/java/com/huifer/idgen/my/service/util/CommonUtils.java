@@ -7,17 +7,28 @@ import java.util.Arrays;
  * @description:
  */
 public class CommonUtils {
-
-	public static String[] switch_on = {"ON", "TRUE"};
-	public static String[] switch_off = {"OFF", "FALSE"};
-
-	public static boolean isOn(String switch_) {
-		return Arrays.asList(switch_on).contains(switch_);
+	private CommonUtils() {
+		throw new IllegalStateException("Utility class");
 	}
 
+	private static final String[] SWITCH_ON = {"ON", "TRUE"};
+	private static final String[] SWITCH_OFF = {"OFF", "FALSE"};
+
+	public static boolean isOn(String sw) {
+		return Arrays.asList(SWITCH_ON).contains(sw);
+	}
+
+	public static boolean isOff(String sw) {
+		return Arrays.asList(SWITCH_OFF).contains(sw);
+	}
+
+	public static boolean isPropKeyOff(String key) {
+		String property = System.getProperty(key);
+		return Arrays.asList(SWITCH_OFF).contains(property);
+	}
 
 	public static boolean isPropKeyOn(String key) {
 		String property = System.getProperty(key);
-		return Arrays.asList(switch_on).contains(property);
+		return Arrays.asList(SWITCH_ON).contains(property);
 	}
 }

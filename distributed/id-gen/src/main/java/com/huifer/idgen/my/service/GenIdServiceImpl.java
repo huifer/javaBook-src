@@ -14,8 +14,8 @@ import com.huifer.idgen.my.service.util.CommonUtils;
  */
 public class GenIdServiceImpl extends AbstractIdService {
 
-	public static final String sync_lock = "lock";
-	public static final String atomic = "atomic";
+	public static final String SYNC_LOCK = "lock";
+	public static final String ATOMIC = "atomic";
 
 	protected IdPopulator idPopulator;
 
@@ -24,6 +24,10 @@ public class GenIdServiceImpl extends AbstractIdService {
 		initPopulator();
 	}
 
+	/**
+	 * {@link IdType} id类型决定时间戳
+	 * @param idType
+	 */
 	public GenIdServiceImpl(IdType idType) {
 		super(idType);
 		initPopulator();
@@ -37,10 +41,9 @@ public class GenIdServiceImpl extends AbstractIdService {
 
 	public void initPopulator() {
 		if (idPopulator != null) {
-
-		} else if (CommonUtils.isPropKeyOn(sync_lock)) {
+		} else if (CommonUtils.isPropKeyOn(SYNC_LOCK)) {
 			idPopulator = new SyncIdPopulator();
-		} else if (CommonUtils.isPropKeyOn(atomic)) {
+		} else if (CommonUtils.isPropKeyOn(ATOMIC)) {
 			idPopulator = new AtomicIdPopulator();
 		} else {
 			idPopulator = new LockIdPropulator();
@@ -52,7 +55,4 @@ public class GenIdServiceImpl extends AbstractIdService {
 		idPopulator.populatorId(id, this.idMeta);
 	}
 
-	public void setIdPopulator(IdPopulator idPopulator) {
-		this.idPopulator = idPopulator;
-	}
 }

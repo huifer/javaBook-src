@@ -18,7 +18,7 @@ public class AtomicIdPopulator implements IdPopulator, ResetPopulator {
 		private long lastTime = -1L;
 	}
 
-	private AtomicReference<Param> paramAtomicReference = new AtomicReference<Param>(new Param());
+	private AtomicReference<Param> paramAtomicReference = new AtomicReference<>(new Param());
 
 
 	@Override
@@ -57,6 +57,6 @@ public class AtomicIdPopulator implements IdPopulator, ResetPopulator {
 
 	@Override
 	public void reset() {
-		paramAtomicReference = new AtomicReference<Param>(new Param());
+		paramAtomicReference = new AtomicReference<>(new Param());
 	}
 }

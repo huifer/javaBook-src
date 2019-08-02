@@ -1,5 +1,6 @@
 package com.huifer.idgen.my.service.util;
 
+import com.huifer.idgen.my.service.IdGenException;
 import com.huifer.idgen.my.service.bean.enums.IdType;
 
 /**
@@ -12,7 +13,7 @@ public class TimeUtils {
 
 	public static void validateTime(long lastTime, long timestamp) {
 		if (timestamp < lastTime) {
-			throw new RuntimeException(String.format(
+			throw new IdGenException(String.format(
 					"Clock moved backwards.  Refusing to generate id for %d second/milisecond.",
 					lastTime - timestamp));
 		}

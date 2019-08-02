@@ -1,7 +1,9 @@
-package com.huifer.idgen.my.service.springboot.config;
+package com.huifer.idgen.my.service.exmple;
 
 import com.huifer.idgen.my.service.GenIdService;
 import com.huifer.idgen.my.service.bean.Id;
+import com.sun.media.jfxmedia.logging.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -9,7 +11,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author: wang
  * @description:
  */
-public class Run {
+@Slf4j
+public class SpringIdGenRun {
 
 	public static void main(String[] args) {
 		ApplicationContext context = new ClassPathXmlApplicationContext("spring-factory-beans.xml");
@@ -19,6 +22,7 @@ public class Run {
 
 			long l = idServiceFactory.genId();
 			Id id = idServiceFactory.expId(l);
+			log.info("{}", id);
 		}
 	}
 

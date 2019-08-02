@@ -1,4 +1,4 @@
-package com.huifer.idgen.my.service.springboot.config;
+package com.huifer.idgen.my.service.exmple.springboot;
 
 import com.huifer.idgen.my.service.GenIdService;
 import com.huifer.idgen.my.service.bean.enums.Type;
@@ -24,7 +24,7 @@ public class SpringFactoryBeans {
 	public GenIdService genIdService() {
 
 		IdServiceFactoryBean idServiceFactoryBean = new IdServiceFactoryBean();
-		idServiceFactoryBean.setProviderType(Type.PROPERTY);
+		idServiceFactoryBean.setProviderType(Type.IP);
 		idServiceFactoryBean.setMachineId(1L);
 		idServiceFactoryBean.init();
 

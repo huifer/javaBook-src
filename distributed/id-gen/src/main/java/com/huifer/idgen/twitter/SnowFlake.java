@@ -1,9 +1,13 @@
 package com.huifer.idgen.twitter;
 
+import com.huifer.idgen.my.service.IdGenException;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author: wang
  * @description:
  */
+@Slf4j
 public class SnowFlake {
 
 	/**
@@ -82,7 +86,7 @@ public class SnowFlake {
 	public synchronized long genId() {
 		long curStmp = System.currentTimeMillis();
 		if (curStmp < lastStmp) {
-			throw new RuntimeException();
+			throw new IdGenException("当前时间 < 上一次操作时间");
 		}
 		if (curStmp == lastStmp) {
 			// 时间戳相同时序列号+1
@@ -113,14 +117,13 @@ public class SnowFlake {
 	}
 
 
-
 	public static void main(String[] args) {
 		long dataCenterId = 2L;
 		long machineId = 3L;
 		SnowFlake snowFlake = new SnowFlake(dataCenterId, machineId);
 		for (int i = 0; i < 10; i++) {
 			long genId = snowFlake.genId();
-			System.out.println(genId);
+			log.info("{}", genId);
 		}
 	}
 }
