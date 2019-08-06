@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * <p>Title : Tcontroller </p>
@@ -15,17 +16,26 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @Controller
 public class Tcontroller {
 
-    @GetMapping("/")
-    public String hello(Model model) {
-        model.addAttribute("message", "hello");
+	@GetMapping("/adapter")
+	public String adapter(
+			@RequestParam("user_id") long userId,
+			@RequestParam("hc") String hc
+	) {
+	    return "kljl";
+	}
 
-        return "h1";
-    }
 
-    @ModelAttribute(name = "upp")
-    public String upp(){
-        return "jkll";
-    }
+	@GetMapping("/")
+	public String hello(Model model) {
+		model.addAttribute("message", "hello");
+
+		return "h1";
+	}
+
+	@ModelAttribute(name = "upp")
+	public String upp() {
+		return "jkll";
+	}
 
 
 }
