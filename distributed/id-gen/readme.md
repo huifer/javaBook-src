@@ -280,3 +280,35 @@ public class SnowFlake {
 }
 ```
 
+---
+## 自实现id生成器
+
+根据`Snowflake`算法剔除的思路进行修改。拓展一个实体类，对每个特征值进行位移一定的位数转换成二进制进行返回得到一个id
+
+```java
+	/**
+	 * 机器id
+	 */
+	private long machine;
+	/**
+	 * 步长
+	 */
+	private long seq;
+	/**
+	 * 时间戳
+	 */
+	private long time;
+	/**
+	 * 生产方法
+	 */
+	private long genMethod;
+	/**
+	 * 类型
+	 */
+	private long type;
+	/**
+	 * 版本号
+	 */
+	private long version;
+```
+
