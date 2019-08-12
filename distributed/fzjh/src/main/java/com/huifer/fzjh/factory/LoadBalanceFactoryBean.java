@@ -20,8 +20,6 @@ public class LoadBalanceFactoryBean implements FactoryBean<LoadBalanceService> {
 	@Setter
 	private List<ServerWeight> serverWeightList;
 
-	public LoadBalanceFactoryBean() {
-	}
 
 	/**
 	 * 请求
