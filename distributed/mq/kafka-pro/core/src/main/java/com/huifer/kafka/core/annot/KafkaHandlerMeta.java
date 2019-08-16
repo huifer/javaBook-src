@@ -24,4 +24,12 @@ public class KafkaHandlerMeta<T> {
 
 	private Map<ErrorHandler, Method> errorHandlers = new HashMap<>();
 
+	public void addErrorHandlers(Map<ErrorHandler, Method> errorHandlers) {
+		this.errorHandlers.putAll(errorHandlers);
+	}
+
+	public void addErrorHandlers(ErrorHandler errorHandler, Method method) {
+		this.errorHandlers.put(errorHandler, method);
+	}
+
 }
