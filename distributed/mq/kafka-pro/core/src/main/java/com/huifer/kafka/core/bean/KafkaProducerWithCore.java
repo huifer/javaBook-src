@@ -29,9 +29,7 @@ public class KafkaProducerWithCore {
     @Setter
     private String defaultTopic;
     @Getter
-    @Setter
     private KafkaProducer producer;
-
 
 
     protected void init() {
@@ -39,15 +37,13 @@ public class KafkaProducerWithCore {
             properties = new Properties();
         }
         try {
-            properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                    propertiesFileName
-            ));
+            properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFileName));
         } catch (IOException e) {
             log.error("kafka-producer配置文件不存在,文件名={}", propertiesFileName);
             throw new IllegalArgumentException("配置文件不存在");
         }
         log.info("kafka-producer配置内容={}", properties);
-        producer = new KafkaProducer<>(properties);
+        producer = new KafkaProducer<String, String>(properties);
     }
 
 
@@ -69,7 +65,7 @@ public class KafkaProducerWithCore {
         if (topic == null) {
             topic = defaultTopic;
         }
-        Future<org.apache.kafka.clients.producer.RecordMetadata> send = producer.send(new ProducerRecord<>(topic, msg));
+        Future<org.apache.kafka.clients.producer.RecordMetadata> send = producer.send(new ProducerRecord<String, String>(topic, msg));
         log.info("发送后返回={}", send);
     }
 
