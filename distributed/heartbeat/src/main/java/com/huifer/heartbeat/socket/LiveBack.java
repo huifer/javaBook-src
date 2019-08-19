@@ -1,4 +1,4 @@
-package com.huifer.heartbeat.ez;
+package com.huifer.heartbeat.socket;
 
 import java.io.Serializable;
 

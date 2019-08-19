@@ -1,4 +1,4 @@
-package com.huifer.heartbeat.ez.server;
+package com.huifer.heartbeat.socket.server;
 
 import java.io.IOException;
 import java.io.InputStream;

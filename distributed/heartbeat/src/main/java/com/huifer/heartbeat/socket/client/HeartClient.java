@@ -1,6 +1,6 @@
-package com.huifer.heartbeat.ez.client;
+package com.huifer.heartbeat.socket.client;
 
-import com.huifer.heartbeat.ez.LiveBack;
+import com.huifer.heartbeat.socket.LiveBack;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -76,7 +76,7 @@ public class HeartClient {
 	}
 
 	/**
-	 * 向心跳服务{@link com.huifer.heartbeat.ez.server.HeartServer} 发送消息
+	 * 向心跳服务{@link com.huifer.heartbeat.socket.server.HeartServer} 发送消息
 	 *
 	 * @param o 消息对象
 	 */
@@ -122,7 +122,7 @@ public class HeartClient {
 	}
 
 	/**
-	 * 处理{@link com.huifer.heartbeat.ez.server.HeartServer} 返回的消息
+	 * 处理{@link com.huifer.heartbeat.socket.server.HeartServer} 返回的消息
 	 */
 	class workRunnable implements Runnable {
 		protected Logger logger = Logger.getLogger(workRunnable.class.getName());
