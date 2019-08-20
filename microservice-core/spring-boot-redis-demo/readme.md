@@ -241,3 +241,237 @@ public class RedisConfigTest {
 
 
 ## StringRedisTemplate
+> 常用的一些操作对象
+> - 操作字符串 redisTemplate.opsForValue();　　 
+> - 操作hash redisTemplate.opsForHash();　　  
+> - 操作list redisTemplate.opsForList();　　  
+
+
+### stringRedisTemplate 操作代码如下
+```java
+  /**
+     * 设置k-v
+     */
+    public void setString(String k, String v) {
+        stringRedisTemplate.opsForValue().set(k, v);
+    }
+
+    /**
+     * 读取k下面的v
+     *
+     * @param k
+     * @return
+     */
+    public String getString(String k) {
+        return stringRedisTemplate.opsForValue().get(k);
+    }
+
+    /**
+     * 设置list
+     */
+    public void setList(String k, String v) {
+        stringRedisTemplate.opsForList().rightPush(k, v);
+    }
+
+    /**
+     * 删除同一个元素v
+     */
+    public void removeAllElement(String k, String v) {
+        stringRedisTemplate.opsForList().remove(k, 0, v);
+    }
+
+    /**
+     * 获取k
+     */
+    public List<String> getList(String k) {
+        return stringRedisTemplate.opsForList().range(k, 0, -1);
+    }
+
+    /**
+     * 设置hash
+     * {bigK:[{k:v},{k:v}]}
+     *
+     * @param bigK 最外层k
+     * @param k    内层k
+     * @param v    内层v
+     */
+    public void setHash(String bigK, String k, String v) {
+        stringRedisTemplate.opsForHash().put(bigK, k, v);
+    }
+
+    /**
+     * 获取hash
+     *
+     * @param bigK
+     * @return
+     */
+    public Map<String, String> getHash(String bigK) {
+        return stringRedisTemplate.<String, String>opsForHash().entries(bigK);
+    }
+
+    /**
+     * 删除内层k
+     *
+     * @param bigK
+     * @param k
+     */
+    public void removeK(String bigK, String k) {
+        stringRedisTemplate.opsForHash().delete(bigK, k);
+    }
+
+```
+
+有了这些基本的操作方法我们还需要进行对Bean 实体进行操作,这里使用的是[fastjson](https://github.com/alibaba/fastjson)继续bean转换成json文本(互相转换)
+> 具体操作对象有
+> - bean
+> - list
+> - map
+
+### fastjson 转换工具类
+```java
+package com.huifer.redis.string;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class FastJsonUtils {
+
+    private FastJsonUtils() {
+        throw new RuntimeException("this is a utils");
+    }
+
+    /**
+     * bean to jsonStr
+     *
+     * @param bean bean
+     */
+    public static <T> String toJsonStr(T bean) {
+        return JSON.toJSONString(bean);
+    }
+
+    /**
+     * jsonStr to bean
+     *
+     * @param jsonStr jsonStr
+     * @param clazz   clazz
+     * @return bean
+     */
+    public static <T> T toBean(String jsonStr, Class<T> clazz) {
+        return JSON.parseObject(jsonStr, clazz);
+    }
+
+    /**
+     * map to jsonStr
+     *
+     * @param map map
+     * @return jsonStr
+     */
+    public static <K, V> String toBean(Map<K, V> map) {
+        return JSON.toJSONString(map);
+    }
+
+    /**
+     * list to jsonStr
+     *
+     * @param list list
+     * @return jsonStr
+     */
+    public static <T> String toJsonStr(List<T> list) {
+        return JSON.toJSONString(list);
+    }
+
+    /**
+     * jsonStr to map
+     *
+     * @param jsonStr jsonStr
+     * @param map     map
+     * @return {@link Map}
+     */
+    public static <K, V> Map<K, V> strToMap(String jsonStr, Map<K, V> map) {
+        Map<K, V> kvMap = JSON.parseObject(jsonStr, new TypeReference<Map<K, V>>() {
+        });
+        Map<K, V> result = new HashMap<>();
+        Class<?> aClass = map.values().stream().collect(Collectors.toList()).get(0).getClass();
+        Map<K, V> m = new HashMap<>();
+        kvMap.forEach(
+                (k, v) -> {
+                    JSONObject jsonObject = (JSONObject) v;
+                    V o = (V) jsonObject.toJavaObject(aClass);
+
+                    m.put(k, o);
+                }
+        );
+
+        return m;
+    }
+
+    /**
+     * jsonStr to list
+     *
+     * @param jsonStr jsonStr
+     * @param bean   bean
+     * @return {@link List}
+     */
+    public static <T> List<T> strToList(String jsonStr, T bean) {
+        List<JSONObject> list = JSON.parseObject(jsonStr, new TypeReference<List<JSONObject>>() {
+
+        });
+        List<T> res = new ArrayList<>();
+        for (JSONObject jsonObject : list) {
+            T o = (T) jsonObject.toJavaObject(bean.getClass());
+            res.add(o);
+        }
+        return res;
+    }
+
+
+}
+
+```
+
+这样就可以对stringRedisTemplate进行改进
+```java
+ /**
+     * 设置k , value 为 bean
+     *
+     * @param k    k
+     * @param bean bean对象
+     */
+    public <T> void setStringBean(String k, T bean) {
+        this.setString(k, FastJsonUtils.toJsonStr(bean));
+    }
+
+    /**
+     * 获取对象
+     *
+     * @param k     k
+     * @param clazz clazz
+     */
+    public <T> T getStringBean(String k, Class<T> clazz) {
+        String string = this.getString(k);
+        return FastJsonUtils.toBean(string, clazz);
+    }
+
+    public <T> void setList(String k, List<T> list) {
+        this.setString(k, FastJsonUtils.toJsonStr(list));
+    }
+
+    public <T> List<T> getList(String k, T bean) {
+        String string = this.getString(k);
+        return FastJsonUtils.strToList(string, bean);
+    }
+
+    public <K, V> void setHash(String k, Map<K, V> map) {
+        this.setString(k, FastJsonUtils.toBean(map));
+    }
+
+    public <K, V> Map<K, V> getHash(String k, Map<K, V> map) {
+        String string = this.getString(k);
+        return FastJsonUtils.strToMap(string, map);
+    }
+
+```

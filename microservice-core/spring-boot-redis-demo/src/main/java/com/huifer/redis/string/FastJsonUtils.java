@@ -82,7 +82,7 @@ public class FastJsonUtils {
      * jsonStr to list
      *
      * @param jsonStr jsonStr
-     * @param clazz   clazz
+     * @param bean   bean
      * @return {@link List}
      */
     public static <T> List<T> strToList(String jsonStr, T bean) {
