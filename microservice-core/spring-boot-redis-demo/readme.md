@@ -238,3 +238,6 @@ public class RedisConfigTest {
 }
 
 ```
+
+
+## StringRedisTemplate
