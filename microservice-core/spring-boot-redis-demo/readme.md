@@ -475,3 +475,117 @@ public class FastJsonUtils {
     }
 
 ```
+
+
+## 排行榜
+假设有有一个在线的投票系统,让用户进行投票并且可以看到排名情况.这时候redis的ZSet可以很好的解决这个问题.
+ZSet是一个可以排列的数据结构方法有如下几个
+`org.springframework.data.redis.core.DefaultZSetOperations`
+- Boolean add(K key, V value, double score);
+    - 新增一个有序集合，存在的话为false，不存在的话为true
+- Long add(K key, Set<TypedTuple<V>> tuples);
+    - 新增一个有序集合
+- Long remove(K key, Object... values);
+    - 从有序集合中移除一个或者多个元素
+- Double incrementScore(K key, V value, double delta);
+    - 增加元素的score值，并返回增加后的值
+- Long rank(K key, Object o);
+    - 返回有序集中指定成员的排名，其中有序集成员按分数值递增(从小到大)顺序排列
+- Long reverseRank(K key, Object o);
+    - 返回有序集中指定成员的排名，其中有序集成员按分数值递减(从大到小)顺序排列
+- Set<V> range(K key, long start, long end);
+    - 通过索引区间返回有序集合成指定区间内的成员，其中有序集成员按分数值递增(从小到大)顺序排列
+- Set<TypedTuple<V>> rangeWithScores(K key, long start, long end);
+    - 通过索引区间返回有序集合成指定区间内的成员对象，其中有序集成员按分数值递增(从小到大)顺序排列
+- Set<V> rangeByScore(K key, double min, double max);
+    - 通过分数返回有序集合指定区间内的成员，其中有序集成员按分数值递增(从小到大)顺序排列
+- Set<TypedTuple<V>> rangeByScoreWithScores(K key, double min, double max);
+    - 通过分数返回有序集合指定区间内的成员对象，其中有序集成员按分数值递增(从小到大)顺序排列
+- Set<V> rangeByScore(K key, double min, double max, long offset, long count);
+    - 通过分数返回有序集合指定区间内的成员，并在索引范围内，其中有序集成员按分数值递增(从小到大)顺序排列
+- Set<TypedTuple<V>> rangeByScoreWithScores(K key, double min, double max, long offset, long count);
+    - 通过分数返回有序集合指定区间内的成员对象，并在索引范围内，其中有序集成员按分数值递增(从小到大)顺序排列
+- Set<V> reverseRange(K key, long start, long end);
+    - 通过索引区间返回有序集合成指定区间内的成员，其中有序集成员按分数值递减(从大到小)顺序排列
+- Set<TypedTuple<V>> reverseRangeWithScores(K key, long start, long end);
+    - 通过索引区间返回有序集合成指定区间内的成员对象，其中有序集成员按分数值递减(从大到小)顺序排列
+- Long count(K key, double min, double max);
+    - 通过分数返回有序集合指定区间内的成员个数
+- Long size(K key);
+    - 获取有序集合的成员数，内部调用的就是zCard方法
+- Long zCard(K key);
+    - 获取有序集合的成员数
+- Double score(K key, Object o);
+    - 获取指定成员的score值
+- Long removeRange(K key, long start, long end);
+    - 移除指定索引位置的成员，其中有序集成员按分数值递增(从小到大)顺序排列
+- Cursor<TypedTuple<V>> scan(K key, ScanOptions options);
+    - 遍历ZSet
+- Long intersectAndStore(K key, K otherKey, K destKey);
+    - 计算给定的一个或多个有序集的交集并将结果集存储在新的有序集合 key 中
+- Long unionAndStore(K key, Collection<K> otherKeys, K destKey);
+    - 计算给定的多个有序集的并集，并存储在新的 destKey中
+- Long unionAndStore(K key, K otherKey, K destKey);
+    - 计算给定的一个有序集的并集，并存储在新的 destKey中，key相同的话会把score值相加
+    
+
+- 知道了这些操作方法后,我们可以思考一下一个排名需要哪些操作.
+    1. 增加一个排名,分数
+    1. 获取前N名
+    1. 获取N-M名
+### 排名接口
+```java
+public interface TopInterface {
+    /**
+     * 增加指定名称的分数
+     *
+     * @param name  名称
+     * @param score 分数
+     */
+    void addScore(String key, String name, int score);
+
+    /**
+     * 获取前topSize
+     */
+    Set<String> getTop(String key, int topSize);
+
+    /**
+     * 获取 start - limit 之间
+     *
+     * @param start
+     * @param limit
+     * @return
+     */
+    Set<String> getLimit(String key, int start, int limit);
+
+
+}
+
+```
+
+### 排名接口实现类
+```java
+@Service
+public class TopInterfaceImpl implements TopInterface {
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public void addScore(String key, String name, int score) {
+        Double aDouble = stringRedisTemplate.opsForZSet().incrementScore(key, name, score);
+    }
+
+    @Override
+    public Set<String> getTop(String key, int topSize) {
+        Set<String> range = stringRedisTemplate.opsForZSet().reverseRange(key, 0, topSize - 1);
+        return range;
+    }
+
+    @Override
+    public Set<String> getLimit(String key, int start, int limit) {
+        Set<String> range = stringRedisTemplate.opsForZSet().reverseRange(key, start - 1, limit - 1);
+        return range;
+    }
+}
+```

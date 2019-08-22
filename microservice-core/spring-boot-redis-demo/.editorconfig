@@ -7,6 +7,9 @@ root = true
 # ij_formatter_tags_enabled = false
 # ij_smart_tabs = false
 # ij_wrap_on_typing = false
+charset = utf-8
+indent_style = space
+indent_size = 2
 
 [*.java]
 # ij_smart_tabs = true
