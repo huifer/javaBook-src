@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class FastJsonUtils {
@@ -67,12 +70,12 @@ public class FastJsonUtils {
         Class<?> aClass = map.values().stream().collect(Collectors.toList()).get(0).getClass();
         Map<K, V> m = new HashMap<>();
         kvMap.forEach(
-                (k, v) -> {
-                    JSONObject jsonObject = (JSONObject) v;
-                    V o = (V) jsonObject.toJavaObject(aClass);
+            (k, v) -> {
+                JSONObject jsonObject = (JSONObject) v;
+                V o = (V) jsonObject.toJavaObject(aClass);
 
-                    m.put(k, o);
-                }
+                m.put(k, o);
+            }
         );
 
         return m;
@@ -82,7 +85,7 @@ public class FastJsonUtils {
      * jsonStr to list
      *
      * @param jsonStr jsonStr
-     * @param bean   bean
+     * @param bean    bean
      * @return {@link List}
      */
     public static <T> List<T> strToList(String jsonStr, T bean) {
