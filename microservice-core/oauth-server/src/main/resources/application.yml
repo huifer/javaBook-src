@@ -1,0 +1,24 @@
+server:
+  port: 9999
+spring:
+  redis:
+    database: 3
+    port: 6379
+    host: localhost
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        min-idle: 0
+        max-idle: 8
+game:
+  security:
+    oauth2:
+      storeType: jwt #或者jwt
+      jwtSigningKey: admin
+      clients[0]:
+        clientId: admin
+        clientSecret: admin
+      clients[1]:
+        clientId: game1
+        clientSecret: game1
