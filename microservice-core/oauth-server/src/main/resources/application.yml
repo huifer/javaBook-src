@@ -2,7 +2,7 @@ server:
   port: 9999
 spring:
   redis:
-    database: 3
+    database: 10
     port: 6379
     host: localhost
     jedis:
@@ -14,7 +14,7 @@ spring:
 game:
   security:
     oauth2:
-      storeType: jwt #或者jwt
+      storeType: redis #或者jwt
       jwtSigningKey: admin
       clients[0]:
         clientId: admin

@@ -36,6 +36,7 @@ public class GameAuthorizationServerConfig extends AuthorizationServerConfigurer
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
+	@Autowired
 	private TokenStore tokenStore;
 
 	@Autowired(required = false)
