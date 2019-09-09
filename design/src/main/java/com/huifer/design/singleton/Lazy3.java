@@ -22,6 +22,7 @@ public class Lazy3 {
     /**
      * static 保证单例的空间共享出去
      * final 保证不被重写
+     *
      * @return
      */
     public static final Lazy3 getInstance() {

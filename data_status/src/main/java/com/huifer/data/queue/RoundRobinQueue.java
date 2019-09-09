@@ -35,7 +35,6 @@ public class RoundRobinQueue {
     }
 
 
-
     /**
      * 是否满队列
      */
@@ -53,15 +52,14 @@ public class RoundRobinQueue {
     }
 
 
-    public Object dequeue(){
-        if(rear==front){
+    public Object dequeue() {
+        if (rear == front) {
             return null;
         }
         Object obj = queue[front];
-        front = (front+1)%queue.length;
+        front = (front + 1) % queue.length;
         return obj;
     }
-
 
 
 }

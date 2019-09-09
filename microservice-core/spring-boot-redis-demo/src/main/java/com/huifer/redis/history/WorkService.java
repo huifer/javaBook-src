@@ -20,17 +20,13 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class WorkService {
+    public static final String HISTORY = "history";
     @Autowired
     private TesService tesService;
     @Autowired
     private EsMapper esMapper;
-
     @Autowired
     private StringRedisExample stringRedisExample;
-
-
-    public static final String HISTORY = "history";
-
 
     public void work() {
         TableStatus t_es = esMapper.qTable("t_es");
@@ -91,8 +87,8 @@ public class WorkService {
 
         List<QueryResult> result = new ArrayList<>();
         all.stream().collect(Collectors.groupingBy(
-            QueryResult::getName,
-            Collectors.summingLong(QueryResult::getNs)
+                QueryResult::getName,
+                Collectors.summingLong(QueryResult::getNs)
         )).forEach((k, v) -> {
             result.add(QueryResult.builder().name(k).ns(v).build());
         });

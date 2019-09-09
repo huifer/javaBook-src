@@ -25,12 +25,7 @@ public class WaitNotifyDemo {
     private static class SharedObject {
         private String message;
 
-        public synchronized void setMessage (String message) {
-            this.message = message;
-            notify();
-        }
-
-        public synchronized String getMessage () {
+        public synchronized String getMessage() {
             while (message == null) {
                 try {
                     wait();
@@ -39,6 +34,11 @@ public class WaitNotifyDemo {
                 }
             }
             return message;
+        }
+
+        public synchronized void setMessage(String message) {
+            this.message = message;
+            notify();
         }
     }
 

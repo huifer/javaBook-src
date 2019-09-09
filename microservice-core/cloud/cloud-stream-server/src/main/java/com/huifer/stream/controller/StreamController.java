@@ -1,16 +1,13 @@
 package com.huifer.stream.controller;
 
 import com.huifer.stream.stream.SimpleServer;
-import java.io.UnsupportedEncodingException;
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.*;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.UnsupportedEncodingException;
 
 /**
  * <p>Title : StreamController </p>

@@ -1,13 +1,8 @@
 package com.huifer.activermq.receiver;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
 import org.apache.activemq.ActiveMQConnectionFactory;
+
+import javax.jms.*;
 
 /**
  * <p>Title : JMSQueueReceiver </p>
@@ -28,7 +23,7 @@ public class JMSPersistenceTopicReceiver {
         connection.start();
         Session session = connection.createSession(true, Session.AUTO_ACKNOWLEDGE);
         Topic testTopic = session.createTopic("testTopic");
-        MessageConsumer consumer = session.createDurableSubscriber(testTopic,PS);
+        MessageConsumer consumer = session.createDurableSubscriber(testTopic, PS);
         TextMessage msg = (TextMessage) consumer.receive();
         System.out.println(msg.getText());
 

@@ -28,6 +28,7 @@ public enum PayType {
 
     /**
      * 获取支付形式
+     *
      * @return
      */
     public Payment get() {

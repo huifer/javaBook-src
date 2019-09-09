@@ -12,7 +12,7 @@ public interface MyRegisterCenter {
     /**
      * 注册器
      *
-     * @param serviceName 服务名称
+     * @param serviceName    服务名称
      * @param serviceAddress 服务IP地址
      */
     void register(String serviceName, String serviceAddress) throws Exception;

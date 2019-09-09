@@ -1,13 +1,14 @@
 package com.huifer.feign.annotation;
 
-import java.util.Arrays;
-import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * <p>Title : RibbonRestController </p>
@@ -39,7 +40,7 @@ public class RibbonConfig {
     @Bean
     @Autowired
     public Object f(@Qualifier(value = "ribbon") Collection<RestTemplate> restTemplates,
-            ClientHttpRequestInterceptor interceptor) {
+                    ClientHttpRequestInterceptor interceptor) {
         restTemplates.forEach(
                 restTemplate -> {
                     restTemplate.setInterceptors(Arrays.asList(interceptor));

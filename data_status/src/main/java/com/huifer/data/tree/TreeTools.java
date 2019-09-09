@@ -36,8 +36,6 @@ public class TreeTools {
         System.out.println(numForKLevel);
 
 
-
-
         TreeNode<String> T2 = new TreeNode<>("A");
         T2.addLeft("B");
         T2.leftChild.addLeft("D");
@@ -61,7 +59,7 @@ public class TreeTools {
         System.out.println("=======================");
 
 
-        TreeNode<String> t3= new TreeNode<>("A");
+        TreeNode<String> t3 = new TreeNode<>("A");
         t3.addLeft("B");
         t3.leftChild.addLeft("C");
         t3.leftChild.addRight("D");
@@ -137,7 +135,7 @@ public class TreeTools {
     /**
      * 后序遍历，注: 中序遍历 后序遍历将print位置调整即可
      */
-    public static <T> void postorderTraversal (TreeNode<T> root) {
+    public static <T> void postorderTraversal(TreeNode<T> root) {
         if (root == null) {
             return;
         }
@@ -145,7 +143,6 @@ public class TreeTools {
         postorderTraversal(root.rightChild);
         printNodeValue(root);
     }
-
 
 
     /**

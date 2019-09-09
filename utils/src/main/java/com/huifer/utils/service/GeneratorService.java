@@ -2,13 +2,14 @@ package com.huifer.utils.service;
 
 import com.huifer.utils.mapper.GeneratorMapper;
 import com.huifer.utils.utils.GenUtils;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author: wang

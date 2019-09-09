@@ -1,16 +1,12 @@
 package com.huifer.hystrix.controller;
 
 import com.huifer.hystrix.annotation.Fusing;
-import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Random;
+import java.util.concurrent.*;
 
 /**
  * <p>Title : MyHystrixController </p>
@@ -64,7 +60,6 @@ public class MyHystrixController {
         System.out.println("v4 gogogo");
         return resultMsg(msg);
     }
-
 
 
     private String errorMsg(String msg) {

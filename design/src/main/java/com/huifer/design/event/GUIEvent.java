@@ -1,10 +1,10 @@
 package com.huifer.design.event;
 
+import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JFrame;
 
 /**
  * <p>Title : GUIEvent </p>

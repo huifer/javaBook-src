@@ -6,6 +6,6 @@ package com.huifer.idgen.my.service.provider;
  */
 public interface MachineIdsProvider {
 
-	long getMachineId();
+    long getMachineId();
 
 }

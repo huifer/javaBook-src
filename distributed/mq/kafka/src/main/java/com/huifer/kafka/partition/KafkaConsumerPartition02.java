@@ -1,11 +1,12 @@
 package com.huifer.kafka.partition;
 
-import java.util.Collections;
-import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import java.util.Collections;
+import java.util.Properties;
 
 /**
  * <p>Title : KafkaConsumerDemo </p>

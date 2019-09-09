@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Controller {
 
-    @GetMapping(name="/hello")
+    @GetMapping(name = "/hello")
     public ResponseEntity<String> helloWorld() {
         return ResponseEntity.ok("hello");
     }
 
 
-    @PostMapping(value="/string")
+    @PostMapping(value = "/string")
     public String readString(@RequestBody String string) {
         return "测试数据" + string + "'";
     }

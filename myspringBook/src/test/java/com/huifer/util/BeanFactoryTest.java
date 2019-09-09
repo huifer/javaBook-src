@@ -54,7 +54,7 @@ public class BeanFactoryTest {
         Teacher teacher2 = (Teacher) beanFactory.getBean("teacher");
 
         System.out.println(teacher1 == teacher2);
-        Assert.assertFalse(teacher1==teacher2);
+        Assert.assertFalse(teacher1 == teacher2);
         Student stu = (Student) beanFactory.getBeanScope("student");
         Student st2 = (Student) beanFactory.getBeanScope("student");
         System.out.println(stu == st2);
@@ -62,7 +62,6 @@ public class BeanFactoryTest {
 
         System.out.println();
     }
-
 
 
     @Test
@@ -73,7 +72,6 @@ public class BeanFactoryTest {
         bean01.setFactoryBean("tFactory");
         bean01.setFactoryMethod("createTeacher");
         bean01.setScope("prototype");
-
 
 
         List<BeanDefined> beanDefinedList = new ArrayList<BeanDefined>();

@@ -1,16 +1,17 @@
 package com.huifer.feign.annotation;
 
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
 public class ReuqestMappingHandler implements InvocationHandler {
 

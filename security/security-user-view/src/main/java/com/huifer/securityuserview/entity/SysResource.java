@@ -1,18 +1,16 @@
 package com.huifer.securityuserview.entity;
 
-import javax.persistence.*;
-
 /**
- *  资源类：本实例指的是访问路径
+ * 资源类：本实例指的是访问路径
  */
 @Entity
 public class SysResource {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column (name="id",length=10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", length = 10)
     private Integer id;
 
-    @Column(name="resourceName",length=1000)
+    @Column(name = "resourceName", length = 1000)
     private String resourceName;
 
     public int getId() {

@@ -22,7 +22,7 @@ public class ProcessorHandler implements Runnable {
     private Map<String, Object> serverHandler = new HashMap<>();
 
 
-    public ProcessorHandler(Socket socket,  Map<String, Object>  serverHandler) {
+    public ProcessorHandler(Socket socket, Map<String, Object> serverHandler) {
         this.socket = socket;
         this.serverHandler = serverHandler;
     }

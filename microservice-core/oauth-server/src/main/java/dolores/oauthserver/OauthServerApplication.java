@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OauthServerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(OauthServerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(OauthServerApplication.class, args);
+    }
 
-	@GetMapping("/hello")
-	public String hello() {
-		return "this is a live";
-	}
+    @GetMapping("/hello")
+    public String hello() {
+        return "this is a live";
+    }
 
 
 }

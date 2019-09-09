@@ -11,5 +11,4 @@ package com.huifer.spring.controller;
 public class Controller {
 
 
-
 }

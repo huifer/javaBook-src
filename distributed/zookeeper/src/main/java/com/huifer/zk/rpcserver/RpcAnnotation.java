@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * 标注具体的发布地址
+ *
  * @author huifer
  */
 @Target(ElementType.TYPE)
@@ -15,6 +16,7 @@ public @interface RpcAnnotation {
 
     /**
      * 对外发布服务的接口地址
+     *
      * @return
      */
     Class<?> value();

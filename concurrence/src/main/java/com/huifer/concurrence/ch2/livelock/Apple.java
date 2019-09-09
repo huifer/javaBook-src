@@ -19,11 +19,11 @@ public class Apple {
         owner = d;
     }
 
-    public People getOwner () {
+    public People getOwner() {
         return owner;
     }
 
-    public synchronized void setOwner (People d) {
+    public synchronized void setOwner(People d) {
         owner = d;
     }
 }

@@ -35,9 +35,9 @@ public class StringBF {
             }
         }
         if (j >= t.length) {
-             k = i - t.length;
+            k = i - t.length;
         } else {
-             k = 0;
+            k = 0;
         }
         System.out.println(k);
     }

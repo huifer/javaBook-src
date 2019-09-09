@@ -2,8 +2,9 @@ package com.huifer.ssm.mapper;
 
 import com.huifer.ssm.pojo.Orders;
 import com.huifer.ssm.pojo.OrdersExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface OrdersMapper {
     /**

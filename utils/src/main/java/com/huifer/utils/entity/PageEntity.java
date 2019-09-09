@@ -1,9 +1,10 @@
 package com.huifer.utils.entity;
 
-import java.io.Serializable;
-import java.util.List;
 import lombok.Data;
 import lombok.ToString;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author: wang

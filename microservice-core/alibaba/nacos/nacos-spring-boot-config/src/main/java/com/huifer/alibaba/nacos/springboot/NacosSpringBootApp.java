@@ -12,8 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @NacosPropertySource(dataId = "springboot-nacos-config", autoRefreshed = true)
 public class NacosSpringBootApp {
 
-	public static void main(String[] args) {
-		SpringApplication.run(NacosSpringBootApp.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(NacosSpringBootApp.class, args);
+    }
 
 }

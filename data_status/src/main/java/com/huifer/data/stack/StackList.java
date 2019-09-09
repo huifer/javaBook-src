@@ -52,7 +52,7 @@ public class StackList<E> {
         for (int i = 0; i < elements.length; i++) {
             if (elements[i] != null) {
 
-            System.out.print(elements[i] + "\t");
+                System.out.print(elements[i] + "\t");
             }
 
         }

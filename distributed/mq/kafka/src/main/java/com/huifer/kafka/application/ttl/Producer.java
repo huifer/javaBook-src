@@ -1,11 +1,12 @@
 package com.huifer.kafka.application.ttl;
 
-import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
+
+import java.util.Properties;
 
 /**
  * <p>Title : Producer </p>

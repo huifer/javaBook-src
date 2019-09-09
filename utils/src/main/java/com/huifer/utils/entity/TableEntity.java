@@ -1,8 +1,9 @@
 package com.huifer.utils.entity;
 
-import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+
+import java.util.List;
 
 /**
  * @author: wang

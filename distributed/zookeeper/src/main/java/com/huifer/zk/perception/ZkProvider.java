@@ -13,23 +13,31 @@ import java.util.List;
  */
 public class ZkProvider {
 
-    private ZooKeeper zooKeeper = null;
-
     private final int timeout = 2000;
+    private ZooKeeper zooKeeper = null;
     /**
      * 地址列表用","分割 server1:port,server2:port
      */
     private String connects = "localhost:2181";
-
-    public ZooKeeper getZooKeeper() {
-        return zooKeeper;
-    }
-
     /**
      * 父节点
      */
     private String parentNode = "/server";
 
+    public ZkProvider() {
+        initZk();
+    }
+
+
+    public ZkProvider(ZooKeeper zooKeeper, String connects) {
+        this.zooKeeper = zooKeeper;
+        this.connects = connects;
+        initZk();
+    }
+
+    public ZooKeeper getZooKeeper() {
+        return zooKeeper;
+    }
 
     /**
      * 节点递归输出
@@ -52,16 +60,6 @@ public class ZkProvider {
                 ls(path + "/" + s);
             }
         }
-    }
-
-    public ZkProvider() {
-        initZk();
-    }
-
-    public ZkProvider(ZooKeeper zooKeeper, String connects) {
-        this.zooKeeper = zooKeeper;
-        this.connects = connects;
-        initZk();
     }
 
     /**

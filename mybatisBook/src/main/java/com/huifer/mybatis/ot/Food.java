@@ -43,12 +43,12 @@ public class Food {
     }
 }
 
-class  Da <T>{
+class Da<T> {
+    private T data;
+
     public Da(T data) {
         this.data = data;
     }
-
-    private T data;
 
     public T getData() {
         return data;
@@ -72,10 +72,11 @@ class YouZha extends Food {
 class ShuiGuo extends Food {
 
 }
+
 /**
  * 薯条
  */
-class ShuTiao extends YouZha{
+class ShuTiao extends YouZha {
 
 }
 

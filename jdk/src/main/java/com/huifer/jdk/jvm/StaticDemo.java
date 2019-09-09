@@ -9,8 +9,8 @@ package com.huifer.jdk.jvm;
  */
 public class StaticDemo {
 
-    private static final Boolean LIVING = true; // 这段代码的加载事件太靠后了
     public static final StaticDemo STATIC_DEMO = new StaticDemo(); // static 修饰
+    private static final Boolean LIVING = true; // 这段代码的加载事件太靠后了
     private final Boolean alive = LIVING;
 
     private StaticDemo() {

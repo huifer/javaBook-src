@@ -36,7 +36,7 @@ public class StarveDemo {
                         c = 0;
                     }
                     ++c;
-                    System.out.println(Thread.currentThread().getName() + "值:"+c);
+                    System.out.println(Thread.currentThread().getName() + "值:" + c);
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {

@@ -1,11 +1,12 @@
 package com.huifer.emailtask.task;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * <p>Title : MyTask </p>
@@ -25,6 +26,7 @@ public class MyTask {
                 + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
                 .format(new Date()));
     }
+
     @Scheduled(fixedRate = 2 * 1000)
     public void runJobB() {
         logger.info("[定时任务B]"

@@ -8,18 +8,18 @@ import com.huifer.idgen.my.service.bean.Id;
  */
 public interface IdConverter {
 
-	/**
-	 * {@link Id 转换成longid}
-	 *
-	 * @param id id
-	 */
-	long converter(Id id);
+    /**
+     * {@link Id 转换成longid}
+     *
+     * @param id id
+     */
+    long converter(Id id);
 
-	/**
-	 * long id 转换成 {@link Id}
-	 *
-	 * @param id longId
-	 */
-	Id converter(long id);
+    /**
+     * long id 转换成 {@link Id}
+     *
+     * @param id longId
+     */
+    Id converter(long id);
 
 }

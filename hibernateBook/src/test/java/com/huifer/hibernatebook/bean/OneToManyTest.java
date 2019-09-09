@@ -159,7 +159,7 @@ public class OneToManyTest {
      * 一方放弃外键维护权
      */
     @Test
-    public void demo6(){
+    public void demo6() {
         demo1();
         Session session = HibernateUtils.getCurrentSession();
         Transaction transaction = session.beginTransaction();

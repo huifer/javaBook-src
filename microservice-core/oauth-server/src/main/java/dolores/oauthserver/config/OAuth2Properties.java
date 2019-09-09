@@ -8,6 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "game.security.oauth2")
 public class OAuth2Properties {
 
-	private String jwtSigningKey = "game";
-	private OAuth2ClientProperties[] clients = {};
+    private String jwtSigningKey = "game";
+    private OAuth2ClientProperties[] clients = {};
 }

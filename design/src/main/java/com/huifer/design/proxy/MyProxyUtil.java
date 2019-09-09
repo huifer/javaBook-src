@@ -68,7 +68,7 @@ public class MyProxyUtil {
              */
             @Override
             public Object intercept(Object o, Method method, Object[] objects,
-                    MethodProxy methodProxy) throws Throwable {
+                                    MethodProxy methodProxy) throws Throwable {
                 System.out.println("cglib代理");
                 return methodProxy.invokeSuper(o, objects);
             }

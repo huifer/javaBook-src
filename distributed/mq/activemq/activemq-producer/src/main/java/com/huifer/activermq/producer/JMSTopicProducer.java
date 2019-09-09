@@ -1,13 +1,8 @@
 package com.huifer.activermq.producer;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.DeliveryMode;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
 import org.apache.activemq.ActiveMQConnectionFactory;
+
+import javax.jms.*;
 
 /**
  * <p>Title : JMSTopicProducer </p>
@@ -21,7 +16,7 @@ public class JMSTopicProducer {
     public static void main(String[] args) throws Exception {
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(
                 "tcp://192.168.1.108:61616");
-        ((ActiveMQConnectionFactory)connectionFactory).setAlwaysSyncSend(true);
+        ((ActiveMQConnectionFactory) connectionFactory).setAlwaysSyncSend(true);
         Connection connection = connectionFactory.createConnection();
         // 启动连接
         connection.start();

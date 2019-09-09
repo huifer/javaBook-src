@@ -1,9 +1,10 @@
 package com.huifer.design.proxy.cglib;
 
-import java.lang.reflect.Method;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
 
 /**
  * <p>Title : CGLIBZhiLian </p>
@@ -21,7 +22,7 @@ public class CGLIBZhiLian {
         enhancer.setCallback(new MethodInterceptor() {
             @Override
             public Object intercept(Object o, Method method, Object[] args,
-                    MethodProxy methodProxy) throws Throwable {
+                                    MethodProxy methodProxy) throws Throwable {
                 System.out.println("CGLIB 代理智联");
                 Object o1 = methodProxy.invokeSuper(o, args);
                 return o1;

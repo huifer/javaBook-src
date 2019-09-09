@@ -12,6 +12,7 @@ import java.sql.SQLException;
  */
 public class DeptMapper implements SqlSession {
     PreparedStatement preparedStatement;
+
     @Override
     public Object select(String sql) throws SQLException {
         ResultSet resultSet = preparedStatement.executeQuery(sql);

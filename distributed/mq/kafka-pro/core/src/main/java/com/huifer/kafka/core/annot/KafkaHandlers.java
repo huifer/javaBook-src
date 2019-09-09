@@ -2,8 +2,6 @@ package com.huifer.kafka.core.annot;
 
 import org.springframework.stereotype.Component;
 
-import java.lang.annotation.*;
-
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

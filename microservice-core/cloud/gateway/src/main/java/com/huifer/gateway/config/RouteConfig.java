@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Configuration;
 public class RouteConfig {
 
     @Bean
-    public RouteLocator routeLocator (RouteLocatorBuilder builder) {
+    public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         StripPrefixGatewayFilterFactory.Config config = new StripPrefixGatewayFilterFactory.Config();
         config.setParts(1);
-      return   builder.routes()
+        return builder.routes()
                 .route("host_route", r -> r.path("/c/**").filters(f -> f.stripPrefix(1)).uri("http://localhost:9001"))
                 .route("host_route", r -> r.path("/d/**").filters(f -> f.stripPrefix(1)).uri("http://localhost:9000"))
                 .build();

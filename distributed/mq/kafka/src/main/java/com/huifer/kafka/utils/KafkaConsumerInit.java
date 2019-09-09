@@ -1,7 +1,8 @@
 package com.huifer.kafka.utils;
 
-import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+
+import java.util.Properties;
 
 /**
  * <p>Title : KafkaConsumerInit </p>

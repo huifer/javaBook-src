@@ -12,10 +12,10 @@ import java.util.List;
  */
 public interface ItemService {
 
-        List<Item> queryItemList();
+    List<Item> queryItemList();
 
-        Item queryItemById(Integer id);
+    Item queryItemById(Integer id);
 
-        void updateItem(Item item);
+    void updateItem(Item item);
 
 }

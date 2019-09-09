@@ -19,7 +19,7 @@ public class ThreadInterrup {
             }
         };
 
-        Thread t1 = new Thread(r,"thread-01");
+        Thread t1 = new Thread(r, "thread-01");
         Thread t2 = new Thread(r, "thread-02");
         t1.start();
         t2.start();

@@ -9,9 +9,7 @@ import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 描述:
@@ -55,7 +53,7 @@ public class RedisViewService {
      * @param scores 分数数组
      * @param fields 字段数组
      */
-    public void setValue(String  key, Object[] values, double[] scores, Object[] fields) {
+    public void setValue(String key, Object[] values, double[] scores, Object[] fields) {
         DataType type = redisTemplate.type(key);
         switch (type) {
             case SET:
@@ -317,7 +315,6 @@ public class RedisViewService {
         }
         return value;
     }
-
 
 
     /**

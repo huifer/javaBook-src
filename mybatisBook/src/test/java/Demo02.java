@@ -23,7 +23,7 @@ public class Demo02 {
 
 
     @Before
-    public void init(){
+    public void init() {
         try {
             InputStream in = Resources.getResourceAsStream("mybatis-config.xml");
             SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(in);
@@ -36,7 +36,7 @@ public class Demo02 {
 
 
     @Test
-    public void test01(){
+    public void test01() {
         DeptMapper mapper = session.getMapper(DeptMapper.class);
         Dept dept = mapper.deptFindById(1L);
         System.out.println(dept);
@@ -44,7 +44,7 @@ public class Demo02 {
 
 
     @Test
-    public void test02(){
+    public void test02() {
         DeptMapper mapper = session.getMapper(DeptMapper.class);
         Dept depts = mapper.deptFindByIdWithEmp(1L);
         System.out.println();
@@ -52,7 +52,7 @@ public class Demo02 {
 
 
     @After
-    public void end(){
+    public void end() {
         if (session != null) {
             session.close();
 

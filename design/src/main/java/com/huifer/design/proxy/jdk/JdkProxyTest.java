@@ -1,8 +1,9 @@
 package com.huifer.design.proxy.jdk;
 
 import com.huifer.design.proxy.staticproxy.Person;
-import java.io.FileOutputStream;
 import sun.misc.ProxyGenerator;
+
+import java.io.FileOutputStream;
 
 /**
  * <p>Title : JdkProxyTest </p>
@@ -13,7 +14,7 @@ import sun.misc.ProxyGenerator;
  */
 public class JdkProxyTest {
 
-    public static void main(String[] args)throws Exception {
+    public static void main(String[] args) throws Exception {
         PersonJdk pjd = new PersonJdk();
         Object obj = new ZhiLianJdk().getInstance(pjd);
         // 注意 JDK 代理实现的是接口 并不是实现了接口的类 (PersonJdk)

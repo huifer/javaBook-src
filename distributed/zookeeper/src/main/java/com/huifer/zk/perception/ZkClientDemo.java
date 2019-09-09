@@ -7,16 +7,22 @@ import java.util.List;
 
 public class ZkClientDemo {
 
+    private final int timeout = 2000;
     /**
      * 地址列表用","分割 server1:port,server2:port
      */
     private String servers = "localhost:2181";
-
-
-    private final int timeout = 2000;
-
     private ZkClient zkClient = null;
     private String path = "/";
+
+    public ZkClientDemo() {
+        initZkClient();
+    }
+
+    public ZkClientDemo(String servers) {
+        this.servers = servers;
+        initZkClient();
+    }
 
     protected void initZkClient() {
         zkClient = new ZkClient(servers, timeout);
@@ -50,15 +56,5 @@ public class ZkClientDemo {
      */
     public void update(String name, Object data) {
         zkClient.writeData(name, data);
-    }
-
-
-    public ZkClientDemo() {
-        initZkClient();
-    }
-
-    public ZkClientDemo(String servers ) {
-        this.servers = servers;
-        initZkClient();
     }
 }

@@ -30,13 +30,13 @@ public class SpringIoc {
     }
 
     @Test
-    public void testIocDemo03(){
+    public void testIocDemo03() {
         Teacher tea = (Teacher) context.getBean("teacherStatic");
 
     }
 
     @Test
-    public void testIocDemo04(){
+    public void testIocDemo04() {
         BaseService so = (BaseService) context.getBean("tec");
         String s = so.doSome();
         System.out.println(s);
@@ -48,7 +48,6 @@ public class SpringIoc {
         Di di = (Di) context.getBean("di01");
         System.out.println();
     }
-
 
 
 }

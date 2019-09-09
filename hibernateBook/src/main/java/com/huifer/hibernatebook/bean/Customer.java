@@ -19,10 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer {
-    public Customer(String cust_name) {
-        this.cust_name = cust_name;
-    }
-
     /**
      * 客户编号(主键)
      */
@@ -51,12 +47,15 @@ public class Customer {
      * 移动电话
      */
     private String cust_mobile;
-
-
     /**
      * 联系人
      */
     private Set<LinkMan> linkMans = new HashSet<LinkMan>();
+
+
+    public Customer(String cust_name) {
+        this.cust_name = cust_name;
+    }
 
     @Override
     public boolean equals(Object o) {

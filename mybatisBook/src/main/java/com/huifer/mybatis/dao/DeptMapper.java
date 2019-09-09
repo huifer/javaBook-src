@@ -16,5 +16,4 @@ public interface DeptMapper {
     Dept deptFindByIdWithEmp(Long deptno);
 
 
-
 }

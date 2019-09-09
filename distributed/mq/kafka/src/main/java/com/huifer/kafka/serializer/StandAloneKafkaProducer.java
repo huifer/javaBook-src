@@ -1,10 +1,11 @@
 package com.huifer.kafka.serializer;
 
-import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.IntegerSerializer;
+
+import java.util.Properties;
 
 /**
  * <p>Title : StandAloneKafkaProducer </p>
@@ -31,8 +32,6 @@ public class StandAloneKafkaProducer extends Thread {
                 StudentSerializer.class.getName());
 
 
-
-
         this.producer = new KafkaProducer(properties);
         this.topic = topic;
 
@@ -50,7 +49,7 @@ public class StandAloneKafkaProducer extends Thread {
         int n = 0;
         while (n < 10) {
             n++;
-            Student student = new Student("张三",  "李四");
+            Student student = new Student("张三", "李四");
             producer.send(new ProducerRecord(topic, student));
 
         }

@@ -16,10 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 public class KafkaHandler {
 
-	private KafkaConsumerWithCore kafkaConsumer;
-	private KafkaProducerWithCore kafkaProducer;
+    private KafkaConsumerWithCore kafkaConsumer;
+    private KafkaProducerWithCore kafkaProducer;
 
 
-	private List<ExceptionHandler> exceptionHandlers;
-	private KafkaHandlerMeta kafkaHandlerMeta;
+    private List<ExceptionHandler> exceptionHandlers;
+    private KafkaHandlerMeta kafkaHandlerMeta;
 }

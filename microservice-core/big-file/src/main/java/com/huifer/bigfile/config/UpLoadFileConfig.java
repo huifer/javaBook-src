@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2019-05-27
  */
 @Configuration
-    public class UpLoadFileConfig {
+public class UpLoadFileConfig {
 
     public static String uploadPath;
 

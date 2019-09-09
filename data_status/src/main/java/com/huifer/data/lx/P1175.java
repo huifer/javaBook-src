@@ -74,8 +74,8 @@ public class P1175 {
      * 进行数学运算
      *
      * @param op 运算符
-     * @param b 数b
-     * @param a 数a
+     * @param b  数b
+     * @param a  数a
      * @return 结果值
      */
     public static float caculate(char op, float b, float a) {

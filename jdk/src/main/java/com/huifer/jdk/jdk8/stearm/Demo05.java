@@ -14,7 +14,7 @@ public class Demo05 {
 
         int sum = integerStream.filter(integer -> integer > 2).mapToInt(x -> x * 2).skip(2).limit(2).sum();
         System.out.println(sum);
-        
+
 //        IntSummaryStatistics intSummaryStatistics = distinct.filter(integer -> integer > 2).mapToInt(x -> x * 2).summaryStatistics();
 //        System.out.println(intSummaryStatistics.getMin());
 //

@@ -1,13 +1,14 @@
 package com.huifer.cloud.config.myrespository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.cloud.config.environment.Environment;
 import org.springframework.cloud.config.environment.PropertySource;
 import org.springframework.cloud.config.server.environment.EnvironmentRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Title : MyEnvironmentRepository </p>

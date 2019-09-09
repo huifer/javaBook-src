@@ -9,8 +9,8 @@ package com.huifer.design.template.entity;
  */
 public class Menber {
 
-    private  String name;
-    private  String pwd;
+    private String name;
+    private String pwd;
 
     public Menber() {
     }

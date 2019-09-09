@@ -22,14 +22,13 @@ public class OrderEvent implements Serializable {
         return serialVersionUID;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
-
     public long getValue() {
         return value;
     }
 
+    public void setValue(int value) {
+        this.value = value;
+    }
 
     @Override
     public String toString() {

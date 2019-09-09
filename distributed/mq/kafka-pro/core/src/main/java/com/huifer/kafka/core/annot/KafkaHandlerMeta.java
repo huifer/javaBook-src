@@ -14,22 +14,22 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KafkaHandlerMeta<T> {
-	private T bean;
-	private Method method;
-	private Class<? extends Object> parameterType;
+    private T bean;
+    private Method method;
+    private Class<? extends Object> parameterType;
 
-	private InputConsumer inputConsumer;
+    private InputConsumer inputConsumer;
 
-	private OutputProducer outputProducer;
+    private OutputProducer outputProducer;
 
-	private Map<ErrorHandler, Method> errorHandlers = new HashMap<>();
+    private Map<ErrorHandler, Method> errorHandlers = new HashMap<>();
 
-	public void addErrorHandlers(Map<ErrorHandler, Method> errorHandlers) {
-		this.errorHandlers.putAll(errorHandlers);
-	}
+    public void addErrorHandlers(Map<ErrorHandler, Method> errorHandlers) {
+        this.errorHandlers.putAll(errorHandlers);
+    }
 
-	public void addErrorHandlers(ErrorHandler errorHandler, Method method) {
-		this.errorHandlers.put(errorHandler, method);
-	}
+    public void addErrorHandlers(ErrorHandler errorHandler, Method method) {
+        this.errorHandlers.put(errorHandler, method);
+    }
 
 }

@@ -22,6 +22,7 @@ public abstract class AbstractFactory {
 
     /**
      * 伊利
+     *
      * @return
      */
     public abstract Milk getYiLi();

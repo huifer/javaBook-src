@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class RequestEntity {
 
-	private String ip;
+    private String ip;
 
 
 }

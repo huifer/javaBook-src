@@ -7,24 +7,24 @@ package com.huifer.idgen.my.service.provider;
 public class PropertyMachineIdsProvider implements MachineIdsProvider {
 
 
-	private long[] machineIds;
+    private long[] machineIds;
 
 
-	private int currentIndex;
+    private int currentIndex;
 
 
-	@Override
-	public long getMachineId() {
-		return machineIds[currentIndex++ % machineIds.length];
-	}
+    @Override
+    public long getMachineId() {
+        return machineIds[currentIndex++ % machineIds.length];
+    }
 
-	public long[] getMachineIds() {
-		return machineIds;
-	}
+    public long[] getMachineIds() {
+        return machineIds;
+    }
 
-	public void setMachineIds(long[] machineIds) {
-		this.machineIds = machineIds;
-	}
+    public void setMachineIds(long[] machineIds) {
+        this.machineIds = machineIds;
+    }
 
 
 }

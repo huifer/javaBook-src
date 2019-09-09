@@ -12,24 +12,24 @@ import java.util.UUID;
 @Slf4j
 public class UuidDemo {
 
-	public static void main(String[] args) {
-		randomly();
-		nameBased();
-		timeBased01();
-	}
+    public static void main(String[] args) {
+        randomly();
+        nameBased();
+        timeBased01();
+    }
 
-	private static void timeBased01() {
-		UUID uuid = Generators.timeBasedGenerator().generate();
-		log.info("{}",uuid);
-	}
+    private static void timeBased01() {
+        UUID uuid = Generators.timeBasedGenerator().generate();
+        log.info("{}", uuid);
+    }
 
-	private static void nameBased() {
-		UUID uuid = UUID.nameUUIDFromBytes("huifer".getBytes());
-		log.info("{}",uuid);
-	}
+    private static void nameBased() {
+        UUID uuid = UUID.nameUUIDFromBytes("huifer".getBytes());
+        log.info("{}", uuid);
+    }
 
-	private static void randomly() {
-		UUID uuid = UUID.randomUUID();
-		log.info("{}",uuid);
-	}
+    private static void randomly() {
+        UUID uuid = UUID.randomUUID();
+        log.info("{}", uuid);
+    }
 }

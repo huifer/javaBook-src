@@ -2,18 +2,18 @@ package com.huifer.redis.history;
 
 public class Es {
     /**
-    * 自增长列
-    */
+     * 自增长列
+     */
     private Long selfPro;
 
     /**
-    * id
-    */
+     * id
+     */
     private Long id;
 
     /**
-    * random
-    */
+     * random
+     */
     private String name;
 
     public Long getSelfPro() {

@@ -1,10 +1,5 @@
 package com.huifer.feign.annotation;
 
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
-
-import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -14,6 +9,12 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
+
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.Map;
+
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
 /**
  * <p>Title : FeignClientsRegistart </p>
@@ -28,7 +29,7 @@ public class FeignClientsRegistart implements ImportBeanDefinitionRegistrar, Bea
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
-            BeanDefinitionRegistry registry) {
+                                        BeanDefinitionRegistry registry) {
 
         ClassLoader classLoader = importingClassMetadata.getClass().getClassLoader();
 

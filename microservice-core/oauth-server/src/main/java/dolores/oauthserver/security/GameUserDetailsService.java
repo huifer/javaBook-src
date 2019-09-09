@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GameUserDetailsService implements UserDetailsService {
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	@Override
-	public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-		return new org.springframework.security.core.userdetails.User(s, passwordEncoder.encode("admin"), AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
-	}
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        return new org.springframework.security.core.userdetails.User(s, passwordEncoder.encode("admin"), AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER"));
+    }
 }

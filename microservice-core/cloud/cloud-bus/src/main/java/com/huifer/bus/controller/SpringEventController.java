@@ -33,7 +33,7 @@ public class SpringEventController implements ApplicationEventPublisherAware {
 
     @EventListener
     public void onMessage(PayloadApplicationEvent event) {
-        System.out.println( "接收的内容: " +  event.getPayload());
+        System.out.println("接收的内容: " + event.getPayload());
     }
 
 

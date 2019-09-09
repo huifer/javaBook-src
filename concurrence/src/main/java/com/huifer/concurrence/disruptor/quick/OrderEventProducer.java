@@ -1,6 +1,7 @@
 package com.huifer.concurrence.disruptor.quick;
 
 import com.lmax.disruptor.RingBuffer;
+
 import java.nio.ByteBuffer;
 
 /**

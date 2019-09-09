@@ -1,8 +1,13 @@
 package com.huifer.jdk.jdk8.lambda;
 
+@FunctionalInterface
+interface MyInterface {
+    void test();
+}
+
 /**
  * 描述:
- *  函数式接口
+ * 函数式接口
  *
  * @author huifer
  * @date 2019-06-12
@@ -19,9 +24,4 @@ public class Demo01 {
     public void myInterfaceTest(MyInterface myInterface) {
         myInterface.test();
     }
-}
-
-@FunctionalInterface
-interface MyInterface {
-    void test();
 }

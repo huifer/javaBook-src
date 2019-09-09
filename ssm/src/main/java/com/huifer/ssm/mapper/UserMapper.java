@@ -4,8 +4,9 @@ import com.huifer.ssm.pojo.User;
 import com.huifer.ssm.pojo.UserExample;
 import com.huifer.ssm.pojo.UserKey;
 import com.huifer.ssm.pojo.UserWithBLOBs;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface UserMapper {
     /**

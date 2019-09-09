@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class MyProxyUtilTest {
     @Test
-    public void testJdkProxy(){
+    public void testJdkProxy() {
 
         BaseService bs = new BaseServiceImpl();
         BaseService proxy = MyProxyUtil.getBaseServiceWithJdk(bs);
@@ -15,7 +15,7 @@ public class MyProxyUtilTest {
     }
 
     @Test
-    public void testCgLibProxy(){
+    public void testCgLibProxy() {
 
         BaseService bs = new BaseServiceImpl();
         BaseService proxy = MyProxyUtil.getBaseServiceWithCgLib(bs);

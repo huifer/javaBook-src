@@ -25,6 +25,10 @@ public class DoLog implements Serializable {
      * 操作方法
      */
     private String methodName;
+    /**
+     * 参数
+     */
+    private Object params;
 
     public Object getParams() {
         return params;
@@ -33,9 +37,4 @@ public class DoLog implements Serializable {
     public void setParams(Object params) {
         this.params = params;
     }
-
-    /**
-     * 参数
-     */
-    private Object params;
 }

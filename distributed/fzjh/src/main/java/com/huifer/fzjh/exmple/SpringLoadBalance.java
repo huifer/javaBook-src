@@ -7,14 +7,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 @Slf4j
 public class SpringLoadBalance {
-	public static void main(String[] args) {
-		ApplicationContext context = new ClassPathXmlApplicationContext("spring-loadBalance.xml");
-		LoadBalanceService loadBalanceFactoryBean = (LoadBalanceService) context.getBean("loadBalanceFactoryBean");
-		for (int i = 0; i < 15; i++) {
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring-loadBalance.xml");
+        LoadBalanceService loadBalanceFactoryBean = (LoadBalanceService) context.getBean("loadBalanceFactoryBean");
+        for (int i = 0; i < 15; i++) {
 
-			String loadBalanceId = loadBalanceFactoryBean.loadBalance();
-			log.info(loadBalanceId);
-		}
+            String loadBalanceId = loadBalanceFactoryBean.loadBalance();
+            log.info(loadBalanceId);
+        }
 
-	}
+    }
 }

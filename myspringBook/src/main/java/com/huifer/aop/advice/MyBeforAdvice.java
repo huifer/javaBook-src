@@ -25,6 +25,5 @@ public class MyBeforAdvice implements MethodBeforeAdvice {
         System.out.println("洗手！！！");
 
 
-
     }
 }

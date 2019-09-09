@@ -7,30 +7,30 @@ import java.util.List;
 
 public abstract class BeanMessageHandler<T> extends SafelyMessageHandler {
 
-	private Class<T> clazz;
+    private Class<T> clazz;
 
-	public BeanMessageHandler(Class<T> clazz) {
-		super();
+    public BeanMessageHandler(Class<T> clazz) {
+        super();
 
-		this.clazz = clazz;
-	}
+        this.clazz = clazz;
+    }
 
-	public BeanMessageHandler(Class<T> clazz, ExceptionHandler exceptionHandler) {
-		super(exceptionHandler);
+    public BeanMessageHandler(Class<T> clazz, ExceptionHandler exceptionHandler) {
+        super(exceptionHandler);
 
-		this.clazz = clazz;
-	}
+        this.clazz = clazz;
+    }
 
-	public BeanMessageHandler(Class<T> clazz, List<ExceptionHandler> exceptionHandlers) {
-		super(exceptionHandlers);
+    public BeanMessageHandler(Class<T> clazz, List<ExceptionHandler> exceptionHandlers) {
+        super(exceptionHandlers);
 
-		this.clazz = clazz;
-	}
+        this.clazz = clazz;
+    }
 
-	protected void doExecute(String message) {
-		T bean = JSON.parseObject(message, clazz);
-		doExecuteBean(bean);
-	}
+    protected void doExecute(String message) {
+        T bean = JSON.parseObject(message, clazz);
+        doExecuteBean(bean);
+    }
 
-	protected abstract void doExecuteBean(T bean);
+    protected abstract void doExecuteBean(T bean);
 }

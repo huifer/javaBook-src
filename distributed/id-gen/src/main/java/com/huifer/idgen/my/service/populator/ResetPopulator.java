@@ -6,9 +6,9 @@ package com.huifer.idgen.my.service.populator;
  */
 public interface ResetPopulator {
 
-	/**
-	 * 重置参数
-	 */
-	void reset();
+    /**
+     * 重置参数
+     */
+    void reset();
 
 }

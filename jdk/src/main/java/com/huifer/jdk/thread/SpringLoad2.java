@@ -1,11 +1,5 @@
 package com.huifer.jdk.thread;
 
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
 /**
  * <p>Title : SpringLoad2 </p>
  * <p>Description : </p>
@@ -13,7 +7,7 @@ import java.util.concurrent.TimeUnit;
  * @author huifer
  * @date 2019-05-27
  */
-public class SpringLoad2  {
+public class SpringLoad2 {
 
     public static void main(String[] args) {
         SpringLoad2 springLoad2 = new SpringLoad2();

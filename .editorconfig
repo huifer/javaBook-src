@@ -1,0 +1,12 @@
+root = true
+
+[*]
+tab_width = 4
+charset = utf-8
+end_of_line = crlf
+
+[java]
+tab_width = 4
+
+[{*.tld, *.xslt, *.jhm, *.rng, *.bpmn, *.pom, *.ant, *.xul, *.xsl, *.xsd, *.jnlp, *.xml, *.xjb, *.wadl, *.plan, *.jrxml, *.fxml, *.wsdl, *.wsdd}]
+tab_width = 2

@@ -7,7 +7,7 @@ public class SonPojo extends FatherPojo {
     public SonPojo() {
     }
 
-    public SonPojo( int age) {
+    public SonPojo(int age) {
         super();
         this.age = age;
     }

@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 public class AccountServiceImpl implements AccountService {
     @Resource
     private AccountMapper mapper;
+
     @Override
     public void transfer(String from, String to, double money) {
         double fromMoney = mapper.queryMoney(from);

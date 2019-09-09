@@ -4,11 +4,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.*;
-import java.util.*;
-
 /**
- *  用户类
+ * 用户类
  */
 @Entity
 public class SysUser implements UserDetails {
@@ -23,7 +20,7 @@ public class SysUser implements UserDetails {
     @Column(name = "password", length = 120)
     private String password;
 
-    @ManyToMany(cascade = CascadeType.REFRESH,fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER)
     private List<SysRole> roles;
 
     public SysUser() {
@@ -54,7 +51,7 @@ public class SysUser implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         List<SysRole> userRoles = this.getRoles();
-        if(userRoles != null){
+        if (userRoles != null) {
             for (SysRole role : userRoles) {
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.getRoleName());
                 authorities.add(authority);
@@ -71,12 +68,12 @@ public class SysUser implements UserDetails {
         this.id = id;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getUsername() {
         return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

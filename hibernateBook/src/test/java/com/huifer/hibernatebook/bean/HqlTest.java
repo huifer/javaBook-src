@@ -167,7 +167,7 @@ public class HqlTest {
 
 
     @Test
-    public void demo9(){
+    public void demo9() {
         Session session = HibernateUtils.getCurrentSession();
         Transaction tx = session.beginTransaction();
 
@@ -179,10 +179,6 @@ public class HqlTest {
 
         tx.commit();
     }
-
-
-
-
 
 
 }

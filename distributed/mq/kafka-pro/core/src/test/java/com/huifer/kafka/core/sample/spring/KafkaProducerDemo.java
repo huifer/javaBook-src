@@ -24,7 +24,7 @@ public class KafkaProducerDemo extends Thread {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringSerializer");// 序列化手段
         properties.forEach((k, v) -> {
-            System.out.println(k + "="+ v);
+            System.out.println(k + "=" + v);
         });
         this.producer = new KafkaProducer<>(properties);
         this.topic = topic;

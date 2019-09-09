@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @RestController
 public class SpringBootLoadBalanceApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(SpringBootLoadBalanceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SpringBootLoadBalanceApplication.class, args);
+    }
 
 
-	@GetMapping("/")
-	public String s() {
+    @GetMapping("/")
+    public String s() {
 
-		return "";
-	}
+        return "";
+    }
 }

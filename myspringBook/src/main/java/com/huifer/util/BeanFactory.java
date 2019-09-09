@@ -22,6 +22,34 @@ public class BeanFactory {
      * beans标签列表
      */
     private List<BeanDefined> beanDefineds;
+    /**
+     * id-> 具体对象 单例模式对象
+     */
+    private Map<String, Object> Ioc;
+    private Map<String, Object> factory;
+
+
+    /**
+     * 将单例模式的类保存到 Ioc
+     *
+     * @param beanDefineds
+     * @throws Exception
+     */
+    public BeanFactory(List<BeanDefined> beanDefineds) throws Exception {
+        this.beanDefineds = beanDefineds;
+
+        Ioc = new HashMap<>();
+        for (BeanDefined bean : beanDefineds) {
+            if (bean.getScope().equals("singleton")) {
+                Class<?> classFile = Class.forName(bean.getClassPath());
+                Object o = classFile.newInstance();
+
+                Ioc.put(bean.getBeanId(), o);
+
+            }
+        }
+
+    }
 
     /**
      * 模仿 Spring 中的getBeans
@@ -51,39 +79,6 @@ public class BeanFactory {
         return obj;
 
     }
-
-    /**
-     * id-> 具体对象 单例模式对象
-     */
-    private Map<String, Object> Ioc;
-
-
-    private Map<String, Object> factory;
-
-
-    /**
-     * 将单例模式的类保存到 Ioc
-     *
-     * @param beanDefineds
-     * @throws Exception
-     */
-    public BeanFactory(List<BeanDefined> beanDefineds) throws Exception {
-        this.beanDefineds = beanDefineds;
-
-        Ioc = new HashMap<>();
-        for (BeanDefined bean : beanDefineds) {
-            if (bean.getScope().equals("singleton")) {
-                Class<?> classFile = Class.forName(bean.getClassPath());
-                Object o = classFile.newInstance();
-
-                Ioc.put(bean.getBeanId(), o);
-
-            }
-        }
-
-    }
-
-
 
     /**
      * 考虑是否单例模式的获取

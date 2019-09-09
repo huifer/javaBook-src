@@ -75,7 +75,7 @@ public class DistributedLock implements Lock, Watcher {
             Stat stat = zk.exists(prev, true);
             if (stat != null) {
                 System.out.println(
-                        Thread.currentThread().getName() + "-->>" +  prev
+                        Thread.currentThread().getName() + "-->>" + prev
                                 + " 等待锁");
                 countDownLatch = new CountDownLatch(1);
                 countDownLatch.await();

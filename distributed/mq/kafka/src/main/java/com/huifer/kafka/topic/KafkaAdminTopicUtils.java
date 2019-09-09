@@ -1,16 +1,11 @@
 package com.huifer.kafka.topic;
 
+import org.apache.kafka.clients.admin.*;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.CreateTopicsResult;
-import org.apache.kafka.clients.admin.DeleteTopicsResult;
-import org.apache.kafka.clients.admin.DescribeTopicsResult;
-import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.admin.TopicDescription;
 
 /**
  * <p>Title : KafkaAdminTopicUtils </p>
@@ -86,7 +81,7 @@ public class KafkaAdminTopicUtils {
             Map<String, TopicDescription> stringTopicDescriptionMap = describeTopicsResult.all()
                     .get();
             TopicDescription topicDescription = stringTopicDescriptionMap.get(topic);
-            stringTopicDescriptionMap.forEach((k,v)->{
+            stringTopicDescriptionMap.forEach((k, v) -> {
                 System.out.println(k + " : " + v);
             });
         } catch (Exception e) {

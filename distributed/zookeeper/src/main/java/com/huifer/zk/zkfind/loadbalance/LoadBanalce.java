@@ -13,6 +13,7 @@ public interface LoadBanalce {
 
     /**
      * 随机一个服务地址
+     *
      * @param servicePaths 服务地址
      * @return
      */

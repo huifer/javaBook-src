@@ -1,11 +1,12 @@
 package com.huifer.netty.io.bio;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>Title : BioServerHandler </p>

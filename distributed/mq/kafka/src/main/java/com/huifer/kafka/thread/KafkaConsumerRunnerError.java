@@ -1,12 +1,13 @@
 package com.huifer.kafka.thread;
 
 import com.huifer.kafka.utils.KafkaConsumerInit;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
+
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class KafkaConsumerRunnerError implements Runnable {
 

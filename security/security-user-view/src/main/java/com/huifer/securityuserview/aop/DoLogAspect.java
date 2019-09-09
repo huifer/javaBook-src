@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 public class DoLogAspect {
 
 
-
     @Pointcut("@annotation( com.huifer.securityuserview.aop.AspLog )")
     public void ddlog() {
     }

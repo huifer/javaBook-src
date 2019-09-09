@@ -9,8 +9,9 @@ package com.huifer.dao;
 public interface BookService {
     /**
      * 借书
-     * @param from 从xxx借出
-     * @param to 借给xxx
+     *
+     * @param from  从xxx借出
+     * @param to    借给xxx
      * @param bname 书名
      */
     void loanBook(String from, String to, String bname);

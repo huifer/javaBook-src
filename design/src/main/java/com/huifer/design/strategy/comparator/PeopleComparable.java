@@ -11,6 +11,7 @@ public class PeopleComparable implements Comparable<PeopleComparable> {
 
     public double height;
     public double weight;
+
     public PeopleComparable() {
     }
 

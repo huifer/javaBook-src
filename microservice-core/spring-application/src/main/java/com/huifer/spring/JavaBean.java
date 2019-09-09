@@ -7,6 +7,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JavaBean implements BeanPostProcessor {
+    private String name;
+
+    public JavaBean() {
+    }
+
     public static void main(String[] args) {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("BeanLive.xml");
         JavaBean javaBean = (JavaBean) ctx.getBean("javaBean");
@@ -26,8 +31,6 @@ public class JavaBean implements BeanPostProcessor {
         return bean;
     }
 
-    private String name;
-
     public String getName() {
         return name;
     }
@@ -35,9 +38,6 @@ public class JavaBean implements BeanPostProcessor {
     public void setName(String name) {
         System.out.println("setter 方法");
         this.name = name;
-    }
-
-    public JavaBean() {
     }
 
     public void init() {

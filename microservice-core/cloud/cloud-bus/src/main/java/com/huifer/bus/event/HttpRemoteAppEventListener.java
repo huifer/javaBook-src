@@ -1,12 +1,13 @@
 package com.huifer.bus.event;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>Title : HttpRemoteAppEventListener </p>

@@ -1,6 +1,5 @@
 package com.huifer.security.entity;
 
-import javax.persistence.*;
 import java.util.Objects;
 
 /**

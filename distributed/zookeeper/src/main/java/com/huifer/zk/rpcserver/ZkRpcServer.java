@@ -1,6 +1,7 @@
 package com.huifer.zk.rpcserver;
 
 import com.huifer.zk.regist.MyRegisterCenter;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -73,16 +74,13 @@ public class ZkRpcServer {
             }
 
 
-
-
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             if (serverSocket != null) {
                 serverSocket.close();
             }
         }
-
 
 
     }

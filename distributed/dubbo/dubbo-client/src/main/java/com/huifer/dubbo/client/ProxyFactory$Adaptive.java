@@ -47,7 +47,7 @@ public class ProxyFactory$Adaptive implements org.apache.dubbo.rpc.ProxyFactory 
     }
 
     public org.apache.dubbo.rpc.Invoker getInvoker(java.lang.Object arg0, java.lang.Class arg1,
-            org.apache.dubbo.common.URL arg2) throws org.apache.dubbo.rpc.RpcException {
+                                                   org.apache.dubbo.common.URL arg2) throws org.apache.dubbo.rpc.RpcException {
         if (arg2 == null) {
             throw new IllegalArgumentException("url == null");
         }

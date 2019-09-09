@@ -15,6 +15,9 @@ import java.util.*;
 @SpringBootTest
 public class StringRedisExampleTest {
 
+    List<Peo> peoList = new ArrayList<>();
+    Peo peo = new Peo();
+    HashMap<Integer, Peo> h = new HashMap<>();
     @Autowired
     private StringRedisExample stringRedisExample;
 
@@ -40,7 +43,6 @@ public class StringRedisExampleTest {
         Assert.assertTrue(list.size() == 3);
     }
 
-
     @Test
     public void setHash() {
         stringRedisExample.setHash("string-hash", "k1", "v1");
@@ -60,11 +62,6 @@ public class StringRedisExampleTest {
     public void removeK() {
         stringRedisExample.removeK("string-hash", "k4");
     }
-
-
-    List<Peo> peoList = new ArrayList<>();
-    Peo peo = new Peo();
-    HashMap<Integer, Peo> h = new HashMap<>();
 
     @Before
     public void initBean() {

@@ -1,8 +1,6 @@
 package com.huifer.bus.controller;
 
 import com.huifer.bus.event.RemoteAppEvent;
-import java.util.Arrays;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -10,11 +8,10 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * <p>Title : RemoteAppEventController </p>
@@ -48,7 +45,7 @@ public class RemoteAppEventController implements ApplicationEventPublisherAware 
      */
     @PostMapping("/send/remote/event/{appName}")
     public String sendAppCluster(@PathVariable("appName") String appName,
-            @RequestParam String message
+                                 @RequestParam String message
     ) {
         List<ServiceInstance> instances = discoveryClient.getInstances(appName);
         RemoteAppEvent remoteAppEvent = new RemoteAppEvent(message, currentAppName, appName,
@@ -64,9 +61,9 @@ public class RemoteAppEventController implements ApplicationEventPublisherAware 
      */
     @PostMapping("/send/remote/event/{appName}/{ip}/{port}")
     public String sendAppInterceptors(@PathVariable("appName") String appName,
-            @PathVariable("ip") String ip,
-            @PathVariable("port") int port,
-            @RequestParam String data) {
+                                      @PathVariable("ip") String ip,
+                                      @PathVariable("port") int port,
+                                      @RequestParam String data) {
         ServiceInstance instances = new DefaultServiceInstance(appName, ip,
                 port, false);
 

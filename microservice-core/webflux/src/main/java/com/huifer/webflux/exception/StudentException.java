@@ -6,7 +6,8 @@ import lombok.Setter;
 
 /**
  * 描述:
- *  自定义校验异常
+ * 自定义校验异常
+ *
  * @author huifer
  * @date 2019-06-02
  */

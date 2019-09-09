@@ -16,26 +16,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class Tcontroller {
 
-	@GetMapping("/adapter")
-	public String adapter(
-			@RequestParam("user_id") long userId,
-			@RequestParam("hc") String hc
-	) {
-	    return "kljl";
-	}
+    @GetMapping("/adapter")
+    public String adapter(
+            @RequestParam("user_id") long userId,
+            @RequestParam("hc") String hc
+    ) {
+        return "kljl";
+    }
 
 
-	@GetMapping("/")
-	public String hello(Model model) {
-		model.addAttribute("message", "hello");
+    @GetMapping("/")
+    public String hello(Model model) {
+        model.addAttribute("message", "hello");
 
-		return "h1";
-	}
+        return "h1";
+    }
 
-	@ModelAttribute(name = "upp")
-	public String upp() {
-		return "jkll";
-	}
+    @ModelAttribute(name = "upp")
+    public String upp() {
+        return "jkll";
+    }
 
 
 }

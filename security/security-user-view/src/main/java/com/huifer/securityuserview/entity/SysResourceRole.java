@@ -1,22 +1,19 @@
 package com.huifer.securityuserview.entity;
 
-import javax.persistence.*;
-import java.util.Date;
-
 /**
- *  资源与角色中间表
+ * 资源与角色中间表
  */
 @Entity
 public class SysResourceRole {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column (name="id",length=10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", length = 10)
     private int id;
 
-    @Column(name="roleId",length=50)
+    @Column(name = "roleId", length = 50)
     private String roleId;
 
-    @Column(name="resourceId",length=50)
+    @Column(name = "resourceId", length = 50)
     private String resourceId;
 
 

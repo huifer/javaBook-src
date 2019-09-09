@@ -11,7 +11,7 @@ public interface BaseService {
     /**
      * do what
      */
-    String  doSome();
+    String doSome();
 
 
 }

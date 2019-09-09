@@ -14,11 +14,9 @@ import java.util.Set;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class TopInterfaceImplTest {
 
+    public static final String kk = "RK";
     @Autowired
     private TopInterface topInterface;
-
-    public static final String kk = "RK";
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 

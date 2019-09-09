@@ -1,15 +1,12 @@
 package com.huifer.bigfile.pojo;
 
-import java.io.Serializable;
-import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>Title : FileInfo </p>
@@ -38,7 +35,6 @@ public class FileInfo implements Serializable {
     private Date uploadTime;
     @Column(name = "type")
     private String type;
-
 
 
     public FileInfo(String name, String md5, String path, Date uploadTime, String type) {

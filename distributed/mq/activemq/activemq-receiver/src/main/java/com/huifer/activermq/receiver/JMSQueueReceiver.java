@@ -1,13 +1,8 @@
 package com.huifer.activermq.receiver;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.TextMessage;
 import org.apache.activemq.ActiveMQConnectionFactory;
+
+import javax.jms.*;
 
 /**
  * <p>Title : JMSQueueReceiver </p>

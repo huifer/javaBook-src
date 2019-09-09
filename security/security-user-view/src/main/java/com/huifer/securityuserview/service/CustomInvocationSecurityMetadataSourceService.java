@@ -14,7 +14,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+
 /**
  * 描述:
  *
@@ -25,16 +25,14 @@ import java.util.*;
 @Service
 public class CustomInvocationSecurityMetadataSourceService implements FilterInvocationSecurityMetadataSource {
 
-    @Autowired
-    private SysRoleRepository roleRepository;
-
-    @Autowired
-    private SysResourceRepository resourceRepository;
-
     /**
      * 权限和url映射
      */
     private static Map<String, Collection<ConfigAttribute>> resourceMap = null;
+    @Autowired
+    private SysRoleRepository roleRepository;
+    @Autowired
+    private SysResourceRepository resourceRepository;
 
     @PostConstruct
     private void loadResourceDefine() {

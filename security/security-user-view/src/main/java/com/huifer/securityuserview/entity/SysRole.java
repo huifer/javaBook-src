@@ -1,19 +1,16 @@
 package com.huifer.securityuserview.entity;
 
-import javax.persistence.*;
-
-
 /**
- *  角色类
+ * 角色类
  */
 @Entity
 public class SysRole {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column (name="id",length=10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", length = 10)
     private Integer id;
 
-    @Column(name="roleName",length=100)
+    @Column(name = "roleName", length = 100)
     private String roleName;
 
     public Integer getId() {

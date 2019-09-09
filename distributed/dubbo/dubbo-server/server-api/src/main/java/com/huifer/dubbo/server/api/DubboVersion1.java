@@ -11,6 +11,7 @@ public interface DubboVersion1 {
 
     /**
      * 第一个版本的hello
+     *
      * @param o
      * @return
      */

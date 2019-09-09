@@ -18,7 +18,7 @@ public class ClientSocketDemo {
 
         try {
             socket = new Socket("127.0.0.1", 8080);
-            PrintWriter printWriter = new PrintWriter(socket.getOutputStream(),true);
+            PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
             printWriter.println("hello");
         } catch (Exception e) {
 

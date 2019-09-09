@@ -2,8 +2,8 @@ package com.huifer.idgen.my.service.conv;
 
 import com.huifer.idgen.my.service.bean.Id;
 import com.huifer.idgen.my.service.bean.IdMeta;
-import com.huifer.idgen.my.service.factory.IdMetaFactory;
 import com.huifer.idgen.my.service.bean.enums.IdType;
+import com.huifer.idgen.my.service.factory.IdMetaFactory;
 
 /**
  * @author: wang
@@ -32,12 +32,13 @@ public class IdConverterImpl implements IdConverter {
         return doConvert(id, idMeta);
     }
 
-	/**
-	 * 根据id生产,根据id元数据生产一个long类型的id
-	 * @param id
-	 * @param idMeta
-	 * @return
-	 */
+    /**
+     * 根据id生产,根据id元数据生产一个long类型的id
+     *
+     * @param id
+     * @param idMeta
+     * @return
+     */
     protected long doConverter(Id id, IdMeta idMeta) {
         long res = 0;
         res |= id.getMachine();
@@ -49,12 +50,13 @@ public class IdConverterImpl implements IdConverter {
         return res;
     }
 
-	/**
-	 * 根据long类型id,根据id元数据返回这个id的意义
-	 * @param id
-	 * @param idMeta
-	 * @return
-	 */
+    /**
+     * 根据long类型id,根据id元数据返回这个id的意义
+     *
+     * @param id
+     * @param idMeta
+     * @return
+     */
     protected Id doConvert(long id, IdMeta idMeta) {
         Id res = new Id();
         res.setMachine(id & idMeta.getMachineBitsMask());

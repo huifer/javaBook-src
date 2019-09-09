@@ -5,10 +5,11 @@ import com.huifer.bigfile.dao.FileInfoRep;
 import com.huifer.bigfile.pojo.FileInfo;
 import com.huifer.bigfile.utils.DownloadFileUtils;
 import com.huifer.bigfile.utils.MD5Utils;
-import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Date;
 
 /**
  * <p>Title : FileService </p>
@@ -30,7 +31,7 @@ public class FileService {
 
 
     public FileInfo upload(String name,
-            MultipartFile file) throws Exception {
+                           MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename();
 
         String prefix = filename.substring(filename.lastIndexOf(".") + 1);

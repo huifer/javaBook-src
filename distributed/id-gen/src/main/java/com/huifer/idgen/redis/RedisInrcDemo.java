@@ -10,19 +10,19 @@ import redis.clients.jedis.Jedis;
 @Slf4j
 public class RedisInrcDemo {
 
-	public static void main(String[] args) {
-		Jedis jedis = new Jedis();
-		Long incr = jedis.incrBy("test-inrc", 1L);
-		Long incr1 = jedis.incr("test-inrc");
-		Long incr2 = jedis.incrBy("test-inrc", 1L);
-		Long incr3 = jedis.incr("test-inrc");
-		String s = jedis.get("test-inrc");
-		log.info("{}", incr);
-		log.info("{}", incr1);
-		log.info("{}", incr2);
-		log.info("{}", incr3);
-		log.info("{}", s);
+    public static void main(String[] args) {
+        Jedis jedis = new Jedis();
+        Long incr = jedis.incrBy("test-inrc", 1L);
+        Long incr1 = jedis.incr("test-inrc");
+        Long incr2 = jedis.incrBy("test-inrc", 1L);
+        Long incr3 = jedis.incr("test-inrc");
+        String s = jedis.get("test-inrc");
+        log.info("{}", incr);
+        log.info("{}", incr1);
+        log.info("{}", incr2);
+        log.info("{}", incr3);
+        log.info("{}", s);
 
-	}
+    }
 
 }

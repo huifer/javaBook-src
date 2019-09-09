@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
  * @author huifer
  * @date 2019-06-02
  */
-@WebServlet(value = "/sse/default",asyncSupported = true)
+@WebServlet(value = "/sse/default", asyncSupported = true)
 public class DefaultEventServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

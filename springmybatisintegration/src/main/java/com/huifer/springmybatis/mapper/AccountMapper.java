@@ -24,5 +24,5 @@ public interface AccountMapper {
      * @param name
      * @return
      */
-    double queryMoney(@Param("name")String name);
+    double queryMoney(@Param("name") String name);
 }

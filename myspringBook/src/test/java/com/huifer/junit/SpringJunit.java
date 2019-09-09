@@ -29,7 +29,7 @@ public class SpringJunit {
 
 
     @Test
-    public void demo(){
+    public void demo() {
         userService.saveUser();
     }
 }

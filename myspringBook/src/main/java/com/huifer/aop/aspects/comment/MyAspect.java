@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 描述:
- *  切面类
+ * 切面类
+ *
  * @author huifer
  * @date 2019-03-04
  */
@@ -16,10 +17,9 @@ public class MyAspect {
 
 
     @Before(value = "execution(* *..*.*ServiceImpl.*(..))")
-    public void asBefor(){
+    public void asBefor() {
         System.out.println("注解形式的前置通知");
     }
-
 
 
 }

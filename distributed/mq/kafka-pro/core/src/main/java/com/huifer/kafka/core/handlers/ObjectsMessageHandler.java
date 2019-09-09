@@ -8,22 +8,22 @@ import java.util.List;
 
 public abstract class ObjectsMessageHandler<T> extends SafelyMessageHandler {
 
-	public ObjectsMessageHandler() {
-		super();
-	}
+    public ObjectsMessageHandler() {
+        super();
+    }
 
-	public ObjectsMessageHandler(ExceptionHandler exceptionHandler) {
-		super(exceptionHandler);
-	}
+    public ObjectsMessageHandler(ExceptionHandler exceptionHandler) {
+        super(exceptionHandler);
+    }
 
-	public ObjectsMessageHandler(List<ExceptionHandler> exceptionHandlers) {
-		super(exceptionHandlers);
-	}
+    public ObjectsMessageHandler(List<ExceptionHandler> exceptionHandlers) {
+        super(exceptionHandlers);
+    }
 
-	protected void doExecute(String message) {
-		JSONArray jsonArray = JSON.parseArray(message);
-		doExecuteObjects(jsonArray);
-	}
+    protected void doExecute(String message) {
+        JSONArray jsonArray = JSON.parseArray(message);
+        doExecuteObjects(jsonArray);
+    }
 
-	protected abstract void doExecuteObjects(JSONArray jsonArray);
+    protected abstract void doExecuteObjects(JSONArray jsonArray);
 }

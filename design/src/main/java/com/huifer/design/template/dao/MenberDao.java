@@ -3,10 +3,11 @@ package com.huifer.design.template.dao;
 import com.huifer.design.template.JdbcTemplate;
 import com.huifer.design.template.RowMapper;
 import com.huifer.design.template.entity.Menber;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.util.List;
-import javax.sql.DataSource;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * <p>Title : MenberDao </p>
@@ -17,14 +18,13 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  */
 public class MenberDao {
 
-    private JdbcTemplate jdbcTemplate = new JdbcTemplate(getDatasource());
-
     private static final String driverClassName = "com.mysql.cj.jdbc.Driver";
     private static final String url = "jdbc:mysql://localhost:3306/test?serverTimezone=UTC&rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8";
     private static final String dbUsername = "root";
     private static final String dbPassword = "root";
+    private JdbcTemplate jdbcTemplate = new JdbcTemplate(getDatasource());
 
-    public static void main(String[] args)throws Exception {
+    public static void main(String[] args) throws Exception {
 
         MenberDao menberDao = new MenberDao();
         List<Object> query = menberDao.query();

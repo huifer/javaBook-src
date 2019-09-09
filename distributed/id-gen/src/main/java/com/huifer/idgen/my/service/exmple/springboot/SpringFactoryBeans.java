@@ -14,22 +14,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SpringFactoryBeans {
 
-	@Value("${idgen.ips}")
-	String ips;
+    @Value("${idgen.ips}")
+    String ips;
 
-	@Value("${idgen.machine}")
-	long machine;
+    @Value("${idgen.machine}")
+    long machine;
 
-	@Bean
-	public GenIdService genIdService() {
+    @Bean
+    public GenIdService genIdService() {
 
-		IdServiceFactoryBean idServiceFactoryBean = new IdServiceFactoryBean();
-		idServiceFactoryBean.setProviderType(Type.IP);
-		idServiceFactoryBean.setMachineId(1L);
-		idServiceFactoryBean.init();
+        IdServiceFactoryBean idServiceFactoryBean = new IdServiceFactoryBean();
+        idServiceFactoryBean.setProviderType(Type.IP);
+        idServiceFactoryBean.setMachineId(1L);
+        idServiceFactoryBean.init();
 
-		return idServiceFactoryBean.getGenIdService();
-	}
+        return idServiceFactoryBean.getGenIdService();
+    }
 
 
 }

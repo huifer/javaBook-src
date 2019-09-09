@@ -27,72 +27,72 @@ import java.util.List;
 @EnableAuthorizationServer
 public class GameAuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-	@Autowired
-	private OAuth2Properties oAuth2Properties;
+    @Autowired
+    private OAuth2Properties oAuth2Properties;
 
-	@Autowired
-	private UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-	@Autowired
-	private TokenStore tokenStore;
+    @Autowired
+    private TokenStore tokenStore;
 
-	@Autowired(required = false)
-	@Qualifier("jwtAccessTokenConverter")
-	private JwtAccessTokenConverter jwtAccessTokenConverter;
+    @Autowired(required = false)
+    @Qualifier("jwtAccessTokenConverter")
+    private JwtAccessTokenConverter jwtAccessTokenConverter;
 
-	@Autowired(required = false)
-	@Qualifier("jwtTokenEnhancer")
-	private TokenEnhancer jwtTokenEnhancer;
+    @Autowired(required = false)
+    @Qualifier("jwtTokenEnhancer")
+    private TokenEnhancer jwtTokenEnhancer;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	@Override
-	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-		security.tokenKeyAccess("permitAll()");
-		security.checkTokenAccess("isAuthenticated()");
-	}
+    public GameAuthorizationServerConfig() {
+        super();
+    }
 
-	public GameAuthorizationServerConfig() {
-		super();
-	}
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        security.tokenKeyAccess("permitAll()");
+        security.checkTokenAccess("isAuthenticated()");
+    }
 
-	@Override
-	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-		InMemoryClientDetailsServiceBuilder builder = clients.inMemory();
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        InMemoryClientDetailsServiceBuilder builder = clients.inMemory();
 
-		if (ArrayUtils.isNotEmpty(oAuth2Properties.getClients())) {
-			for (OAuth2ClientProperties config : oAuth2Properties.getClients()) {
-				builder.withClient(config.getClientId())
-						.secret(passwordEncoder.encode(config.getClientSecret()))
-						.accessTokenValiditySeconds(config.getAccessTokenValiditySeconds())
-						.refreshTokenValiditySeconds(60 * 60 * 24 * 15)
-						.authorizedGrantTypes("refresh_token", "password", "authorization_code")//OAuth2支持的验证模式
-						.redirectUris("http://www.ixx.com")
-						.scopes("all");
-			}
-		}
-	}
+        if (ArrayUtils.isNotEmpty(oAuth2Properties.getClients())) {
+            for (OAuth2ClientProperties config : oAuth2Properties.getClients()) {
+                builder.withClient(config.getClientId())
+                        .secret(passwordEncoder.encode(config.getClientSecret()))
+                        .accessTokenValiditySeconds(config.getAccessTokenValiditySeconds())
+                        .refreshTokenValiditySeconds(60 * 60 * 24 * 15)
+                        .authorizedGrantTypes("refresh_token", "password", "authorization_code")//OAuth2支持的验证模式
+                        .redirectUris("http://www.ixx.com")
+                        .scopes("all");
+            }
+        }
+    }
 
-	@Override
-	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		endpoints
-				.tokenStore(tokenStore)
-				.authenticationManager(authenticationManager)
-				.userDetailsService(userDetailsService);
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        endpoints
+                .tokenStore(tokenStore)
+                .authenticationManager(authenticationManager)
+                .userDetailsService(userDetailsService);
 
-		if (jwtAccessTokenConverter != null && jwtTokenEnhancer != null) {
-			TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-			List<TokenEnhancer> enhancers = new ArrayList<>();
-			enhancers.add(jwtTokenEnhancer);
-			enhancers.add(jwtAccessTokenConverter);
-			tokenEnhancerChain.setTokenEnhancers(enhancers);
-			endpoints
-					.tokenEnhancer(tokenEnhancerChain)
-					.accessTokenConverter(jwtAccessTokenConverter);
-		}
-	}
+        if (jwtAccessTokenConverter != null && jwtTokenEnhancer != null) {
+            TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+            List<TokenEnhancer> enhancers = new ArrayList<>();
+            enhancers.add(jwtTokenEnhancer);
+            enhancers.add(jwtAccessTokenConverter);
+            tokenEnhancerChain.setTokenEnhancers(enhancers);
+            endpoints
+                    .tokenEnhancer(tokenEnhancerChain)
+                    .accessTokenConverter(jwtAccessTokenConverter);
+        }
+    }
 }

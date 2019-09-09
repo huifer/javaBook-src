@@ -21,16 +21,16 @@ public class Kmp {
     }
 
     private static void kmpSearch(char[] text, char[] pattern) {
-        int n = pattern.length-1;
+        int n = pattern.length - 1;
         int[] prefix = new int[n];
         prefixTable(pattern, prefix, n);
         movePrefixTable(prefix, n);
         // text [i]  len(text) = m
         // pattern[j] len(pattern) = n
-        int m = text.length-1;
+        int m = text.length - 1;
         int i = 0;
         int j = 0;
-        while (i < m ) {
+        while (i < m) {
 
             if (j == n - 1 && text[i] == pattern[j]) {
                 System.out.println("匹配位置：" + (i - j));

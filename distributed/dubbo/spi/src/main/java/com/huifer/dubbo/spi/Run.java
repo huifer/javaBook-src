@@ -15,7 +15,8 @@ public class Run {
         ServiceLoader<BaseService> baseServices = ServiceLoader.load(BaseService.class);
 
         for (BaseService baseService : baseServices) {
-            System.out.println(baseService.hello("fff"));;
+            System.out.println(baseService.hello("fff"));
+            ;
         }
     }
 

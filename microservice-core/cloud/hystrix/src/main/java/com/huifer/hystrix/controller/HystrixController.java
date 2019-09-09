@@ -2,10 +2,11 @@ package com.huifer.hystrix.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
-import java.util.Random;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Random;
 
 /**
  * <p>Title : HystrixController </p>
@@ -38,7 +39,6 @@ public class HystrixController {
     }
 
 
-
     @HystrixCommand(
             fallbackMethod = "errorHystrix2",
             commandProperties = {
@@ -52,15 +52,10 @@ public class HystrixController {
         Thread.sleep(i);
         return "hello hystrix";
     }
-    public String errorHystrix2( String msg) {
+
+    public String errorHystrix2(String msg) {
         return "error hystrix";
     }
-
-
-
-
-
-
 
 
 }

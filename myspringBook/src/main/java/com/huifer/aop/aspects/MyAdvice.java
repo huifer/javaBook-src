@@ -11,13 +11,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
  */
 public class MyAdvice {
 
-    public void log(){
+    public void log() {
         System.out.println("log");
     }
 
 
     /**
      * 环绕通知的使用: 事务管理的时候使用
+     *
      * @param joinPoint
      * @throws Throwable
      */
@@ -28,7 +29,7 @@ public class MyAdvice {
         System.out.println("环绕通知end \t 结束事务");
     }
 
-    public void throwAdvice(){
+    public void throwAdvice() {
         System.out.println("异常通知");
     }
 

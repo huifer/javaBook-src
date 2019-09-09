@@ -13,7 +13,6 @@ public class Main {
         Object obj = builder.select("select * from dept");
 
 
-
         System.out.println();
     }
 }

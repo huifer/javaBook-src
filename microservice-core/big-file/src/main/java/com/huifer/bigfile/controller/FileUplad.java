@@ -25,7 +25,7 @@ public class FileUplad {
 
 
     @PostMapping("/")
-    public void upload(String name , MultipartFile file) throws Exception {
+    public void upload(String name, MultipartFile file) throws Exception {
         fileService.upload(name, file);
     }
 

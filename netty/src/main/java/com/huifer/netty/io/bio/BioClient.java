@@ -1,11 +1,12 @@
 package com.huifer.netty.io.bio;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>Title : BioClient </p>
@@ -34,7 +35,7 @@ public class BioClient {
             socket = new Socket(serverIp, serverPort);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-            out.println( exp);
+            out.println(exp);
             log.info("返回结果 " + in.readLine());
         } catch (Exception e) {
             e.printStackTrace();

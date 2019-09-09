@@ -37,8 +37,5 @@ public class Using {
         chaAdapter.method();
 
 
-
-
-
     }
 }

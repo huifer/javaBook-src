@@ -10,7 +10,7 @@ import com.huifer.proxy.BaseService;
  */
 public class BaseServiceImpl implements BaseService {
     @Override
-    public String  doSome() {
+    public String doSome() {
         return "implimplimplimpl";
     }
 }

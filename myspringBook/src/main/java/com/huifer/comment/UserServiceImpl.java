@@ -26,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private int dc;
     @Value(value = "${data.pc}")
     private String pc;
+
     @Override
     public void saveUser() {
         System.out.println(bt);

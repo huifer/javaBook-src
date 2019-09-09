@@ -1,10 +1,11 @@
 package com.huifer.kafka.serializer;
 
+import org.apache.kafka.common.errors.SerializationException;
+import org.apache.kafka.common.serialization.Deserializer;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import org.apache.kafka.common.errors.SerializationException;
-import org.apache.kafka.common.serialization.Deserializer;
 
 /**
  * <p>Title : StudentDeserializer </p>
@@ -46,7 +47,7 @@ public class StudentDeserializer implements Deserializer<Student> {
             name = new String(nameBytes, StandardCharsets.UTF_8);
             teacherName = new String(teacherBytes, StandardCharsets.UTF_8);
 
-            return new Student(name,  teacherName);
+            return new Student(name, teacherName);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -14,31 +14,31 @@ import java.util.List;
 @Slf4j
 public class IpLoadBalance extends AbstractLoadBalance {
 
-	private int count = -1;
-	private RequestEntity requestEntity;
-	private List<ServerWeight> serverWeights;
+    private int count = -1;
+    private RequestEntity requestEntity;
+    private List<ServerWeight> serverWeights;
 
-	@Override
-	public String loadBalance() {
+    public IpLoadBalance(RequestEntity requestEntity, List<ServerWeight> serverWeights) {
+        super(requestEntity, serverWeights);
+        this.count = serverWeights.size();
+        this.requestEntity = requestEntity;
+        this.serverWeights = serverWeights;
+    }
 
-		if (count < 0) {
-			throw new LoadBalanceException("机器数量不能小于0");
-		}
+    public IpLoadBalance() {
+    }
 
-		int machineId = requestEntity.getIp().hashCode() % count;
+    @Override
+    public String loadBalance() {
 
-		ServerWeight serverWeight = serverWeights.get(machineId);
-		log.info("当前请求信息={},负载均衡计算后的机器ip={},端口={}", requestEntity, serverWeight.getIp(), serverWeight.getPort());
-		return serverWeight.getIp() + ":" + serverWeight.getPort();
-	}
+        if (count < 0) {
+            throw new LoadBalanceException("机器数量不能小于0");
+        }
 
-	public IpLoadBalance(RequestEntity requestEntity, List<ServerWeight> serverWeights) {
-		super(requestEntity, serverWeights);
-		this.count = serverWeights.size();
-		this.requestEntity = requestEntity;
-		this.serverWeights = serverWeights;
-	}
+        int machineId = requestEntity.getIp().hashCode() % count;
 
-	public IpLoadBalance() {
-	}
+        ServerWeight serverWeight = serverWeights.get(machineId);
+        log.info("当前请求信息={},负载均衡计算后的机器ip={},端口={}", requestEntity, serverWeight.getIp(), serverWeight.getPort());
+        return serverWeight.getIp() + ":" + serverWeight.getPort();
+    }
 }

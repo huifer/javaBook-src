@@ -17,21 +17,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class IdGenApplication {
 
-	@Autowired
-	GenIdService genIdService;
+    @Autowired
+    GenIdService genIdService;
 
 
-	public static void main(String[] args) {
-		SpringApplication.run(IdGenApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(IdGenApplication.class, args);
+    }
 
-	@GetMapping("/gen_id")
-	public long createId() {
-		return genIdService.genId();
-	}
+    @GetMapping("/gen_id")
+    public long createId() {
+        return genIdService.genId();
+    }
 
-	@GetMapping("exp")
-	public Id expId(@RequestParam("id") long id) {
-		return genIdService.expId(id);
-	}
+    @GetMapping("exp")
+    public Id expId(@RequestParam("id") long id) {
+        return genIdService.expId(id);
+    }
 }

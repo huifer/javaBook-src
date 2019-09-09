@@ -44,7 +44,7 @@ public class Protocol$Adaptive implements org.apache.dubbo.rpc.Protocol {
     }
 
     public org.apache.dubbo.rpc.Invoker refer(java.lang.Class arg0,
-            org.apache.dubbo.common.URL arg1) throws org.apache.dubbo.rpc.RpcException {
+                                              org.apache.dubbo.common.URL arg1) throws org.apache.dubbo.rpc.RpcException {
         if (arg1 == null) {
             throw new IllegalArgumentException("url == null");
         }

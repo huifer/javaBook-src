@@ -17,19 +17,18 @@ public class HibernateUtils {
     public static final Configuration HIBERNATE_CFG;
     public static final SessionFactory HIBERNATE_SESSIONFACTORY;
 
-    static
-    {
+    static {
         HIBERNATE_CFG = new Configuration().configure();
         HIBERNATE_SESSIONFACTORY = HIBERNATE_CFG.buildSessionFactory();
     }
 
 
-    public static Session getHibernateSession(){
+    public static Session getHibernateSession() {
         return HIBERNATE_SESSIONFACTORY.openSession();
     }
 
 
-    public static Session getCurrentSession(){
+    public static Session getCurrentSession() {
         return HIBERNATE_SESSIONFACTORY.getCurrentSession();
     }
 }

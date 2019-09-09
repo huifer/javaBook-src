@@ -10,15 +10,15 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @Configuration
 @EnableResourceServer
 public class GameResourceServerConfig extends ResourceServerConfigurerAdapter {
-	@Autowired
-	private AuthenticationSuccessHandler handler;
+    @Autowired
+    private AuthenticationSuccessHandler handler;
 
 
-	@Override
-	public void configure(HttpSecurity http) throws Exception {
-		http.formLogin()
-				.successHandler(handler).and()
-				.authorizeRequests().anyRequest().authenticated().and()
-				.csrf().disable();
-	}
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http.formLogin()
+                .successHandler(handler).and()
+                .authorizeRequests().anyRequest().authenticated().and()
+                .csrf().disable();
+    }
 }

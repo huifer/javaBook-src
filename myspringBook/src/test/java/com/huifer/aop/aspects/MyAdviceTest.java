@@ -15,7 +15,7 @@ public class MyAdviceTest {
 
 
     @Test
-    public void demo(){
+    public void demo() {
         roleService.saveRole();
     }
 }

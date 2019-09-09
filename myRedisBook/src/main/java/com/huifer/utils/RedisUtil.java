@@ -13,6 +13,17 @@ import redis.clients.jedis.JedisPoolConfig;
  */
 public class RedisUtil {
 
+    private static JedisPool pool;
+
+    static {
+        JedisPoolConfig config = new JedisPoolConfig();
+        config.setMinIdle(10);
+
+        pool = new JedisPool(config, "localhost", 6379);
+
+
+    }
+
     public static void main(String[] args) {
         poolConnect();
 
@@ -42,18 +53,6 @@ public class RedisUtil {
         System.out.println(s1);
         resource.close();
         jedisPool.close();
-
-    }
-
-    private static JedisPool pool;
-
-
-    static {
-        JedisPoolConfig config = new JedisPoolConfig();
-        config.setMinIdle(10);
-
-        pool = new JedisPool(config, "localhost", 6379);
-
 
     }
 
@@ -103,6 +102,7 @@ public class RedisUtil {
 
     /**
      * 释放锁
+     *
      * @param lockKey
      * @param requestId
      * @param timeout

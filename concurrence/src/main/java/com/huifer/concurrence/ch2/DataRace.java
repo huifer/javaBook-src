@@ -30,7 +30,7 @@ public class DataRace {
         System.out.println(Thread.currentThread().getName() + " - 操作前 " + now + " 操作后 " + calc);
     }
 
-    private  static void addOne() {
+    private static void addOne() {
         int now = calc;
         calc++;
         System.out.println(Thread.currentThread().getName() + " - 操作前 " + now + " 操作后 " + calc);

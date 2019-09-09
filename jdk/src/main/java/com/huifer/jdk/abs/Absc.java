@@ -7,7 +7,7 @@ package com.huifer.jdk.abs;
  * @author huifer
  * @date 2019-05-24
  */
-public abstract class Absc  {
+public abstract class Absc {
 
     void hello() {
         System.out.println("hello");

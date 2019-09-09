@@ -1,12 +1,9 @@
 package com.huifer.kafka;
 
+import org.apache.kafka.clients.producer.*;
+
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
-import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 
 /**
  * <p>Title : KafkaProducerDemo </p>

@@ -1,11 +1,12 @@
 package com.huifer.kafka;
 
-import java.util.Collections;
-import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import java.util.Collections;
+import java.util.Properties;
 
 /**
  * <p>Title : KafkaConsumerDemo </p>
@@ -18,6 +19,7 @@ public class KafkaConsumerDemo extends Thread {
 
     private final KafkaConsumer kafkaConsumer;
     private final String topic;
+
     public KafkaConsumerDemo(String topic) {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.1.108:9092,192.168.1.106:9092,192.168.1.106:9092");

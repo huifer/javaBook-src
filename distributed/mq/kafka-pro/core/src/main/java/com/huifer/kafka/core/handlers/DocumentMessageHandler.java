@@ -13,27 +13,27 @@ import java.util.List;
 
 public abstract class DocumentMessageHandler extends SafelyMessageHandler {
 
-	public DocumentMessageHandler() {
-		super();
-	}
+    public DocumentMessageHandler() {
+        super();
+    }
 
-	public DocumentMessageHandler(ExceptionHandler exceptionHandler) {
-		super(exceptionHandler);
-	}
+    public DocumentMessageHandler(ExceptionHandler exceptionHandler) {
+        super(exceptionHandler);
+    }
 
-	public DocumentMessageHandler(List<ExceptionHandler> exceptionHandlers) {
-		super(exceptionHandlers);
-	}
+    public DocumentMessageHandler(List<ExceptionHandler> exceptionHandlers) {
+        super(exceptionHandlers);
+    }
 
-	protected void doExecute(String message) {
-		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-		try {
-			DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
-			Document document = docBuilder.parse(new ByteArrayInputStream(message.getBytes()));
-			doExecuteDocument(document);
-		} catch (IOException | ParserConfigurationException | SAXException e) {
-		}
-	}
+    protected void doExecute(String message) {
+        DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+            Document document = docBuilder.parse(new ByteArrayInputStream(message.getBytes()));
+            doExecuteDocument(document);
+        } catch (IOException | ParserConfigurationException | SAXException e) {
+        }
+    }
 
-	protected abstract void doExecuteDocument(Document document);
+    protected abstract void doExecuteDocument(Document document);
 }

@@ -1,9 +1,5 @@
 package com.huifer.springboot.mysql.conf;
 
-import java.util.Properties;
-import javax.annotation.Resource;
-import javax.persistence.EntityManager;
-import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +14,11 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
  * <p>Title : DataSourceConfig </p>
@@ -82,7 +83,6 @@ public class TwoDataSourceConfig {
         DataSourceProperties dataSourceProperties = new DataSourceProperties();
         return dataSourceProperties;
     }
-
 
 
     @Bean(name = "twoJdbcTemplate")

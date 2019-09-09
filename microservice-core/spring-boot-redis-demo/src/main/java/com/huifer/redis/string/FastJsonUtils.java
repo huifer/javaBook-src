@@ -70,12 +70,12 @@ public class FastJsonUtils {
         Class<?> aClass = map.values().stream().collect(Collectors.toList()).get(0).getClass();
         Map<K, V> m = new HashMap<>();
         kvMap.forEach(
-            (k, v) -> {
-                JSONObject jsonObject = (JSONObject) v;
-                V o = (V) jsonObject.toJavaObject(aClass);
+                (k, v) -> {
+                    JSONObject jsonObject = (JSONObject) v;
+                    V o = (V) jsonObject.toJavaObject(aClass);
 
-                m.put(k, o);
-            }
+                    m.put(k, o);
+                }
         );
 
         return m;

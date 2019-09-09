@@ -1,7 +1,5 @@
 package com.huifer.zk.controller;
 
-import java.util.Arrays;
-import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * <p>Title : RibbonRestController </p>
@@ -37,7 +38,7 @@ public class RibbonRestController {
 
     @GetMapping("/lb/{service}/say")
     public String lbSay(@PathVariable String service,
-            @RequestParam String message) {
+                        @RequestParam String message) {
         return restTemplate3
                 .getForObject("http://" + service + "/say?message=" + message, String.class);
     }
@@ -45,6 +46,7 @@ public class RibbonRestController {
 
     /**
      * 所有的restTemplate 都增加
+     *
      * @param restTemplates
      * @param interceptor
      * @return
@@ -52,7 +54,7 @@ public class RibbonRestController {
     @Bean
     @Autowired
     public Object f(@Qualifier(value = "ribbon") Collection<RestTemplate> restTemplates,
-            ClientHttpRequestInterceptor interceptor) {
+                    ClientHttpRequestInterceptor interceptor) {
         restTemplates.forEach(
                 restTemplate -> {
                     restTemplate.setInterceptors(Arrays.asList(interceptor));

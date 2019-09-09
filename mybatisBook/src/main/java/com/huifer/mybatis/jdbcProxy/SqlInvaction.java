@@ -16,9 +16,9 @@ import java.sql.ResultSet;
  */
 public class SqlInvaction implements InvocationHandler {
 
-    private SqlSession obj;
     Connection connection;
     PreparedStatement preparedStatement;
+    private SqlSession obj;
 
     public SqlInvaction(SqlSession obj) {
         this.obj = obj;

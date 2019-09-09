@@ -13,7 +13,7 @@ public class MatePhoneTest {
     }
 
     @Test
-    public void HuaWeiDec(){
+    public void HuaWeiDec() {
         HuaWei matePhone = new MatePhone();
         matePhone.call();
         System.out.println("===============");

@@ -1,8 +1,9 @@
 package com.huifer.rest.annotation;
 
+import org.springframework.core.annotation.AnnotationUtils;
+
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * <p>Title : Run </p>
@@ -29,7 +30,6 @@ public class Run {
         F2 af2 = AnnotationUtils
                 .findAnnotation(method2, F2.class);
         logic.accept(af2);
-
 
 
         System.out.println();

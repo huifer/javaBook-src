@@ -2,17 +2,6 @@ package com.huifer.utils.utils;
 
 import com.huifer.utils.entity.ColumnEntity;
 import com.huifer.utils.entity.TableEntity;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -22,6 +11,13 @@ import org.apache.commons.lang.WordUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -100,7 +96,7 @@ public class GenUtils {
     }
 
     public static void generatorCode(Map<String, String> table, List<Map<String, String>> columns,
-            ZipOutputStream zip) {
+                                     ZipOutputStream zip) {
         // 配置信息
         Configuration config = generatorConfig();
         boolean hasBigDecimal = false;

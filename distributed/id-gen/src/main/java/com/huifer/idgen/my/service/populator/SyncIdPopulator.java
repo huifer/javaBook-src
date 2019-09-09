@@ -9,8 +9,8 @@ import com.huifer.idgen.my.service.bean.IdMeta;
  */
 public class SyncIdPopulator extends BasePopulator {
 
-	@Override
-	public synchronized void populatorId(Id id, IdMeta idMeta) {
-		super.populatorId(id, idMeta);
-	}
+    @Override
+    public synchronized void populatorId(Id id, IdMeta idMeta) {
+        super.populatorId(id, idMeta);
+    }
 }

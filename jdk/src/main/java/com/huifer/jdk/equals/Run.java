@@ -21,7 +21,7 @@ public class Run {
         String a = "b";
         String b = "b";
         System.out.println(a == b);
-        String c = new String("b") ;
+        String c = new String("b");
         System.out.println(a == c);
 
         // equlas
@@ -34,7 +34,7 @@ public class Run {
     }
 
 
-    private static class Eq{
+    private static class Eq {
         public int anInt;
 
         public Eq(int anInt) {

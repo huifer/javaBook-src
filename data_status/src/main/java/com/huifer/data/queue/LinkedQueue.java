@@ -33,9 +33,9 @@ public class LinkedQueue<E> {
         l.add("元素3");
         l.add("元素4");
         String delete = l.delete();
-         delete = l.delete();
-         delete = l.delete();
-         delete = l.delete();
+        delete = l.delete();
+        delete = l.delete();
+        delete = l.delete();
         System.out.println();
     }
 

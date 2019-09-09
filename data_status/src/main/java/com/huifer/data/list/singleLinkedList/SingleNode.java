@@ -16,10 +16,7 @@ public class SingleNode {
     /**
      * 下一个结点
      */
-    public SingleNode next=null;
-
-
-
+    public SingleNode next = null;
 
 
     public SingleNode(int data, SingleNode next) {

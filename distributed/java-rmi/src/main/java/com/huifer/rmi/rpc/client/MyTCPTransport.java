@@ -24,6 +24,7 @@ public class MyTCPTransport {
 
     /**
      * 创建一个socket
+     *
      * @return
      */
     private Socket newSocket() {
@@ -39,6 +40,7 @@ public class MyTCPTransport {
 
     /**
      * 远程信息交互
+     *
      * @param rpcRequest
      * @return
      * @throws IOException

@@ -57,6 +57,7 @@ public class SingleLinkedList {
 
     /**
      * 根据索引获取数据
+     *
      * @param position 索引
      * @return
      */
@@ -121,7 +122,7 @@ public class SingleLinkedList {
     /**
      * 指定位置插入数据
      *
-     * @param data 数据
+     * @param data     数据
      * @param position 指定索引
      */
     public SingleNode inster(int data, int position) {

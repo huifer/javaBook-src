@@ -22,7 +22,7 @@ public class RpcServer {
      * 发布一个service
      *
      * @param service service {@link com.huifer.rmi.rpc.HelloService}
-     * @param port port
+     * @param port    port
      */
     public void publisher(final Object service, int port) throws IOException {
         ServerSocket serverSocket = null;

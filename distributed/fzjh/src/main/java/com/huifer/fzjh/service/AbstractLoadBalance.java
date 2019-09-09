@@ -10,22 +10,22 @@ import java.util.List;
  */
 public abstract class AbstractLoadBalance implements LoadBalanceService {
 
-	/**
-	 * 请求
-	 */
-	private RequestEntity requestEntity;
-	/**
-	 * 服务器权重列表
-	 */
-	private List<ServerWeight> serverWeights;
+    /**
+     * 请求
+     */
+    private RequestEntity requestEntity;
+    /**
+     * 服务器权重列表
+     */
+    private List<ServerWeight> serverWeights;
 
 
-	public AbstractLoadBalance(RequestEntity requestEntity, List<ServerWeight> serverWeights) {
-		this.requestEntity = requestEntity;
-		this.serverWeights = serverWeights;
-	}
+    public AbstractLoadBalance(RequestEntity requestEntity, List<ServerWeight> serverWeights) {
+        this.requestEntity = requestEntity;
+        this.serverWeights = serverWeights;
+    }
 
-	public AbstractLoadBalance() {
-	}
+    public AbstractLoadBalance() {
+    }
 
 }

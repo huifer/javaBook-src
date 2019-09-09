@@ -13,16 +13,16 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 @Slf4j
 public class SpringIdGenRun {
 
-	public static void main(String[] args) {
-		ApplicationContext context = new ClassPathXmlApplicationContext("spring-factory-beans.xml");
-		GenIdService idServiceFactory =
-				(GenIdService) context.getBean("idServiceFactory");
-		for (int i = 0; i < 10; i++) {
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("spring-factory-beans.xml");
+        GenIdService idServiceFactory =
+                (GenIdService) context.getBean("idServiceFactory");
+        for (int i = 0; i < 10; i++) {
 
-			long l = idServiceFactory.genId();
-			Id id = idServiceFactory.expId(l);
-			log.info("{}", id);
-		}
-	}
+            long l = idServiceFactory.genId();
+            Id id = idServiceFactory.expId(l);
+            log.info("{}", id);
+        }
+    }
 
 }

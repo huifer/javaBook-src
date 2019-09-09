@@ -1,8 +1,9 @@
 package com.huifer.design.proxy.cglib;
 
 import com.huifer.design.proxy.staticproxy.Person;
-import java.io.FileOutputStream;
 import sun.misc.ProxyGenerator;
+
+import java.io.FileOutputStream;
 
 /**
  * <p>Title : CglibProxyTest </p>
@@ -18,7 +19,6 @@ public class CglibProxyTest {
         CGPerson instance = (CGPerson) new CGLIBZhiLian().getInstance(CGPerson.class);
         instance.findWork();
         System.out.println(instance.getClass());
-
 
 
         try {

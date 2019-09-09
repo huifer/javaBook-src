@@ -1,9 +1,10 @@
 package com.huifer.kafka.serializer;
 
+import org.apache.kafka.common.serialization.Serializer;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import org.apache.kafka.common.serialization.Serializer;
 
 /**
  * <p>Title : StudentSerializer </p>
@@ -24,7 +25,7 @@ public class StudentSerializer implements Serializer<Student> {
         if (data == null) {
             return null;
         }
-        byte[] name,  teacherName;
+        byte[] name, teacherName;
         try {
             if (data.getName() != null) {
                 name = data.getName().getBytes(StandardCharsets.UTF_8);
@@ -40,7 +41,7 @@ public class StudentSerializer implements Serializer<Student> {
 
 
             ByteBuffer buffer = ByteBuffer
-                    .allocate(4 + 4 + name.length + teacherName.length );
+                    .allocate(4 + 4 + name.length + teacherName.length);
             buffer.putInt(name.length);
             buffer.put(name);
             buffer.putInt(teacherName.length);

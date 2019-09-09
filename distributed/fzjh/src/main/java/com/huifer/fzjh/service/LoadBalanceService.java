@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public interface LoadBalanceService {
-	/**
-	 * 负载均衡
-	 */
-	String loadBalance();
+    /**
+     * 负载均衡
+     */
+    String loadBalance();
 }

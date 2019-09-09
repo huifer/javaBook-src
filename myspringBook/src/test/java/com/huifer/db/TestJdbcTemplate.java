@@ -25,8 +25,11 @@ import java.util.List;
 public class TestJdbcTemplate {
 
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Test
-    public void testInsert(){
+    public void testInsert() {
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
@@ -41,22 +44,17 @@ public class TestJdbcTemplate {
         System.out.println();
     }
 
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @Test
-    public void testJdbcTemplate(){
+    public void testJdbcTemplate() {
         jdbcTemplate.update("insert  into dept value (null,?,?) ", "oc", "afkj");
         System.out.println();
     }
 
     @Test
-    public void testJdbcTemplateSelect(){
+    public void testJdbcTemplateSelect() {
         List<Dept> maps = jdbcTemplate.query("select * from dept", new RowMapperTest());
         System.out.println(maps);
     }
-
 
 
 }

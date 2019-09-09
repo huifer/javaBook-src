@@ -2,7 +2,8 @@ package com.huifer.design.adapter.ChaTou;
 
 /**
  * 描述:
- *  us 插头
+ * us 插头
+ *
  * @author huifer
  * @date 2019-03-13
  */

@@ -9,36 +9,36 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GenIdNettyServer {
-	private final int port;
+    private final int port;
 
-	public GenIdNettyServer(int port) {
-		this.port = port;
-	}
+    public GenIdNettyServer(int port) {
+        this.port = port;
+    }
 
-	public void run() throws Exception {
-		NioEventLoopGroup bossGroup = new NioEventLoopGroup();
-		NioEventLoopGroup workGoup = new NioEventLoopGroup();
-		try {
-			ServerBootstrap b = new ServerBootstrap();
-			b.option(ChannelOption.SO_BACKLOG, 1024);
-			b.group(bossGroup, workGoup)
-					.channel(NioServerSocketChannel.class)
-					.childHandler(new GenIdNettyInitializer());
+    public static void main(String[] args) throws Exception {
+        int port = 10086;
+        new GenIdNettyServer(port).run();
+    }
 
-			Channel ch = b.bind(port).sync().channel();
+    public void run() throws Exception {
+        NioEventLoopGroup bossGroup = new NioEventLoopGroup();
+        NioEventLoopGroup workGoup = new NioEventLoopGroup();
+        try {
+            ServerBootstrap b = new ServerBootstrap();
+            b.option(ChannelOption.SO_BACKLOG, 1024);
+            b.group(bossGroup, workGoup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new GenIdNettyInitializer());
 
-			if (log.isDebugEnabled())
-				log.debug("VestaRestNettyServer is started.");
+            Channel ch = b.bind(port).sync().channel();
 
-			ch.closeFuture().sync();
-		} finally {
-			bossGroup.shutdownGracefully();
-			workGoup.shutdownGracefully();
-		}
-	}
+            if (log.isDebugEnabled())
+                log.debug("VestaRestNettyServer is started.");
 
-	public static void main(String[] args) throws Exception {
-		int port = 10086;
-		new GenIdNettyServer(port).run();
-	}
+            ch.closeFuture().sync();
+        } finally {
+            bossGroup.shutdownGracefully();
+            workGoup.shutdownGracefully();
+        }
+    }
 }

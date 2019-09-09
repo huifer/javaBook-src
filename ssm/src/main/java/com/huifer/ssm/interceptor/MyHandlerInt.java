@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 public class MyHandlerInt implements HandlerInterceptor {
     /**
      * 应用场景 ： 登录 ， 授权
+     *
      * @param request
      * @param response
      * @param handler
@@ -28,6 +29,7 @@ public class MyHandlerInt implements HandlerInterceptor {
 
     /**
      * 应用场景：对公用数据模型发送给前台
+     *
      * @param request
      * @param response
      * @param handler
@@ -41,6 +43,7 @@ public class MyHandlerInt implements HandlerInterceptor {
 
     /**
      * 应用场景：统一异常处理， 统一日志处理
+     *
      * @param request
      * @param response
      * @param handler

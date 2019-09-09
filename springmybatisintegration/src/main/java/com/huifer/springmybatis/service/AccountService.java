@@ -7,5 +7,5 @@ package com.huifer.springmybatis.service;
  * @date 2019-03-10
  */
 public interface AccountService {
-    void transfer(String from , String to,double money);
+    void transfer(String from, String to, double money);
 }

@@ -8,13 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(myHandlerInterceptorAdapter()).addPathPatterns("/**");
-	}
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(myHandlerInterceptorAdapter()).addPathPatterns("/**");
+    }
 
-	@Bean
-	MyHandlerInterceptorAdapter myHandlerInterceptorAdapter() {
-		return new MyHandlerInterceptorAdapter();
-	}
+    @Bean
+    MyHandlerInterceptorAdapter myHandlerInterceptorAdapter() {
+        return new MyHandlerInterceptorAdapter();
+    }
 }

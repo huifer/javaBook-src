@@ -26,6 +26,16 @@ public class StackLinkedList<E> {
         top = null;
     }
 
+    public static void main(String[] args) {
+        StackList<String> stringStackList = new StackList<>();
+        stringStackList.push("01");
+        stringStackList.push("02");
+        String peek = stringStackList.peek();
+        System.out.println(peek);
+        String pop = stringStackList.pop();
+        System.out.println();
+    }
+
     /**
      * 当前的栈大小
      */
@@ -39,7 +49,6 @@ public class StackLinkedList<E> {
     public boolean empty() {
         return size == 0;
     }
-
 
     /**
      * 入栈
@@ -80,7 +89,6 @@ public class StackLinkedList<E> {
         }
     }
 
-
     /**
      * 栈的链式存储结点类
      */
@@ -96,15 +104,5 @@ public class StackLinkedList<E> {
             this.e = e;
             this.next = next;
         }
-    }
-
-    public static void main(String[] args) {
-        StackList<String> stringStackList = new StackList<>();
-        stringStackList.push("01");
-        stringStackList.push("02");
-        String peek = stringStackList.peek();
-        System.out.println(peek);
-        String pop = stringStackList.pop();
-        System.out.println();
     }
 }

@@ -1,11 +1,12 @@
 package com.huifer.kafka.interceptor;
 
-import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
 
 /**
  * <p>Title : InterceptorConsumer </p>
@@ -38,7 +39,7 @@ public class InterceptorProducer {
             ProducerRecord<Integer, String> r1 = new ProducerRecord(TOPIC, 0,
                     System.currentTimeMillis() - 10000, null, "当前时间-10秒");
             ProducerRecord<Integer, String> r2 = new ProducerRecord(TOPIC, 0,
-                    System.currentTimeMillis() , null, "当前时间");
+                    System.currentTimeMillis(), null, "当前时间");
 
 
             producer.send(r1);

@@ -1,5 +1,15 @@
 package com.huifer.jdk.jdk8.lambda;
 
+@FunctionalInterface
+interface Interface01 {
+    void demo();
+}
+
+@FunctionalInterface
+interface Interface02 {
+    void demo();
+}
+
 /**
  * 描述:
  * lambda是对象
@@ -19,15 +29,4 @@ public class Demo03 {
         System.out.println(i2.getClass().getInterfaces()[0]);
 
     }
-}
-
-@FunctionalInterface
-interface Interface01 {
-    void demo();
-}
-
-
-@FunctionalInterface
-interface Interface02 {
-    void demo();
 }

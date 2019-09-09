@@ -25,7 +25,7 @@ public class ZhiLianJdk {
         clazz = personJdk.getClass();
 
         // 重构一个新的对象
-        return  Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
+        return Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(),
                 new InvocationHandler() {
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args)

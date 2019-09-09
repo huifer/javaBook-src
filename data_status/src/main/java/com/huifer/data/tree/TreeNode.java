@@ -22,6 +22,7 @@ public class TreeNode<T> {
 
     /**
      * 左节点增加
+     *
      * @param data
      */
     public void addLeft(T data) {
@@ -31,6 +32,7 @@ public class TreeNode<T> {
 
     /**
      * 右节点增加
+     *
      * @param data
      */
     public void addRight(T data) {

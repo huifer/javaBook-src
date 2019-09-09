@@ -11,7 +11,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.concurrent.Future;
 
 
@@ -32,6 +31,33 @@ public class KafkaProducerWithCore {
     private KafkaProducer producer;
 
 
+    /**
+     * 初始化
+     *
+     * @param propertiesFileName 配置文件名称
+     * @param defaultTopic       默认topic
+     */
+    public KafkaProducerWithCore(String propertiesFileName, String defaultTopic) {
+        this.propertiesFileName = propertiesFileName;
+        this.defaultTopic = defaultTopic;
+        init();
+    }
+
+
+    /**
+     * 初始化
+     *
+     * @param properties   配置信息
+     * @param defaultTopic 默认topic
+     */
+    public KafkaProducerWithCore(Properties properties, String defaultTopic) {
+        this.properties = properties;
+        this.defaultTopic = defaultTopic;
+    }
+
+    public KafkaProducerWithCore() {
+    }
+
     protected void init() {
         if (properties == null) {
             properties = new Properties();
@@ -45,7 +71,6 @@ public class KafkaProducerWithCore {
         log.info("kafka-producer配置内容={}", properties);
         producer = new KafkaProducer<String, String>(properties);
     }
-
 
     public void send(String msg) {
         this.send2Topic(null, msg);
@@ -118,7 +143,6 @@ public class KafkaProducerWithCore {
         log.info("发送后返回={}", send);
     }
 
-
     public void send(Map msg) {
         this.send2Topic(null, msg);
     }
@@ -142,7 +166,6 @@ public class KafkaProducerWithCore {
         log.info("发送后返回={}", send);
     }
 
-
     //////////////////Beans
     public <T> void sendBean(T bean) {
         sendBean2Topic(null, bean);
@@ -155,6 +178,11 @@ public class KafkaProducerWithCore {
     public <T> void sendBean2Topic(String topic, String key, T bean) {
         send2Topic(topic, key, JSON.toJSONString(bean));
     }
+
+    ///////////////////////
+
+
+    //////////////////JsonObject
 
     public <T> void sendBeans2Topic(String topic, Collection<T> beans) {
         Collection<String> beanStrs = new ArrayList<>();
@@ -182,12 +210,6 @@ public class KafkaProducerWithCore {
         this.send2Topic(topic, beansStr);
     }
 
-    ///////////////////////
-
-
-    //////////////////JsonObject
-
-
     public void sendJsonObject(JSONObject jsonObject) {
         this.sendJsonObject2Topic(null, jsonObject);
     }
@@ -204,6 +226,8 @@ public class KafkaProducerWithCore {
         sendObjects2Topic(null, jsonArray);
     }
 
+    ///////////////////////
+
     public void sendObjects2Topic(String topicName, JSONArray jsonArray) {
         send2Topic(topicName, jsonArray.toJSONString());
     }
@@ -219,34 +243,6 @@ public class KafkaProducerWithCore {
         }
 
         send2Topic(topic, objs);
-    }
-
-    ///////////////////////
-
-    /**
-     * 初始化
-     *
-     * @param propertiesFileName 配置文件名称
-     * @param defaultTopic       默认topic
-     */
-    public KafkaProducerWithCore(String propertiesFileName, String defaultTopic) {
-        this.propertiesFileName = propertiesFileName;
-        this.defaultTopic = defaultTopic;
-        init();
-    }
-
-    /**
-     * 初始化
-     *
-     * @param properties   配置信息
-     * @param defaultTopic 默认topic
-     */
-    public KafkaProducerWithCore(Properties properties, String defaultTopic) {
-        this.properties = properties;
-        this.defaultTopic = defaultTopic;
-    }
-
-    public KafkaProducerWithCore() {
     }
 
     public void close() {

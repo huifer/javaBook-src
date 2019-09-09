@@ -23,8 +23,9 @@ public class MyPointCutAdvisor implements PointcutAdvisor {
      */
     private Pointcut pointcut;
 
-    public void setAdvice(Advice advice) {
-        this.advice = advice;
+    @Override
+    public Pointcut getPointcut() {
+        return this.pointcut;
     }
 
     public void setPointcut(Pointcut pointcut) {
@@ -32,13 +33,12 @@ public class MyPointCutAdvisor implements PointcutAdvisor {
     }
 
     @Override
-    public Pointcut getPointcut() {
-        return this.pointcut;
-    }
-
-    @Override
     public Advice getAdvice() {
         return this.advice;
+    }
+
+    public void setAdvice(Advice advice) {
+        this.advice = advice;
     }
 
     @Override

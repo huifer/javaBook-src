@@ -7,7 +7,6 @@ import com.huifer.ssm.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +34,7 @@ public class TestController {
     private WebApplicationContext context;
 
     @Autowired
-    private  ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
 
     @GetMapping("queryItem")
@@ -116,7 +115,6 @@ public class TestController {
         o.put(id, id);
         return o;
     }
-
 
 
     @GetMapping("/str")

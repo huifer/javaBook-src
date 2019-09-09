@@ -1,9 +1,10 @@
 package com.huifer.kafka.interceptor;
 
-import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+
+import java.util.Map;
 
 /**
  * <p>Title : MyProducerInterceptor </p>

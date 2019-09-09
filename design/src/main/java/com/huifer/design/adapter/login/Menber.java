@@ -14,6 +14,11 @@ public class Menber {
     private String name;
     private String pwd;
 
+    public Menber(String name, String pwd) {
+        this.name = name;
+        this.pwd = pwd;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("{");
@@ -38,11 +43,6 @@ public class Menber {
     }
 
     public void setPwd(String pwd) {
-        this.pwd = pwd;
-    }
-
-    public Menber(String name, String pwd) {
-        this.name = name;
         this.pwd = pwd;
     }
 

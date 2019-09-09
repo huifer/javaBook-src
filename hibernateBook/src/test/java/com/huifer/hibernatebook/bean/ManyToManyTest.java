@@ -60,7 +60,7 @@ public class ManyToManyTest {
      * 给用户选角色
      */
     @Test
-    public void demo2(){
+    public void demo2() {
         demo1();
 
         Session session = HibernateUtils.getCurrentSession();
@@ -68,7 +68,7 @@ public class ManyToManyTest {
 
         // 给1号用户多选2号角色
         // 查询1号用户
-        User user  = session.get(User.class, 1L);
+        User user = session.get(User.class, 1L);
         // 查询2号角色
         Role role = session.get(Role.class, 2L);
         user.getRoles().add(role);
@@ -80,14 +80,14 @@ public class ManyToManyTest {
      *给用户改选角色
      */
     @Test
-    public void demo3(){
+    public void demo3() {
         demo1();
         Session session = HibernateUtils.getCurrentSession();
         Transaction tx = session.beginTransaction();
 
         // 给2号用户将原有的2号角色改为3号角色
         // 查询2号用户
-        User user  = session.get(User.class, 2L);
+        User user = session.get(User.class, 2L);
         // 查询2号角色
         Role role2 = session.get(Role.class, 2L);
         Role role3 = session.get(Role.class, 3L);

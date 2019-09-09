@@ -11,5 +11,5 @@ package com.huifer.design.decorate.login;
 public interface NewLoginInterface {
 
 
-     ResultMsg loginForQQ(String qqNumb);
+    ResultMsg loginForQQ(String qqNumb);
 }

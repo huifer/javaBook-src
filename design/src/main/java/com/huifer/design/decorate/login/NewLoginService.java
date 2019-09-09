@@ -13,7 +13,7 @@ public class NewLoginService implements NewLoginInterface {
     /**
      * 依旧使用原来的接口来进行注册 登陆操作
      */
-     LoginInterface loginInterface;
+    LoginInterface loginInterface;
 
     public NewLoginService(LoginInterface loginInterface) {
         this.loginInterface = loginInterface;
