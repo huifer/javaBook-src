@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.jenkinsspringboot.mapper.WakaUserinfoMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.jenkinsspringboot.entity.db.WakaUserinfoPO">
+    <!--@mbg.generated-->
+    <id column="api_key" jdbcType="VARCHAR" property="apiKey"/>
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+    <result column="display_name" jdbcType="VARCHAR" property="displayName"/>
+    <result column="email" jdbcType="VARCHAR" property="email"/>
+    <result column="email_public" jdbcType="VARCHAR" property="emailPublic"/>
+    <result column="full_name" jdbcType="VARCHAR" property="fullName"/>
+    <result column="has_premium_features" jdbcType="VARCHAR" property="hasPremiumFeatures"/>
+    <result column="human_readable_website" jdbcType="VARCHAR" property="humanReadableWebsite"/>
+    <result column="id" jdbcType="VARCHAR" property="id"/>
+    <result column="is_email_confirmed" jdbcType="VARCHAR" property="isEmailConfirmed"/>
+    <result column="is_hireable" jdbcType="VARCHAR" property="isHireable"/>
+    <result column="languages_used_public" jdbcType="VARCHAR" property="languagesUsedPublic"/>
+    <result column="last_heartbeat_at" jdbcType="VARCHAR" property="lastHeartbeatAt"/>
+    <result column="last_plugin" jdbcType="VARCHAR" property="lastPlugin"/>
+    <result column="last_plugin_name" jdbcType="VARCHAR" property="lastPluginName"/>
+    <result column="last_project" jdbcType="VARCHAR" property="lastProject"/>
+    <result column="location" jdbcType="VARCHAR" property="location"/>
+    <result column="logged_time_public" jdbcType="VARCHAR" property="loggedTimePublic"/>
+    <result column="modified_at" jdbcType="TIMESTAMP" property="modifiedAt"/>
+    <result column="needs_payment_method" jdbcType="VARCHAR" property="needsPaymentMethod"/>
+    <result column="photo" jdbcType="VARCHAR" property="photo"/>
+    <result column="photo_public" jdbcType="VARCHAR" property="photoPublic"/>
+    <result column="plan" jdbcType="VARCHAR" property="plan"/>
+    <result column="timezone" jdbcType="VARCHAR" property="timezone"/>
+    <result column="username" jdbcType="VARCHAR" property="username"/>
+    <result column="website" jdbcType="VARCHAR" property="website"/>
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    api_key, created_at, display_name, email, email_public, full_name, has_premium_features,
+    human_readable_website, id, is_email_confirmed, is_hireable, languages_used_public,
+    last_heartbeat_at, last_plugin, last_plugin_name, last_project, `location`, logged_time_public,
+    modified_at, needs_payment_method, photo, photo_public, `plan`, timezone, username,
+    website, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select
+    <include refid="Base_Column_List"/>
+    from t_waka_userinfo
+    where api_key = #{apiKey,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    <!--@mbg.generated-->
+    delete from t_waka_userinfo
+    where api_key = #{apiKey,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.huifer.jenkinsspringboot.entity.db.WakaUserinfoPO">
+    <!--@mbg.generated-->
+    insert into t_waka_userinfo (api_key, created_at, display_name,
+    email, email_public, full_name,
+    has_premium_features, human_readable_website,
+    id, is_email_confirmed, is_hireable,
+    languages_used_public, last_heartbeat_at, last_plugin,
+    last_plugin_name, last_project, `location`,
+    logged_time_public, modified_at, needs_payment_method,
+    photo, photo_public, `plan`,
+    timezone, username, website,
+    update_time)
+    values (#{apiKey,jdbcType=VARCHAR}, #{createdAt,jdbcType=TIMESTAMP}, #{displayName,jdbcType=VARCHAR},
+    #{email,jdbcType=VARCHAR}, #{emailPublic,jdbcType=VARCHAR}, #{fullName,jdbcType=VARCHAR},
+    #{hasPremiumFeatures,jdbcType=VARCHAR}, #{humanReadableWebsite,jdbcType=VARCHAR},
+    #{id,jdbcType=VARCHAR}, #{isEmailConfirmed,jdbcType=VARCHAR}, #{isHireable,jdbcType=VARCHAR},
+    #{languagesUsedPublic,jdbcType=VARCHAR}, #{lastHeartbeatAt,jdbcType=VARCHAR}, #{lastPlugin,jdbcType=VARCHAR},
+    #{lastPluginName,jdbcType=VARCHAR}, #{lastProject,jdbcType=VARCHAR}, #{location,jdbcType=VARCHAR},
+    #{loggedTimePublic,jdbcType=VARCHAR}, #{modifiedAt,jdbcType=TIMESTAMP}, #{needsPaymentMethod,jdbcType=VARCHAR},
+    #{photo,jdbcType=VARCHAR}, #{photoPublic,jdbcType=VARCHAR}, #{plan,jdbcType=VARCHAR},
+    #{timezone,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR}, #{website,jdbcType=VARCHAR},
+    #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.huifer.jenkinsspringboot.entity.db.WakaUserinfoPO">
+    <!--@mbg.generated-->
+    insert into t_waka_userinfo
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="apiKey != null">
+        api_key,
+      </if>
+      <if test="createdAt != null">
+        created_at,
+      </if>
+      <if test="displayName != null">
+        display_name,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="emailPublic != null">
+        email_public,
+      </if>
+      <if test="fullName != null">
+        full_name,
+      </if>
+      <if test="hasPremiumFeatures != null">
+        has_premium_features,
+      </if>
+      <if test="humanReadableWebsite != null">
+        human_readable_website,
+      </if>
+      <if test="id != null">
+        id,
+      </if>
+      <if test="isEmailConfirmed != null">
+        is_email_confirmed,
+      </if>
+      <if test="isHireable != null">
+        is_hireable,
+      </if>
+      <if test="languagesUsedPublic != null">
+        languages_used_public,
+      </if>
+      <if test="lastHeartbeatAt != null">
+        last_heartbeat_at,
+      </if>
+      <if test="lastPlugin != null">
+        last_plugin,
+      </if>
+      <if test="lastPluginName != null">
+        last_plugin_name,
+      </if>
+      <if test="lastProject != null">
+        last_project,
+      </if>
+      <if test="location != null">
+        `location`,
+      </if>
+      <if test="loggedTimePublic != null">
+        logged_time_public,
+      </if>
+      <if test="modifiedAt != null">
+        modified_at,
+      </if>
+      <if test="needsPaymentMethod != null">
+        needs_payment_method,
+      </if>
+      <if test="photo != null">
+        photo,
+      </if>
+      <if test="photoPublic != null">
+        photo_public,
+      </if>
+      <if test="plan != null">
+        `plan`,
+      </if>
+      <if test="timezone != null">
+        timezone,
+      </if>
+      <if test="username != null">
+        username,
+      </if>
+      <if test="website != null">
+        website,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="apiKey != null">
+        #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="displayName != null">
+        #{displayName,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="emailPublic != null">
+        #{emailPublic,jdbcType=VARCHAR},
+      </if>
+      <if test="fullName != null">
+        #{fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="hasPremiumFeatures != null">
+        #{hasPremiumFeatures,jdbcType=VARCHAR},
+      </if>
+      <if test="humanReadableWebsite != null">
+        #{humanReadableWebsite,jdbcType=VARCHAR},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="isEmailConfirmed != null">
+        #{isEmailConfirmed,jdbcType=VARCHAR},
+      </if>
+      <if test="isHireable != null">
+        #{isHireable,jdbcType=VARCHAR},
+      </if>
+      <if test="languagesUsedPublic != null">
+        #{languagesUsedPublic,jdbcType=VARCHAR},
+      </if>
+      <if test="lastHeartbeatAt != null">
+        #{lastHeartbeatAt,jdbcType=VARCHAR},
+      </if>
+      <if test="lastPlugin != null">
+        #{lastPlugin,jdbcType=VARCHAR},
+      </if>
+      <if test="lastPluginName != null">
+        #{lastPluginName,jdbcType=VARCHAR},
+      </if>
+      <if test="lastProject != null">
+        #{lastProject,jdbcType=VARCHAR},
+      </if>
+      <if test="location != null">
+        #{location,jdbcType=VARCHAR},
+      </if>
+      <if test="loggedTimePublic != null">
+        #{loggedTimePublic,jdbcType=VARCHAR},
+      </if>
+      <if test="modifiedAt != null">
+        #{modifiedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="needsPaymentMethod != null">
+        #{needsPaymentMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="photo != null">
+        #{photo,jdbcType=VARCHAR},
+      </if>
+      <if test="photoPublic != null">
+        #{photoPublic,jdbcType=VARCHAR},
+      </if>
+      <if test="plan != null">
+        #{plan,jdbcType=VARCHAR},
+      </if>
+      <if test="timezone != null">
+        #{timezone,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null">
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="website != null">
+        #{website,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huifer.jenkinsspringboot.entity.db.WakaUserinfoPO">
+    <!--@mbg.generated-->
+    update t_waka_userinfo
+    <set>
+      <if test="createdAt != null">
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="displayName != null">
+        display_name = #{displayName,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="emailPublic != null">
+        email_public = #{emailPublic,jdbcType=VARCHAR},
+      </if>
+      <if test="fullName != null">
+        full_name = #{fullName,jdbcType=VARCHAR},
+      </if>
+      <if test="hasPremiumFeatures != null">
+        has_premium_features = #{hasPremiumFeatures,jdbcType=VARCHAR},
+      </if>
+      <if test="humanReadableWebsite != null">
+        human_readable_website = #{humanReadableWebsite,jdbcType=VARCHAR},
+      </if>
+      <if test="id != null">
+        id = #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="isEmailConfirmed != null">
+        is_email_confirmed = #{isEmailConfirmed,jdbcType=VARCHAR},
+      </if>
+      <if test="isHireable != null">
+        is_hireable = #{isHireable,jdbcType=VARCHAR},
+      </if>
+      <if test="languagesUsedPublic != null">
+        languages_used_public = #{languagesUsedPublic,jdbcType=VARCHAR},
+      </if>
+      <if test="lastHeartbeatAt != null">
+        last_heartbeat_at = #{lastHeartbeatAt,jdbcType=VARCHAR},
+      </if>
+      <if test="lastPlugin != null">
+        last_plugin = #{lastPlugin,jdbcType=VARCHAR},
+      </if>
+      <if test="lastPluginName != null">
+        last_plugin_name = #{lastPluginName,jdbcType=VARCHAR},
+      </if>
+      <if test="lastProject != null">
+        last_project = #{lastProject,jdbcType=VARCHAR},
+      </if>
+      <if test="location != null">
+        `location` = #{location,jdbcType=VARCHAR},
+      </if>
+      <if test="loggedTimePublic != null">
+        logged_time_public = #{loggedTimePublic,jdbcType=VARCHAR},
+      </if>
+      <if test="modifiedAt != null">
+        modified_at = #{modifiedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="needsPaymentMethod != null">
+        needs_payment_method = #{needsPaymentMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="photo != null">
+        photo = #{photo,jdbcType=VARCHAR},
+      </if>
+      <if test="photoPublic != null">
+        photo_public = #{photoPublic,jdbcType=VARCHAR},
+      </if>
+      <if test="plan != null">
+        `plan` = #{plan,jdbcType=VARCHAR},
+      </if>
+      <if test="timezone != null">
+        timezone = #{timezone,jdbcType=VARCHAR},
+      </if>
+      <if test="username != null">
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="website != null">
+        website = #{website,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where api_key = #{apiKey,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huifer.jenkinsspringboot.entity.db.WakaUserinfoPO">
+    <!--@mbg.generated-->
+    update t_waka_userinfo
+    set created_at = #{createdAt,jdbcType=TIMESTAMP},
+    display_name = #{displayName,jdbcType=VARCHAR},
+    email = #{email,jdbcType=VARCHAR},
+    email_public = #{emailPublic,jdbcType=VARCHAR},
+    full_name = #{fullName,jdbcType=VARCHAR},
+    has_premium_features = #{hasPremiumFeatures,jdbcType=VARCHAR},
+    human_readable_website = #{humanReadableWebsite,jdbcType=VARCHAR},
+    id = #{id,jdbcType=VARCHAR},
+    is_email_confirmed = #{isEmailConfirmed,jdbcType=VARCHAR},
+    is_hireable = #{isHireable,jdbcType=VARCHAR},
+    languages_used_public = #{languagesUsedPublic,jdbcType=VARCHAR},
+    last_heartbeat_at = #{lastHeartbeatAt,jdbcType=VARCHAR},
+    last_plugin = #{lastPlugin,jdbcType=VARCHAR},
+    last_plugin_name = #{lastPluginName,jdbcType=VARCHAR},
+    last_project = #{lastProject,jdbcType=VARCHAR},
+    `location` = #{location,jdbcType=VARCHAR},
+    logged_time_public = #{loggedTimePublic,jdbcType=VARCHAR},
+    modified_at = #{modifiedAt,jdbcType=TIMESTAMP},
+    needs_payment_method = #{needsPaymentMethod,jdbcType=VARCHAR},
+    photo = #{photo,jdbcType=VARCHAR},
+    photo_public = #{photoPublic,jdbcType=VARCHAR},
+    `plan` = #{plan,jdbcType=VARCHAR},
+    timezone = #{timezone,jdbcType=VARCHAR},
+    username = #{username,jdbcType=VARCHAR},
+    website = #{website,jdbcType=VARCHAR},
+    update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where api_key = #{apiKey,jdbcType=VARCHAR}
+  </update>
+</mapper>

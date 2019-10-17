@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="requestEntity" class="com.huifer.fzjh.bean.RequestEntity">
+        <property name="ip" value="192.168.1.1"/>
+    </bean>
+
+    <bean class="com.huifer.fzjh.bean.ServerWeight" id="serverWeight01">
+        <property name="ip" value="127.0.0.1"/>
+        <property name="weight" value="7"/>
+        <property name="currentWeight" value="7"/>
+        <property name="port" value="8080"/>
+    </bean>
+
+    <bean class="com.huifer.fzjh.bean.ServerWeight" id="serverWeight02">
+        <property name="ip" value="127.0.0.3"/>
+        <property name="weight" value="2"/>
+        <property name="currentWeight" value="2"/>
+        <property name="port" value="8080"/>
+    </bean>
+
+    <bean class="com.huifer.fzjh.bean.ServerWeight" id="serverWeight03">
+        <property name="ip" value="127.0.0.3"/>
+        <property name="weight" value="3"/>
+        <property name="currentWeight" value="3"/>
+        <property name="port" value="8080"/>
+    </bean>
+
+    <bean id="loadBalanceFactoryBean" class="com.huifer.fzjh.factory.LoadBalanceFactoryBean" init-method="init">
+        <property name="loadBalanceEnums" value="SMOOTHNESS_WEIGHT_RANDOM_LOAD_BALANCE"/>
+        <property name="requestEntity" ref="requestEntity"/>
+
+        <property name="serverWeightList">
+            <list>
+                <ref bean="serverWeight01"/>
+                <ref bean="serverWeight02"/>
+                <ref bean="serverWeight03"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

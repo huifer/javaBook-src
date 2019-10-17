@@ -1,0 +1,98 @@
+server:
+  port: 9999
+
+
+# wakatime 配置
+wakatime:
+  # 基础url
+  base_url: https://wakatime.com/api/v1/
+  # 密钥
+  secret_api_key: 16e493aa-9ba5-4a40-bcd5-f105bf9522b6
+  # 安全url
+  oauth_url: https://wakatime.com/oauth/token/
+  # 用户信息url
+  user_info_url: ${wakatime.base_url}/users/current
+  # xxx日期下的开发时间
+  duration_url: ${wakatime.base_url}/users/current/durations
+  # 心跳url
+  heart_url: ${wakatime.base_url}/users/current/heartbeats
+  # 当前用户的项目列表
+  project_url: ${wakatime.base_url}/users/current/projects
+  # 一定范围内的开发
+  summary_url: ${wakatime.base_url}/users/current/summaries
+  # 项目列表的commit时间
+  project_detail: ${wakatime.base_url}/users/current/projects
+  # 七日历史记录
+  hository_seven: ${wakatime.base_url}/users/current/stats/last_7_days
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    check-template-location: true
+    cache: false
+    suffix: .html
+    encoding: UTF-8
+    mode: HTML5
+  jackson:
+    #日期格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      #格式化输出
+      indent_output: true
+      #忽略无法转换的对象
+      fail_on_empty_beans: false
+    #设置空如何序列化
+    defaultPropertyInclusion: NON_EMPTY
+    deserialization:
+      #允许对象忽略json中不存在的属性
+      fail_on_unknown_properties: false
+    parser:
+      #允许出现特殊字符和转义符
+      allow_unquoted_control_chars: true
+      #允许出现单引号
+      allow_single_quotes: true
+    property-naming-strategy: CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
+
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/at15?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:mapperxml/*Mapper.xml
+  type-aliases-package: com.huifer.jenkinsspringboot.entity
+
+
+mybatis-plus:
+  # xml
+  mapper-locations: classpath:mapperxml/*Mapper.xml
+  # 实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.huifer.jenkinsspringboot.entity
+  configuration:
+    #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+
+#
+#logging:
+#  level:
+#    com:
+#      huifer:
+#        jenkinsspringboot:
+#          mapper: debug
+
+
+
+# rescue time配置
+rescuetime:
+  base_url: https://www.rescuetime.com/anapi
+  # 分析api
+  analytic_url: ${rescuetime.base_url}/data
+  # 每日摘要信息
+  daily_summary_url: ${rescuetime.base_url}/daily_summary_feed
+  # 警报api
+  alert_url: ${rescuetime.base_url}/alerts_feed
+  # 重点api
+  highlight_url: ${rescuetime.base_url}/highlights_feed
+  # 重点介绍api
+  highlight_info_url: ${rescuetime.base_url}/highlights_post
+
+test_api: xxxxx

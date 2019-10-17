@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.jenkinsspringboot.mapper.SummaryLanguagePOMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.jenkinsspringboot.entity.db.SummaryLanguagePO">
+    <!--@mbg.generated-->
+    <id column="id" jdbcType="INTEGER" property="id"/>
+    <result column="api_key" jdbcType="VARCHAR" property="apiKey"/>
+    <result column="day" jdbcType="VARCHAR" property="day"/>
+    <result column="digital" jdbcType="VARCHAR" property="digital"/>
+    <result column="hours" jdbcType="BIGINT" property="hours"/>
+    <result column="minutes" jdbcType="BIGINT" property="minutes"/>
+    <result column="name" jdbcType="VARCHAR" property="name"/>
+    <result column="percent" jdbcType="BIGINT" property="percent"/>
+    <result column="seconds" jdbcType="BIGINT" property="seconds"/>
+    <result column="text" jdbcType="VARCHAR" property="text"/>
+    <result column="total_seconds" jdbcType="DECIMAL" property="totalSeconds"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, api_key, `day`, digital, `hours`, `minutes`, `name`, `percent`, `seconds`, `text`,
+    total_seconds
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select
+    <include refid="Base_Column_List"/>
+    from t_summary_language
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from t_summary_language
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id"
+          parameterType="com.huifer.jenkinsspringboot.entity.db.SummaryLanguagePO" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into t_summary_language (api_key, `day`, digital,
+    `hours`, `minutes`, `name`,
+    `percent`, `seconds`, `text`,
+    total_seconds)
+    values (#{apiKey,jdbcType=VARCHAR}, #{day,jdbcType=VARCHAR}, #{digital,jdbcType=VARCHAR},
+    #{hours,jdbcType=BIGINT}, #{minutes,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR},
+    #{percent,jdbcType=BIGINT}, #{seconds,jdbcType=BIGINT}, #{text,jdbcType=VARCHAR},
+    #{totalSeconds,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id"
+          parameterType="com.huifer.jenkinsspringboot.entity.db.SummaryLanguagePO" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into t_summary_language
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="apiKey != null">
+        api_key,
+      </if>
+      <if test="day != null">
+        `day`,
+      </if>
+      <if test="digital != null">
+        digital,
+      </if>
+      <if test="hours != null">
+        `hours`,
+      </if>
+      <if test="minutes != null">
+        `minutes`,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="percent != null">
+        `percent`,
+      </if>
+      <if test="seconds != null">
+        `seconds`,
+      </if>
+      <if test="text != null">
+        `text`,
+      </if>
+      <if test="totalSeconds != null">
+        total_seconds,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="apiKey != null">
+        #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="day != null">
+        #{day,jdbcType=VARCHAR},
+      </if>
+      <if test="digital != null">
+        #{digital,jdbcType=VARCHAR},
+      </if>
+      <if test="hours != null">
+        #{hours,jdbcType=BIGINT},
+      </if>
+      <if test="minutes != null">
+        #{minutes,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="percent != null">
+        #{percent,jdbcType=BIGINT},
+      </if>
+      <if test="seconds != null">
+        #{seconds,jdbcType=BIGINT},
+      </if>
+      <if test="text != null">
+        #{text,jdbcType=VARCHAR},
+      </if>
+      <if test="totalSeconds != null">
+        #{totalSeconds,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huifer.jenkinsspringboot.entity.db.SummaryLanguagePO">
+    <!--@mbg.generated-->
+    update t_summary_language
+    <set>
+      <if test="apiKey != null">
+        api_key = #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="day != null">
+        `day` = #{day,jdbcType=VARCHAR},
+      </if>
+      <if test="digital != null">
+        digital = #{digital,jdbcType=VARCHAR},
+      </if>
+      <if test="hours != null">
+        `hours` = #{hours,jdbcType=BIGINT},
+      </if>
+      <if test="minutes != null">
+        `minutes` = #{minutes,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="percent != null">
+        `percent` = #{percent,jdbcType=BIGINT},
+      </if>
+      <if test="seconds != null">
+        `seconds` = #{seconds,jdbcType=BIGINT},
+      </if>
+      <if test="text != null">
+        `text` = #{text,jdbcType=VARCHAR},
+      </if>
+      <if test="totalSeconds != null">
+        total_seconds = #{totalSeconds,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huifer.jenkinsspringboot.entity.db.SummaryLanguagePO">
+    <!--@mbg.generated-->
+    update t_summary_language
+    set api_key = #{apiKey,jdbcType=VARCHAR},
+    `day` = #{day,jdbcType=VARCHAR},
+    digital = #{digital,jdbcType=VARCHAR},
+    `hours` = #{hours,jdbcType=BIGINT},
+    `minutes` = #{minutes,jdbcType=BIGINT},
+    `name` = #{name,jdbcType=VARCHAR},
+    `percent` = #{percent,jdbcType=BIGINT},
+    `seconds` = #{seconds,jdbcType=BIGINT},
+    `text` = #{text,jdbcType=VARCHAR},
+    total_seconds = #{totalSeconds,jdbcType=DECIMAL}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

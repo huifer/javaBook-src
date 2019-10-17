@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.jenkinsspringboot.mapper.HistorySevenPOMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.jenkinsspringboot.entity.db.HistorySevenPO">
+    <!--@mbg.generated-->
+    <id column="uid" jdbcType="INTEGER" property="uid"/>
+    <result column="digital" jdbcType="VARCHAR" property="digital"/>
+    <result column="hours" jdbcType="INTEGER" property="hours"/>
+    <result column="minutes" jdbcType="INTEGER" property="minutes"/>
+    <result column="name" jdbcType="VARCHAR" property="name"/>
+    <result column="percent" jdbcType="DECIMAL" property="percent"/>
+    <result column="text" jdbcType="VARCHAR" property="text"/>
+    <result column="total_seconds" jdbcType="DECIMAL" property="totalSeconds"/>
+    <result column="api_key" jdbcType="VARCHAR" property="apiKey"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    `uid`, digital, `hours`, `minutes`, `name`, `percent`, `text`, total_seconds, api_key
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select
+    <include refid="Base_Column_List"/>
+    from t_history_seven
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from t_history_seven
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="uid" keyProperty="uid"
+          parameterType="com.huifer.jenkinsspringboot.entity.db.HistorySevenPO" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into t_history_seven (digital, `hours`, `minutes`,
+    `name`, `percent`, `text`,
+    total_seconds, api_key)
+    values (#{digital,jdbcType=VARCHAR}, #{hours,jdbcType=INTEGER}, #{minutes,jdbcType=INTEGER},
+    #{name,jdbcType=VARCHAR}, #{percent,jdbcType=DECIMAL}, #{text,jdbcType=VARCHAR},
+    #{totalSeconds,jdbcType=DECIMAL}, #{apiKey,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyColumn="uid" keyProperty="uid"
+          parameterType="com.huifer.jenkinsspringboot.entity.db.HistorySevenPO" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into t_history_seven
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="digital != null and digital != ''">
+        digital,
+      </if>
+      <if test="hours != null">
+        `hours`,
+      </if>
+      <if test="minutes != null">
+        `minutes`,
+      </if>
+      <if test="name != null and name != ''">
+        `name`,
+      </if>
+      <if test="percent != null">
+        `percent`,
+      </if>
+      <if test="text != null and text != ''">
+        `text`,
+      </if>
+      <if test="totalSeconds != null">
+        total_seconds,
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        api_key,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="digital != null and digital != ''">
+        #{digital,jdbcType=VARCHAR},
+      </if>
+      <if test="hours != null">
+        #{hours,jdbcType=INTEGER},
+      </if>
+      <if test="minutes != null">
+        #{minutes,jdbcType=INTEGER},
+      </if>
+      <if test="name != null and name != ''">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="percent != null">
+        #{percent,jdbcType=DECIMAL},
+      </if>
+      <if test="text != null and text != ''">
+        #{text,jdbcType=VARCHAR},
+      </if>
+      <if test="totalSeconds != null">
+        #{totalSeconds,jdbcType=DECIMAL},
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        #{apiKey,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huifer.jenkinsspringboot.entity.db.HistorySevenPO">
+    <!--@mbg.generated-->
+    update t_history_seven
+    <set>
+      <if test="digital != null and digital != ''">
+        digital = #{digital,jdbcType=VARCHAR},
+      </if>
+      <if test="hours != null">
+        `hours` = #{hours,jdbcType=INTEGER},
+      </if>
+      <if test="minutes != null">
+        `minutes` = #{minutes,jdbcType=INTEGER},
+      </if>
+      <if test="name != null and name != ''">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="percent != null">
+        `percent` = #{percent,jdbcType=DECIMAL},
+      </if>
+      <if test="text != null and text != ''">
+        `text` = #{text,jdbcType=VARCHAR},
+      </if>
+      <if test="totalSeconds != null">
+        total_seconds = #{totalSeconds,jdbcType=DECIMAL},
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        api_key = #{apiKey,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huifer.jenkinsspringboot.entity.db.HistorySevenPO">
+    <!--@mbg.generated-->
+    update t_history_seven
+    set digital = #{digital,jdbcType=VARCHAR},
+    `hours` = #{hours,jdbcType=INTEGER},
+    `minutes` = #{minutes,jdbcType=INTEGER},
+    `name` = #{name,jdbcType=VARCHAR},
+    `percent` = #{percent,jdbcType=DECIMAL},
+    `text` = #{text,jdbcType=VARCHAR},
+    total_seconds = #{totalSeconds,jdbcType=DECIMAL},
+    api_key = #{apiKey,jdbcType=VARCHAR}
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteByApiKey">
+    delete from t_history_seven where api_key=#{apiKey}
+  </delete>
+  <select id="findByApiKeyAndProName" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from t_history_seven where api_key=#{apiKey} and name=#{projectName}
+  </select>
+  <update id="updateByApiKeyAndName">
+
+    <!--@mbg.generated-->
+    update t_history_seven
+    <set>
+      <if test="digital != null and digital != ''">
+        digital = #{digital,jdbcType=VARCHAR},
+      </if>
+      <if test="hours != null">
+        `hours` = #{hours,jdbcType=INTEGER},
+      </if>
+      <if test="minutes != null">
+        `minutes` = #{minutes,jdbcType=INTEGER},
+      </if>
+      <if test="name != null and name != ''">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="percent != null">
+        `percent` = #{percent,jdbcType=DECIMAL},
+      </if>
+      <if test="text != null and text != ''">
+        `text` = #{text,jdbcType=VARCHAR},
+      </if>
+      <if test="totalSeconds != null">
+        total_seconds = #{totalSeconds,jdbcType=DECIMAL},
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        api_key = #{apiKey,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where api_key=#{apiKey} and name=#{name}
+
+  </update>
+</mapper>

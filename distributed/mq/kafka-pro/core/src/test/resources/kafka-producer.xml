@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean id="kafka-producer" class="com.huifer.kafka.core.bean.KafkaProducerWithCore" init-method="init"
+          destroy-method="close">
+        <property name="defaultTopic" value="test"/>
+        <property name="propertiesFileName" value="kafka-producer.properties"/>
+    </bean>
+
+</beans>

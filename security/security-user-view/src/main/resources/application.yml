@@ -1,0 +1,15 @@
+
+server:
+  port: 8088
+
+spring:
+  datasource:
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/at15?serverTimezone=UTC&rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: update

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+</head>
+<body>
+<button onclick="ajaxbutton()">ajax</button>
+<script>
+    function ajaxbutton() {
+        $.ajax({
+            url: "http://localhost:8082/item/queryItem",
+            method: "GET",
+            xhrFields: {withCredentials: true},
+            success: function (data) {
+                console.log(data);
+            },
+            error: function () {
+                console.log("error")
+            }
+        })
+
+    }
+</script>
+</body>
+</html>

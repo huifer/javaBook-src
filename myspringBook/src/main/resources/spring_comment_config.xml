@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation=" http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd"
+>
+
+    <!--组建扫描器 -->
+    <!--组建扫描器：扫描带有spring注解的类，加载到 BeanDefinition中-->
+    <context:component-scan base-package="com.huifer.comment"/>
+
+    <context:property-placeholder location="classpath:data.properties"></context:property-placeholder>
+
+    <!--配置通知-->
+    <bean id="myAdvice2" class="com.huifer.aop.aspects.MyAdvice"/>
+
+
+    <!--aop配置-->
+    <aop:config>
+        <aop:aspect ref="myAdvice2">
+            <aop:before method="log"
+                        pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:before>
+
+            <aop:around method="around"
+                        pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:around>
+
+            <aop:after-throwing method="throwAdvice"
+                        pointcut="execution(void com.huifer.comment.RoleServiceImpl.saveRole())"></aop:after-throwing>
+
+        </aop:aspect>
+
+    </aop:config>
+
+
+    <!--注解切面-->
+    <!--扫描切面类-->
+    <context:component-scan base-package="com.huifer.aop.aspects.comment"/>
+<!--开启AOP自动代理-->
+    <aop:aspectj-autoproxy ></aop:aspectj-autoproxy>
+
+</beans>

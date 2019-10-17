@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.huifer.mybatis.dao.DeptMapper">
+
+    <insert id="insertDept">
+        INSERT INTO dept (dname, loc)
+        VALUES (#{dname} , #{loc});
+    </insert>
+
+    <select id="deptFindById" resultType="com.huifer.mybatis.pojo.Dept" parameterType="java.lang.Long">
+        select * from dept where dept.id=#{deptno};
+    </select>
+
+
+    <!--级联查询-->
+
+    <resultMap type="com.huifer.mybatis.pojo.Dept" id="deptMap">
+        <id column="dept_deptno" property="id"/>
+        <result column="dname" property="dname"/>
+        <result column="loc" property="loc"/>
+        <!--
+             collection标签中 column属性应该填写查询临时表中来自于一方表主键
+             字段名
+         -->
+        <collection property="empList" ofType="com.huifer.mybatis.pojo.Employee" column="dept_deptno">
+            <id column="empno" property="empNo"></id>
+            <result column="ename" property="ename"/>
+        </collection>
+    </resultMap>
+    <!--根据部门编号查询所有职员-->
+    <select id="deptFindByIdWithEmp" resultMap="deptMap">
+     select dept.id dept_deptno,                    dname,                    loc,
+                    empNo,ename,job,sal
+             From dept join employee emp
+             on dept.id = emp.deptno
+             where dept.id=#{deptno}
+ </select>
+
+
+</mapper>
+

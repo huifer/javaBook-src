@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.jenkinsspringboot.mapper.UserProjectPOMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.jenkinsspringboot.entity.db.UserProjectPO">
+    <!--@mbg.generated-->
+    <id column="uid" jdbcType="INTEGER" property="uid"/>
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+    <result column="html_escaped_name" jdbcType="VARCHAR" property="htmlEscapedName"/>
+    <result column="id" jdbcType="VARCHAR" property="id"/>
+    <result column="name" jdbcType="VARCHAR" property="name"/>
+    <result column="repository" jdbcType="VARCHAR" property="repository"/>
+    <result column="url" jdbcType="VARCHAR" property="url"/>
+    <result column="api_key" jdbcType="VARCHAR" property="apiKey"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    `uid`, created_at, html_escaped_name, id, `name`, repository, url, api_key
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select
+    <include refid="Base_Column_List"/>
+    from t_user_project
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from t_user_project
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="uid" keyProperty="uid"
+          parameterType="com.huifer.jenkinsspringboot.entity.db.UserProjectPO" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into t_user_project (created_at, html_escaped_name, id,
+    `name`, repository, url,
+    api_key)
+    values (#{createdAt,jdbcType=TIMESTAMP}, #{htmlEscapedName,jdbcType=VARCHAR}, #{id,jdbcType=VARCHAR},
+    #{name,jdbcType=VARCHAR}, #{repository,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR},
+    #{apiKey,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyColumn="uid" keyProperty="uid"
+          parameterType="com.huifer.jenkinsspringboot.entity.db.UserProjectPO" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into t_user_project
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="createdAt != null">
+        created_at,
+      </if>
+      <if test="htmlEscapedName != null and htmlEscapedName != ''">
+        html_escaped_name,
+      </if>
+      <if test="id != null and id != ''">
+        id,
+      </if>
+      <if test="name != null and name != ''">
+        `name`,
+      </if>
+      <if test="repository != null and repository != ''">
+        repository,
+      </if>
+      <if test="url != null and url != ''">
+        url,
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        api_key,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="htmlEscapedName != null and htmlEscapedName != ''">
+        #{htmlEscapedName,jdbcType=VARCHAR},
+      </if>
+      <if test="id != null and id != ''">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="repository != null and repository != ''">
+        #{repository,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null and url != ''">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        #{apiKey,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huifer.jenkinsspringboot.entity.db.UserProjectPO">
+    <!--@mbg.generated-->
+    update t_user_project
+    <set>
+      <if test="createdAt != null">
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="htmlEscapedName != null and htmlEscapedName != ''">
+        html_escaped_name = #{htmlEscapedName,jdbcType=VARCHAR},
+      </if>
+      <if test="id != null and id != ''">
+        id = #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="repository != null and repository != ''">
+        repository = #{repository,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null and url != ''">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="apiKey != null and apiKey != ''">
+        api_key = #{apiKey,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huifer.jenkinsspringboot.entity.db.UserProjectPO">
+
+    <!--@mbg.generated-->
+    update t_user_project
+    set created_at = #{createdAt,jdbcType=TIMESTAMP},
+    html_escaped_name = #{htmlEscapedName,jdbcType=VARCHAR},
+    id = #{id,jdbcType=VARCHAR},
+    `name` = #{name,jdbcType=VARCHAR},
+    repository = #{repository,jdbcType=VARCHAR},
+    url = #{url,jdbcType=VARCHAR},
+    api_key = #{apiKey,jdbcType=VARCHAR}
+    where `uid` = #{uid,jdbcType=INTEGER}
+  </update>
+
+  <select id="findAllConditions" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from t_user_project
+    where created_at=#{userProjectPO.createdAt} and html_escaped_name=#{userProjectPO.htmlEscapedName} and
+    id=#{userProjectPO.id} and `name`=#{userProjectPO.name} and
+    url=#{userProjectPO.url} and api_key=#{userProjectPO.apiKey}
+  </select>
+
+</mapper>

@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html;charset=UTF-8"/>
+    <title>项目详情</title>
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
+    <script crossorigin="anonymous"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.3.0-rc.2/echarts.min.js"></script>
+</head>
+<body>
+<h6 th:text="${proj_name}+'开发详情'"> 项目详情</h6>
+<div id="main" style="width: 600px;height:400px;"></div>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>日期</th>
+        <th>项目名称</th>
+        <th>开发时间(秒)</th>
+    </tr>
+    </thead>
+    <tbody th:each="maps,index : ${map}">
+    <tr>
+        <td th:text="${index.index}+1"></td>
+        <td th:text="${maps.value.getDay()}"></td>
+        <td th:text="${proj_name}"></td>
+        <td th:text="${maps.value.getTotalSeconds()}"></td>
+    </tr>
+    </tbody>
+</table>
+<script th:inline="javascript">
+    var datax = [[${x}]];
+    var datay = [[${y}]];
+    var proj = [[${proj_name}]]
+</script>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: proj + "线条图",
+            x: 'center',
+            show: true
+        },
+        xAxis: {
+            type: 'category',
+            data: datax
+        },
+        tooltip: {
+            formatter: '{b}\n开发时间：{c}秒'
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            data: datay,
+            type: 'line',
+            itemStyle: {normal: {label: {show: true}}}
+        }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+
+</body>
+</html>

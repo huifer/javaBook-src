@@ -1,0 +1,11 @@
+syntax ="proto3";
+
+
+package com.huifer.jdk.serializer.proto;
+option java_outer_classname="UserProto";
+
+
+message MyUser{
+    string name=1;
+    int32 age=2;
+}

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.jenkinsspringboot.mapper.HeartPOMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.jenkinsspringboot.entity.db.HeartPO">
+    <!--@mbg.generated-->
+    <result column="pro_user_id" jdbcType="INTEGER" property="proUserId"/>
+    <result column="branch" jdbcType="VARCHAR" property="branch"/>
+    <result column="category" jdbcType="VARCHAR" property="category"/>
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+    <result column="cursorpos" jdbcType="VARCHAR" property="cursorpos"/>
+    <result column="dependencies" jdbcType="VARCHAR" property="dependencies"/>
+    <result column="id" jdbcType="VARCHAR" property="id"/>
+    <result column="is_write" jdbcType="VARCHAR" property="isWrite"/>
+    <result column="language" jdbcType="VARCHAR" property="language"/>
+    <result column="lineno" jdbcType="VARCHAR" property="lineno"/>
+    <result column="lines" jdbcType="VARCHAR" property="lines"/>
+    <result column="machine_name_id" jdbcType="VARCHAR" property="machineNameId"/>
+    <result column="project" jdbcType="VARCHAR" property="project"/>
+    <result column="time" jdbcType="DECIMAL" property="time"/>
+    <result column="type" jdbcType="VARCHAR" property="type"/>
+    <result column="user_agent_id" jdbcType="VARCHAR" property="userAgentId"/>
+    <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    <result column="entity" jdbcType="VARCHAR" property="entity"/>
+    <result column="day" jdbcType="VARCHAR" property="day"/>
+  </resultMap>
+  <insert id="insert" parameterType="com.huifer.jenkinsspringboot.entity.db.HeartPO">
+    <!--@mbg.generated-->
+    insert into t_heart (pro_user_id, branch, category,
+    created_at, cursorpos, dependencies,
+    id, is_write, `language`,
+    `lineno`, `lines`, machine_name_id,
+    project, `time`, `type`,
+    user_agent_id, user_id, update_time,
+    entity, `day`)
+    values (#{proUserId,jdbcType=INTEGER}, #{branch,jdbcType=VARCHAR}, #{category,jdbcType=VARCHAR},
+    #{createdAt,jdbcType=TIMESTAMP}, #{cursorpos,jdbcType=VARCHAR}, #{dependencies,jdbcType=VARCHAR},
+    #{id,jdbcType=VARCHAR}, #{isWrite,jdbcType=VARCHAR}, #{language,jdbcType=VARCHAR},
+    #{lineno,jdbcType=VARCHAR}, #{lines,jdbcType=VARCHAR}, #{machineNameId,jdbcType=VARCHAR},
+    #{project,jdbcType=VARCHAR}, #{time,jdbcType=DECIMAL}, #{type,jdbcType=VARCHAR},
+    #{userAgentId,jdbcType=VARCHAR}, #{userId,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP},
+    #{entity,jdbcType=VARCHAR}, #{day,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.huifer.jenkinsspringboot.entity.db.HeartPO">
+    <!--@mbg.generated-->
+    insert into t_heart
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="proUserId != null">
+        pro_user_id,
+      </if>
+      <if test="branch != null">
+        branch,
+      </if>
+      <if test="category != null">
+        category,
+      </if>
+      <if test="createdAt != null">
+        created_at,
+      </if>
+      <if test="cursorpos != null">
+        cursorpos,
+      </if>
+      <if test="dependencies != null">
+        dependencies,
+      </if>
+      <if test="id != null">
+        id,
+      </if>
+      <if test="isWrite != null">
+        is_write,
+      </if>
+      <if test="language != null">
+        `language`,
+      </if>
+      <if test="lineno != null">
+        `lineno`,
+      </if>
+      <if test="lines != null">
+        `lines`,
+      </if>
+      <if test="machineNameId != null">
+        machine_name_id,
+      </if>
+      <if test="project != null">
+        project,
+      </if>
+      <if test="time != null">
+        `time`,
+      </if>
+      <if test="type != null">
+        `type`,
+      </if>
+      <if test="userAgentId != null">
+        user_agent_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="entity != null">
+        entity,
+      </if>
+      <if test="day != null">
+        `day`,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="proUserId != null">
+        #{proUserId,jdbcType=INTEGER},
+      </if>
+      <if test="branch != null">
+        #{branch,jdbcType=VARCHAR},
+      </if>
+      <if test="category != null">
+        #{category,jdbcType=VARCHAR},
+      </if>
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="cursorpos != null">
+        #{cursorpos,jdbcType=VARCHAR},
+      </if>
+      <if test="dependencies != null">
+        #{dependencies,jdbcType=VARCHAR},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="isWrite != null">
+        #{isWrite,jdbcType=VARCHAR},
+      </if>
+      <if test="language != null">
+        #{language,jdbcType=VARCHAR},
+      </if>
+      <if test="lineno != null">
+        #{lineno,jdbcType=VARCHAR},
+      </if>
+      <if test="lines != null">
+        #{lines,jdbcType=VARCHAR},
+      </if>
+      <if test="machineNameId != null">
+        #{machineNameId,jdbcType=VARCHAR},
+      </if>
+      <if test="project != null">
+        #{project,jdbcType=VARCHAR},
+      </if>
+      <if test="time != null">
+        #{time,jdbcType=DECIMAL},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="userAgentId != null">
+        #{userAgentId,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="entity != null">
+        #{entity,jdbcType=VARCHAR},
+      </if>
+      <if test="day != null">
+        #{day,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>
