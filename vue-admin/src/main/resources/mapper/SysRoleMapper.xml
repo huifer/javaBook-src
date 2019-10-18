@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.vueadmin.mapper.SysRoleMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.vueadmin.entity.db.SysRole">
+    <!--@mbg.generated-->
+    <id column="id" jdbcType="INTEGER" property="id"/>
+    <result column="name" jdbcType="VARCHAR" property="name"/>
+    <result column="desc" jdbcType="VARCHAR" property="desc"/>
+    <result column="val" jdbcType="VARCHAR" property="val"/>
+    <result column="create_time" jdbcType="INTEGER" property="createTime"/>
+    <result column="up_time" jdbcType="INTEGER" property="upTime"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, `name`, `desc`, val, create_time, up_time
+  </sql>
+  <select id="getRoleByUserId" resultType="java.lang.String">
+    select sr.name from t_sys_role sr , t_sys_user_role ur where
+    ur.role_id=sr.id and ur.user_id=#{userId}
+  </select>
+</mapper>

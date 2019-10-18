@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.vueadmin.mapper.SysUserMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.vueadmin.entity.db.SysUser">
+    <!--@mbg.generated-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="pwd" jdbcType="VARCHAR" property="pwd" />
+    <result column="nick" jdbcType="VARCHAR" property="nick" />
+    <result column="salt" jdbcType="VARCHAR" property="salt" />
+    <result column="lock" jdbcType="VARCHAR" property="lock" />
+    <result column="create_time" jdbcType="INTEGER" property="createTime" />
+    <result column="up_time" jdbcType="INTEGER" property="upTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, username, pwd, nick, salt, `lock`, create_time, up_time
+  </sql>
+</mapper>
