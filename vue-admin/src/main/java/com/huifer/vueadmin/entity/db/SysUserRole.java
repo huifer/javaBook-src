@@ -9,11 +9,9 @@ import lombok.Data;
 @Data
 @TableName(value = "t_sys_user_role")
 public class SysUserRole {
-     @TableId(value = "user_id", type = IdType.INPUT)
+    public static final String COL_ROLE_ID = "role_id";
+    @TableId(value = "user_id", type = IdType.INPUT)
     private Integer userId;
-
     @TableField(value = "role_id")
     private Integer roleId;
-
-    public static final String COL_ROLE_ID = "role_id";
 }

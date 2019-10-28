@@ -20,7 +20,7 @@ public class TimeAop {
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         log.info("切片");
         Object[] args = joinPoint.getArgs();
-        log.info("请求参数={}",args);
+        log.info("请求参数={}", args);
         long l = System.currentTimeMillis();
         Object proceed = joinPoint.proceed();
         long workTime = System.currentTimeMillis() - l;

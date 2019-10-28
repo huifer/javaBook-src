@@ -8,8 +8,8 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import java.util.List;
 
 import static com.alibaba.fastjson.serializer.SerializerFeature.*;
@@ -21,6 +21,7 @@ import static com.alibaba.fastjson.serializer.SerializerFeature.*;
 public class WebConfig implements WebMvcConfigurer {
     /**
      * 跨域
+     *
      * @return
      */
     @Bean

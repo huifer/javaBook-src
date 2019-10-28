@@ -84,7 +84,7 @@ public class UserController {
 
     @JsonView(UserInfo.UserDetailView.class)
     @GetMapping("/{id:\\d+}")
-    public UserInfo findById(@PathVariable(value = "id") String id)  {
+    public UserInfo findById(@PathVariable(value = "id") String id) {
         return userInfoMap.get(Integer.parseInt(id));
     }
 }

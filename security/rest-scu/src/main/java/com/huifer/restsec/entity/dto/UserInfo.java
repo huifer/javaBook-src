@@ -8,24 +8,16 @@ import java.util.Date;
 
 public class UserInfo {
 
-    public interface UserSimpleView{}
-    public interface UserDetailView extends UserSimpleView{}
-
     private String id;
-
-
-
     @JsonView(UserSimpleView.class)
     private String name;
-
-
     @NotBlank
     @JsonView(UserDetailView.class)
     private String pwd;
-
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date registerTime;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private Date upTime;
 
     @Override
     public String toString() {
@@ -52,9 +44,6 @@ public class UserInfo {
         this.upTime = upTime;
     }
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
-    private Date upTime;
-
     public String getId() {
         return id;
     }
@@ -62,6 +51,7 @@ public class UserInfo {
     public void setId(String id) {
         this.id = id;
     }
+
     public String getPwd() {
         return pwd;
     }
@@ -85,6 +75,12 @@ public class UserInfo {
 
     public void setRegisterTime(Date registerTime) {
         this.registerTime = registerTime;
+    }
+
+    public interface UserSimpleView {
+    }
+
+    public interface UserDetailView extends UserSimpleView {
     }
 
 }

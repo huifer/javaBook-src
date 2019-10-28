@@ -16,9 +16,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class RestSecApplicationTests {
@@ -76,10 +73,11 @@ public class RestSecApplicationTests {
 
     /**
      * 没有添加 @RequestBody 注解可以使用这样的
+     *
      * @throws Exception
      */
     @Test
-    public void addUser()throws Exception{
+    public void addUser() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/user/")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -90,10 +88,11 @@ public class RestSecApplicationTests {
 
     /**
      * 使用@RequestBody
+     *
      * @throws Exception
      */
     @Test
-    public void addUser2()throws Exception{
+    public void addUser2() throws Exception {
         UserInfo userInfo = new UserInfo();
         userInfo.setName("张三");
         userInfo.setPwd("123");
@@ -101,9 +100,9 @@ public class RestSecApplicationTests {
         mockMvc.perform(
                 MockMvcRequestBuilders.post("/user/")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                     .content(
-                             userInfo.toString()
-                     )
+                        .content(
+                                userInfo.toString()
+                        )
         ).andDo(MockMvcResultHandlers.print());
     }
 

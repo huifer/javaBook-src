@@ -6,8 +6,8 @@ import com.huifer.jenkinsspringboot.entity.result.ProInfo;
 import com.huifer.jenkinsspringboot.entity.result.ProjectWithUser;
 import com.huifer.jenkinsspringboot.service.query.WakaTimeQuery;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;

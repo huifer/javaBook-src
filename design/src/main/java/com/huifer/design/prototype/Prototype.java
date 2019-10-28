@@ -1,7 +1,5 @@
 package com.huifer.design.prototype;
 
-import java.io.*;
-
 /**
  * <p>Title : Prototype </p>
  * <p>Description : 原型模式</p>

@@ -2,8 +2,6 @@ package com.huifer.redis.pojo;
 
 import org.springframework.data.redis.core.ZSetOperations;
 
-import java.util.*;
-
 public class RedisValue {
     /**
      * 值

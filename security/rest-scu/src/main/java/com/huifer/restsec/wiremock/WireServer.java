@@ -32,7 +32,7 @@ public class WireServer {
         List<UserInfo> userInfos = new ArrayList<>();
         userInfos.add(userInfo);
         userInfos.add(userInfo);
-        urlPath(urlRegex,userInfos);
+        urlPath(urlRegex, userInfos);
     }
 
     private static void urlPath(String urlRegex, Object obj) {

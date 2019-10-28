@@ -1,6 +1,5 @@
 package com.huifer.bigfile.utils;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;

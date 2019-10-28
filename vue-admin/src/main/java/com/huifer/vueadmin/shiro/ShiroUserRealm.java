@@ -1,7 +1,6 @@
 package com.huifer.vueadmin.shiro;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
 import com.huifer.vueadmin.entity.db.SysUser;
 import com.huifer.vueadmin.service.RoleService;
 import com.huifer.vueadmin.service.SysUserService;
@@ -20,7 +19,6 @@ import org.apache.shiro.util.ByteSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @Date: 2019-10-18

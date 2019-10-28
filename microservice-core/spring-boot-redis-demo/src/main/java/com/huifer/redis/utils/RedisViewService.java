@@ -9,8 +9,6 @@ import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-
 /**
  * 描述:
  * redis可视化

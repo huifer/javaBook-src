@@ -9,6 +9,7 @@ import java.util.Arrays;
 public class CommonUtils {
     private static final String[] SWITCH_ON = {"ON", "TRUE"};
     private static final String[] SWITCH_OFF = {"OFF", "FALSE"};
+
     private CommonUtils() {
         throw new IllegalStateException("Utility class");
     }

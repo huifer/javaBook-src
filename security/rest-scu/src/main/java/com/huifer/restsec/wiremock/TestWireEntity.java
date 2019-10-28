@@ -35,6 +35,7 @@ public class TestWireEntity {
         WireMock.configureFor("47.98.225.144", 9090);
         urlPath("/user/\\d+", model);
     }
+
     private static void urlPath(String urlRegex, Object obj) {
         WireMock.stubFor(
                 WireMock.get(WireMock.urlPathMatching(urlRegex))
