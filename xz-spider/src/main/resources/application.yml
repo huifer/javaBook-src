@@ -1,0 +1,29 @@
+spring:
+  rabbitmq:
+    host: 127.0.0.1
+    password: guest
+    port: 5672
+    username: guest
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/xz
+    driver-class-name: org.postgresql.Driver
+    password: admin
+    username: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  redis:
+    database: 2
+    host: localhost
+    port: 6379
+
+server:
+  port: 9012
