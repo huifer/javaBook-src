@@ -573,20 +573,20 @@ public class DateUtils {
      * @param interModel 区间的模式
      *
      *                   <pre>
-     *                                                                                                             取值：
-     *                                                                                                             LEFT_OPEN_RIGHT_OPEN
-     *                                                                                                             LEFT_CLOSE_RIGHT_OPEN
-     *                                                                                                             LEFT_OPEN_RIGHT_CLOSE
-     *                                                                                                             LEFT_CLOSE_RIGHT_CLOSE
-     *                                                                                                                        </pre>
+     *                                                                                                                               取值：
+     *                                                                                                                               LEFT_OPEN_RIGHT_OPEN
+     *                                                                                                                               LEFT_CLOSE_RIGHT_OPEN
+     *                                                                                                                               LEFT_OPEN_RIGHT_CLOSE
+     *                                                                                                                               LEFT_CLOSE_RIGHT_CLOSE
+     *                                                                                                                                          </pre>
      * @param compModel  比较的模式
      *
      *                   <pre>
-     *                                                                                                             取值：
-     *                                                                                                             COMP_MODEL_DATE	只比较日期，不比较时间
-     *                                                                                                             COMP_MODEL_TIME	只比较时间，不比较日期
-     *                                                                                                             COMP_MODEL_DATETIME 比较日期，也比较时间
-     *                                                                                                                        </pre>
+     *                                                                                                                               取值：
+     *                                                                                                                               COMP_MODEL_DATE	只比较日期，不比较时间
+     *                                                                                                                               COMP_MODEL_TIME	只比较时间，不比较日期
+     *                                                                                                                               COMP_MODEL_DATETIME 比较日期，也比较时间
+     *                                                                                                                                          </pre>
      * @return
      */
     public static boolean isBetween(Date date, Date start, Date end, int interModel, int compModel) {

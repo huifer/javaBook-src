@@ -94,8 +94,7 @@ public class DateHelper {
     }
 
     /**
-返回日期格式(yyyy-MM-dd HH:mm:ss)
-
+     * 返回日期格式(yyyy-MM-dd HH:mm:ss)
      *
      * @return
      */

@@ -6,23 +6,23 @@ import com.huifer.utils.entity.ExcelDataObject;
 import java.util.List;
 
 public interface ExcelReader {
-    public void setExcelFile(String path);
+    void setExcelFile(String path);
 
-    public void switchToSheet(String sheetName) throws RuntimeException;
+    void switchToSheet(String sheetName) throws RuntimeException;
 
-    public void switchToSheet(int number) throws RuntimeException;
+    void switchToSheet(int number) throws RuntimeException;
 
-    public ExcelDataObject[][] getCurrentSheetData();
+    ExcelDataObject[][] getCurrentSheetData();
 
-    public ExcelDataObject[][] getSheetData(String sheetName);
+    ExcelDataObject[][] getSheetData(String sheetName);
 
-    public ExcelDataObject[] getRowData(int rowNo);
+    ExcelDataObject[] getRowData(int rowNo);
 
-    public ExcelDataObject getCellData(int rowNum, int colNum);
+    ExcelDataObject getCellData(int rowNum, int colNum);
 
-    public List<List<ExcelDataObject>> getSheet(String path);
+    List<List<ExcelDataObject>> getSheet(String path);
 
-    public int getRols();
+    int getRols();
 
-    public int getCols();
+    int getCols();
 }
