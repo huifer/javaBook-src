@@ -1,18 +1,13 @@
 package com.huifer.utils.utils;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExtractZip {
     public static final int BUFFER_SIZE = 1024;
