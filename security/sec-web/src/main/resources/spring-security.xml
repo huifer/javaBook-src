@@ -8,11 +8,33 @@
             http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
 
+  <!--
+  <security:http> 标签的作用
+    1. 拦截那些资源
+    1. 什么资源需要什么角色
+    1. 定义认证方式
+    1. 定义登录页,错误页
+  -->
+
   <security:http>
+    <!--    拦截所有-->
+    <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
     <security:http-basic/>
   </security:http>
 
+  <!--
+  <security:authentication-manager> 标签的作用
+    1. 认证信息
+
+  -->
+<!--  <bean name="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>-->
+
   <security:authentication-manager>
-    
+    <security:authentication-provider>
+      <security:user-service>
+<!--        <security:user name="huifer" password="$2a$10$IFWSAJgpUEt4QSS3sMpw1uxZwxI7ozUgmx0NM/ZAJpHpzMiv8JrGG" authorities="ROLE_USER"/>-->
+        <security:user name="huifer" password="123" authorities="ROLE_USER"/>
+      </security:user-service>
+    </security:authentication-provider>
   </security:authentication-manager>
 </beans>

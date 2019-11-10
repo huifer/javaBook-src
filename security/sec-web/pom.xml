@@ -21,7 +21,9 @@
 
     <jdk.version>1.8</jdk.version>
     <spring.version>5.1.5.RELEASE</spring.version>
-    <spring.security.version>5.1.5.RELEASE</spring.security.version>
+<!--    <spring.security.version>5.1.5.RELEASE</spring.security.version>-->
+
+    <spring.security.version>4.2.3.RELEASE</spring.security.version>
     <jstl.version>1.2</jstl.version>
     <servlet.version>2.5</servlet.version>
   </properties>
