@@ -18,6 +18,11 @@
 
   <security:http>
     <security:intercept-url pattern="/product/index" access="permitAll()"/>
+    <security:intercept-url pattern="/product/add" access="hasRole('ROLE_USER')"/>
+    <security:intercept-url pattern="/product/del" access="hasRole('ROLE_ADC')"/>
+
+
+
     <security:intercept-url pattern="/userLogin" access="permitAll()"/>
 
 
@@ -47,6 +52,7 @@
       <security:user-service>
         <!--        <security:user name="huifer" password="$2a$10$IFWSAJgpUEt4QSS3sMpw1uxZwxI7ozUgmx0NM/ZAJpHpzMiv8JrGG" authorities="ROLE_USER"/>-->
         <security:user name="huifer" password="123" authorities="ROLE_USER"/>
+        <security:user name="adc" password="123" authorities="ROLE_ADC"/>
       </security:user-service>
     </security:authentication-provider>
   </security:authentication-manager>
