@@ -17,9 +17,22 @@
   -->
 
   <security:http>
+    <security:intercept-url pattern="/product/index" access="permitAll()"/>
+    <security:intercept-url pattern="/userLogin" access="permitAll()"/>
+
+
+
     <!--    拦截所有-->
     <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
-    <security:http-basic/>
+
+    <security:form-login login-page="/userLogin" login-processing-url="/securityLogin" />
+
+    <!-- 自定义权限不足处理 -->
+    <security:access-denied-handler error-page="/error"/>
+
+    <!-- 关闭Spring Security CSRF机制 -->
+    <security:csrf disabled="true"/>
+    <!--    <security:http-basic/>-->
   </security:http>
 
   <!--
@@ -27,12 +40,12 @@
     1. 认证信息
 
   -->
-<!--  <bean name="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>-->
+  <!--  <bean name="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>-->
 
   <security:authentication-manager>
     <security:authentication-provider>
       <security:user-service>
-<!--        <security:user name="huifer" password="$2a$10$IFWSAJgpUEt4QSS3sMpw1uxZwxI7ozUgmx0NM/ZAJpHpzMiv8JrGG" authorities="ROLE_USER"/>-->
+        <!--        <security:user name="huifer" password="$2a$10$IFWSAJgpUEt4QSS3sMpw1uxZwxI7ozUgmx0NM/ZAJpHpzMiv8JrGG" authorities="ROLE_USER"/>-->
         <security:user name="huifer" password="123" authorities="ROLE_USER"/>
       </security:user-service>
     </security:authentication-provider>
