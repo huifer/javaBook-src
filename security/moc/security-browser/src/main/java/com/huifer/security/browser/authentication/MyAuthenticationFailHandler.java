@@ -1,6 +1,7 @@
 package com.huifer.security.browser.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.huifer.security.browser.support.Response;
 import com.huifer.security.properties.LoginType;
 import com.huifer.security.properties.SecurityProperties;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class MyAuthenticationFailHandler extends SimpleUrlAuthenticationFailureH
         if (LoginType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType("application/json; charset=UTF-8");
-            response.getWriter().write(objectMapper.writeValueAsString(exception));
+            response.getWriter().write(objectMapper.writeValueAsString(new Response(exception.getMessage())));
         } else {
             super.onAuthenticationFailure(request, response, exception);
         }
