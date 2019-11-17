@@ -1,11 +1,14 @@
 package com.huifer.security.browser.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.huifer.security.properties.LoginType;
+import com.huifer.security.properties.SecurityProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
@@ -20,9 +23,11 @@ import java.io.IOException;
  * @date: 2019-11-17
  */
 @Component
-public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-    private Logger log = LoggerFactory.getLogger(getClass());
+public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
+    private Logger log = LoggerFactory.getLogger(getClass());
+    @Autowired
+    private SecurityProperties securityProperties;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -32,8 +37,15 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
             Authentication authentication
     ) throws IOException, ServletException {
         log.info("登陆成功");
-        response.setContentType("application/json; charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(authentication));
+
+        if (LoginType.JSON.equals(securityProperties.getBrowser().getLoginType())) {
+            // json
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write(objectMapper.writeValueAsString(authentication));
+        } else {
+            // 跳转
+            super.onAuthenticationSuccess(request, response, authentication);
+        }
 
     }
 }
