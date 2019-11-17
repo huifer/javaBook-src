@@ -3,6 +3,8 @@ package com.huifer.security.validate.code.impl;
 import com.huifer.security.properties.SecurityProperties;
 import com.huifer.security.validate.code.ImageCode;
 import com.huifer.security.validate.code.ValidateCodeGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
@@ -22,10 +24,13 @@ import java.util.Random;
  */
 public class ImageCodeGenerator implements ValidateCodeGenerator {
     SecurityProperties securityProperties;
+
+    private Logger log = LoggerFactory.getLogger(getClass());
+
     @Override
     public ImageCode generate(HttpServletRequest request) {
         int width = ServletRequestUtils.getIntParameter(request, "width", securityProperties.getCode().getImage().getWidth());
-        int height =ServletRequestUtils.getIntParameter(request, "height", securityProperties.getCode().getImage().getHeight()) ;
+        int height = ServletRequestUtils.getIntParameter(request, "height", securityProperties.getCode().getImage().getHeight());
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
         Graphics g = image.getGraphics();
@@ -54,9 +59,11 @@ public class ImageCodeGenerator implements ValidateCodeGenerator {
         }
 
         g.dispose();
+        log.info("验证码={}", sRand.toString());
         return new ImageCode(image, sRand.toString(), securityProperties.getCode().getImage().getExpireIn());
 
     }
+
     private Color getRandColor(int fc, int bc) {
         Random random = new Random();
         if (fc > 255) {

@@ -9,9 +9,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+
+import javax.sql.DataSource;
 
 /**
  * 描述:
@@ -23,13 +28,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    UserDetailsService myUserDetailsService;
+    @Autowired
     private SecurityProperties securityProperties;
     @Autowired
     private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
-
-
     @Autowired
     private MyAuthenticationFailHandler myAuthenticationFailHandler;
+    @Autowired
+    private DataSource dataSource;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -45,7 +52,11 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .loginProcessingUrl("/auth/form")
                 .successHandler(myAuthenticationSuccessHandler)
                 .failureHandler(myAuthenticationFailHandler)
-
+                .and()
+                .rememberMe()
+                .tokenRepository(this.persistentTokenRepository())
+                .tokenValiditySeconds(this.securityProperties.getBrowser().getRememberMeSeconds())
+                .userDetailsService(myUserDetailsService)
                 .and()
                 .authorizeRequests()
                 // http://localhost:8060/login.html 没有设置
@@ -59,6 +70,15 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
         ;
 
+    }
+
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setDataSource(dataSource);
+        // 自动创建表
+//        jdbcTokenRepository.setCreateTableOnStartup(true);
+        return jdbcTokenRepository;
     }
 
     /**

@@ -3,6 +3,7 @@ package com.huifer.security.browser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @author: huifer
  * @date: 2019-11-17
  */
-@Component
+@Component(value=  "myUserDetailsService")
 public class MyUserDetailsService implements UserDetailsService {
     private Logger log = LoggerFactory.getLogger(getClass());
 
