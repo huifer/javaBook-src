@@ -7,7 +7,10 @@ package com.huifer.security.properties;
  * @date: 2019-11-17
  */
 public class BrowserProperties {
-    private String loginPage = "login.html";
+    /**
+     * // http://localhost:8060/login.html 没有设置
+     */
+    private String loginPage = "/login.html";
 
 
     public String getLoginPage() {
