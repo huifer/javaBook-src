@@ -1,11 +1,14 @@
-package com.huifer.security.vaildate.code;
+package com.huifer.security.validate.code;
 
+import com.huifer.security.properties.SecurityProperties;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestUtils;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -16,6 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 描述:
@@ -24,31 +30,33 @@ import java.io.IOException;
  * @date: 2019-11-17
  */
 @Component
-public class ValidateCodeFilter extends OncePerRequestFilter {
+public class ValidateCodeFilter extends OncePerRequestFilter implements InitializingBean {
     private AuthenticationFailureHandler authenticationFailureHandler;
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
+    private Set<String> urls = new HashSet<>();
 
-    public AuthenticationFailureHandler getAuthenticationFailureHandler() {
-        return authenticationFailureHandler;
-    }
+    @Autowired
+    private SecurityProperties securityProperties;
+    private AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    public void setAuthenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
-        this.authenticationFailureHandler = authenticationFailureHandler;
-    }
-
-    public SessionStrategy getSessionStrategy() {
-        return sessionStrategy;
-    }
-
-    public void setSessionStrategy(SessionStrategy sessionStrategy) {
-        this.sessionStrategy = sessionStrategy;
+    @Override
+    public void afterPropertiesSet() throws ServletException {
+        super.afterPropertiesSet();
+        String[] configUrls = StringUtils.splitByWholeSeparatorPreserveAllTokens(securityProperties.getCode().getImage().getUrl(), ",");
+        urls.addAll(Arrays.asList(configUrls));
+        urls.add("/auth/form");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        boolean action = false;
+        for (String url : urls) {
+            if (pathMatcher.match(url, request.getRequestURI())) {
+                action = true;
+            }
+        }
         if (
-                StringUtils.equals("/auth/form", request.getRequestURI())
-                        && StringUtils.equalsIgnoreCase("post", request.getMethod())
+                action
         ) {
             try {
                 validate(new ServletWebRequest(request));
@@ -81,4 +89,16 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
 
         sessionStrategy.removeAttribute(request, ValidateCodeController.session_key);
     }
+
+
+    public void setAuthenticationFailureHandler(AuthenticationFailureHandler authenticationFailureHandler) {
+        this.authenticationFailureHandler = authenticationFailureHandler;
+    }
+
+
+    public void setSecurityProperties(SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
+    }
+
+
 }

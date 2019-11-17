@@ -1,4 +1,4 @@
-package com.huifer.security.vaildate.code;
+package com.huifer.security.validate.code;
 
 import java.awt.image.BufferedImage;
 import java.time.LocalDate;

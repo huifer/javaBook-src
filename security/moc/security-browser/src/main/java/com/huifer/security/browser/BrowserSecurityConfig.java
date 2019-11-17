@@ -3,7 +3,7 @@ package com.huifer.security.browser;
 import com.huifer.security.browser.authentication.MyAuthenticationFailHandler;
 import com.huifer.security.browser.authentication.MyAuthenticationSuccessHandler;
 import com.huifer.security.properties.SecurityProperties;
-import com.huifer.security.vaildate.code.ValidateCodeFilter;
+import com.huifer.security.validate.code.ValidateCodeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

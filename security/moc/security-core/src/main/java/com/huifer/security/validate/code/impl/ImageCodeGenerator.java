@@ -1,19 +1,17 @@
-package com.huifer.security.vaildate.code;
+package com.huifer.security.validate.code.impl;
 
+import com.huifer.security.properties.SecurityProperties;
+import com.huifer.security.validate.code.ImageCode;
+import com.huifer.security.validate.code.ValidateCodeGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
 import org.springframework.web.bind.ServletRequestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -22,30 +20,12 @@ import java.util.Random;
  * @author: huifer
  * @date: 2019-11-17
  */
-@RestController
-public class ValidateCodeController {
-    public static final String session_key = "session_key_image_code";
-    private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
-
-    @GetMapping("/code/image")
-    public void createCode(
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) throws IOException {
-        ImageCode imageCode = createImageCode(request);
-        sessionStrategy.setAttribute(new ServletWebRequest(request), session_key, imageCode);
-        ImageIO.write(imageCode.getImage(), "JPEG", response.getOutputStream());
-    }
-
-    /**
-     * 图像验证码实现
-     *
-     * @param request
-     * @return
-     */
-    private ImageCode createImageCode(HttpServletRequest request) {
-        int width = 67;
-        int height = 23;
+public class ImageCodeGenerator implements ValidateCodeGenerator {
+    SecurityProperties securityProperties;
+    @Override
+    public ImageCode generate(HttpServletRequest request) {
+        int width = ServletRequestUtils.getIntParameter(request, "width", securityProperties.getCode().getImage().getWidth());
+        int height =ServletRequestUtils.getIntParameter(request, "height", securityProperties.getCode().getImage().getHeight()) ;
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
         Graphics g = image.getGraphics();
@@ -66,7 +46,7 @@ public class ValidateCodeController {
 
         StringBuilder sRand = new StringBuilder();
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < securityProperties.getCode().getImage().getLength(); i++) {
             String rand = String.valueOf(random.nextInt(10));
             sRand.append(rand);
             g.setColor(new Color(20 + random.nextInt(110), 20 + random.nextInt(110), 20 + random.nextInt(110)));
@@ -74,9 +54,9 @@ public class ValidateCodeController {
         }
 
         g.dispose();
-        return new ImageCode(image, sRand.toString(), 100);
-    }
+        return new ImageCode(image, sRand.toString(), securityProperties.getCode().getImage().getExpireIn());
 
+    }
     private Color getRandColor(int fc, int bc) {
         Random random = new Random();
         if (fc > 255) {
@@ -89,5 +69,10 @@ public class ValidateCodeController {
         int g = fc + random.nextInt(bc - fc);
         int b = fc + random.nextInt(bc - fc);
         return new Color(r, g, b);
+    }
+
+
+    public void setSecurityProperties(SecurityProperties securityProperties) {
+        this.securityProperties = securityProperties;
     }
 }
