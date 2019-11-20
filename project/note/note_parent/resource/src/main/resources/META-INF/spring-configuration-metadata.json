@@ -1,0 +1,23 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "com.huifer.note.resource.config.SecurityProperties",
+      "name": "security",
+      "type": "com.huifer.note.resource.config.SecurityProperties"
+    },
+    {
+      "sourceType": "com.huifer.note.resource.config.SecurityProperties",
+      "name": "security.jwt",
+      "sourceMethod": "getJwt()",
+      "type": "com.huifer.note.resource.config.SecurityProperties$JwtProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "com.huifer.note.resource.config.SecurityProperties$JwtProperties",
+      "name": "security.jwt.public-key",
+      "type": "org.springframework.core.io.Resource"
+    }
+  ]
+}
