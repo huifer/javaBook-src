@@ -258,5 +258,16 @@ stop-dfs.sh
 ```
 
 ## MapReduce
-### MapReduce 是什么
+### MapReduce 是什么(1.0版本)
+> MapReduce是一种编程模型，用于大规模数据集（大于1TB）的并行运算。概念"Map（映射）"和"Reduce（归约）"，是它们的主要思想，都是从函数式编程语言里借来的，还有从矢量编程语言里借来的特性。它极大地方便了编程人员在不会分布式并行编程的情况下，将自己的程序运行在分布式系统上。 当前的软件实现是指定一个Map（映射）函数，用来把一组键值对映射成一组新的键值对，指定并发的Reduce（归约）函数，用来保证所有映射的键值对中的每一个共享相同的键组。
+> MapReduce 应该拆分理解,1. map(映射) 2. reduce(化简) ,
 ![](asserts/mapreduce流程.jpg)
+![](asserts/MapReduce-Way-MapReduce-Tutorial-Edureka-768x339.png)
+> **2.0版本使用了 yarm 框架**
+### 核心步骤
+1. input
+1. splitting
+1. mapping
+1. shuffling
+1. reducing
+1. output(final result)
