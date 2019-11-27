@@ -256,3 +256,7 @@ huifer@huifer:~/hadoop-2.10.0/test_dat/input$
 ```shell script
 stop-dfs.sh
 ```
+
+## MapReduce
+### MapReduce 是什么
+![](asserts/mapreduce流程.jpg)
