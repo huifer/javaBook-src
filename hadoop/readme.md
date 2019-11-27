@@ -7,6 +7,8 @@
 ### Hadoop 分布式文件系统
 - Hadoop Common :  Java类库
 - Hadoop YARN :  这是作业调度和集群资源管理的框架.
+
+
 ## 安装
 (官网)[http://hadoop.apache.org/]下载Hadoop,本文使用版本:hadoop-2.10.0
 - 下载hadoop
@@ -152,3 +154,105 @@ huifer@huifer:~/hadoop-2.10.0/sbin$ ./mr-jobhistory-daemon.sh start historyserve
 - 访问 http://localhost:50070/dfshealth.html
 
 ![1574817314049](asserts/1574817314049.png)
+
+## HDFS
+- HDFS 架构
+![](asserts/hdfs架构.jpg)
+- HDFS 包括如下几个元素
+    1. Namenode
+    1. Datanode
+    1. Block
+### Namenode
+职责:
+1. 管理文件系统命名空间
+1. 规范客户端对文件的访问
+1. 文件系统操作
+
+### Datanode
+职责:
+1. 根据客户的请求, 对数据节点上的文件进行读写操作
+1. 对快进行操作(创建,删除等)
+### Block
+- HDFS 中的最小存储单元称为 Block
+
+### 命令
+#### 格式化 HDFS 文件系统
+```shell script
+hadoop namenode -format
+```
+#### 启动 HDFS 
+```shell script
+start-dfs.sh
+```
+#### 文件列表
+```shell script
+bin/hadoop fs -ls <args>
+```
+#### 插入数据
+1. 创建目录
+```shell script
+bin/hadoop fs -mkdir /huifer/input
+
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -mkdir /hh
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -ls /
+Found 3 items
+drwxr-xr-x   - huifer supergroup          0 2019-11-27 10:05 /hh
+drwxrwx---   - huifer supergroup          0 2019-11-27 09:07 /tmp
+drwxr-xr-x   - huifer supergroup          0 2019-11-27 09:58 /user
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -mkdir /hh/input
+huifer@huifer:~/hadoop-2.10.0$ 
+
+```
+**一层一层创建不要直接创建所有**
+1. 传输文件
+```shell script
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -put 1.txt /hh/input
+huifer@huifer:~/hadoop-2.10.0$ 
+
+```
+
+1. ls 验证文件
+```shell script
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -ls /hh/input
+Found 1 items
+-rw-r--r--   1 huifer supergroup         16 2019-11-27 10:06 /hh/input/1.txt
+huifer@huifer:~/hadoop-2.10.0$ 
+```
+
+#### 数据检索
+- 查看命令 cat
+```shell script
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -cat /hh/input/1.txt
+1
+1
+1
+1
+
+1
+1
+1
+huifer@huifer:~/hadoop-2.10.0$
+```
+- 下载命令
+```shell script
+huifer@huifer:~/hadoop-2.10.0$ bin/hadoop fs -get /hh/input test_dat/
+
+huifer@huifer:~/hadoop-2.10.0/test_dat$ ll
+total 12
+drwxrwxr-x  3 huifer huifer 4096 Nov 27 10:11 ./
+drwxr-xr-x 11 huifer huifer 4096 Nov 27 10:01 ../
+drwxrwxr-x  2 huifer huifer 4096 Nov 27 10:11 input/
+huifer@huifer:~/hadoop-2.10.0/test_dat$ cd input/
+huifer@huifer:~/hadoop-2.10.0/test_dat/input$ ll
+total 12
+drwxrwxr-x 2 huifer huifer 4096 Nov 27 10:11 ./
+drwxrwxr-x 3 huifer huifer 4096 Nov 27 10:11 ../
+-rw-r--r-- 1 huifer huifer   16 Nov 27 10:11 1.txt
+huifer@huifer:~/hadoop-2.10.0/test_dat/input$ 
+
+```
+
+#### 关闭 hdfs
+```shell script
+stop-dfs.sh
+```
