@@ -1,5 +1,12 @@
 # Hadoop
 ## 简介
+![](asserts/hadoop.jpg)
+![](asserts/结构图.jpg)
+### MapReduce
+- MapReduce 是一种编程模型
+### Hadoop 分布式文件系统
+- Hadoop Common :  Java类库
+- Hadoop YARN :  这是作业调度和集群资源管理的框架.
 ## 安装
 (官网)[http://hadoop.apache.org/]下载Hadoop,本文使用版本:hadoop-2.10.0
 - 下载hadoop
