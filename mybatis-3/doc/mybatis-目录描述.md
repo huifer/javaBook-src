@@ -1,0 +1,22 @@
+# mybatis 目录描述
+## org.apache.ibatis
+- annotations : 注解,例如`org.apache.ibatis.annotations.Mapper`
+- binding : 数据绑定
+- builder :  构建类
+- cache : 缓存
+- cursor : 游标
+- datasource : 数据源设置 
+- exceptions : 异常
+- executor : 执行器
+- io :  IO
+- jdbc : JDBC相关
+- lang : JDKversion标记
+- logging : 日志
+- mapping : 映射关系
+- parsing : 解析,xml解析
+- plugin : 插件
+- reflection : 反射工具类
+- scripting : 脚本(sql)组装工具
+- session : 会话
+- transaction : 事务相关内容
+- type : 类型,存放了数据库和JAVA类型之间的关系如`org.apache.ibatis.type.JdbcType`
