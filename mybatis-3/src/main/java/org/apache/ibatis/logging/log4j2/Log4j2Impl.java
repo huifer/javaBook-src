@@ -29,7 +29,7 @@ public class Log4j2Impl implements Log {
 
     public Log4j2Impl(String clazz) {
         Logger logger = LogManager.getLogger(clazz);
-
+        // 判断logger的类型实例化不同的日志 适配器模式
         if (logger instanceof AbstractLogger) {
             log = new Log4j2AbstractLoggerImpl((AbstractLogger) logger);
         } else {
