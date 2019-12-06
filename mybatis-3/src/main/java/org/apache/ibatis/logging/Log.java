@@ -16,6 +16,15 @@
 package org.apache.ibatis.logging;
 
 /**
+ * mybatis 的日志接口,提供日志级别
+ * <ol>
+ *     <li>error</li>
+ *     <li>debug</li>
+ *     <li>trace</li>
+ *     <li>warn</li>
+ * </ol>
+ * <p>通过自己定义的接口来实现各大日志框架的内容达到高可用</p>
+ *
  * @author Clinton Begin
  */
 public interface Log {

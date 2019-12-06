@@ -29,6 +29,10 @@ public class Slf4jImpl implements Log {
 
     private Log log;
 
+    /**
+     * 重新创建日志
+     * @param clazz
+     */
     public Slf4jImpl(String clazz) {
         Logger logger = LoggerFactory.getLogger(clazz);
 

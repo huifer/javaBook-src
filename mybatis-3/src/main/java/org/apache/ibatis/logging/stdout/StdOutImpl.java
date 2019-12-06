@@ -18,6 +18,7 @@ package org.apache.ibatis.logging.stdout;
 import org.apache.ibatis.logging.Log;
 
 /**
+ * 控制台日志,通过System.out System.err 来输出日志
  * @author Clinton Begin
  */
 public class StdOutImpl implements Log {
