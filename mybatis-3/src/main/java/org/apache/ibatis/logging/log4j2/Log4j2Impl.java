@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.spi.AbstractLogger;
 
 /**
+ * 日志包装重新使用
  * @author Eduardo Macarron
  */
 public class Log4j2Impl implements Log {
@@ -29,7 +30,7 @@ public class Log4j2Impl implements Log {
 
     public Log4j2Impl(String clazz) {
         Logger logger = LogManager.getLogger(clazz);
-        // 判断logger的类型实例化不同的日志 适配器模式
+        // 判断logger的类型实例化不同的日志
         if (logger instanceof AbstractLogger) {
             log = new Log4j2AbstractLoggerImpl((AbstractLogger) logger);
         } else {
