@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * 将xml文件转换成{@link Document} , 核心方法 org.apache.ibatis.parsing.XPathParser#createDocument(org.xml.sax.InputSource)
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -222,17 +223,27 @@ public class XPathParser {
         }
     }
 
+    /**
+     * 创建xml文档
+     * @param inputSource xml文件流
+     * @return
+     */
     private Document createDocument(InputSource inputSource) {
         // important: this must only be called AFTER common constructor
         try {
+            // XML解析器
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             factory.setValidating(validation);
-
+            // 设置命名空间
             factory.setNamespaceAware(false);
+            // 设置注解忽略
             factory.setIgnoringComments(true);
+            // 设置空白
             factory.setIgnoringElementContentWhitespace(false);
+            // 设置 CDATA 转换
             factory.setCoalescing(false);
+            // 设置拓展
             factory.setExpandEntityReferences(true);
 
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -253,6 +264,7 @@ public class XPathParser {
                     // NOP
                 }
             });
+            // w3c 包里面的解析函数
             return builder.parse(inputSource);
         } catch (Exception e) {
             throw new BuilderException("Error creating document instance.  Cause: " + e, e);

@@ -20,7 +20,13 @@ package org.apache.ibatis.parsing;
  */
 public class GenericTokenParser {
 
+    /**
+     * 开始标记
+     */
     private final String openToken;
+    /**
+     * 结束标记
+     */
     private final String closeToken;
     private final TokenHandler handler;
 

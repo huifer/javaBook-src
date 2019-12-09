@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * w3c node
  * @author Clinton Begin
  */
 public class XNode {
@@ -35,6 +36,9 @@ public class XNode {
     private final Properties variables;
     private final XPathParser xpathParser;
 
+    /**
+     * 构造函数 初始化数据
+     */
     public XNode(XPathParser xpathParser, Node node, Properties variables) {
         this.xpathParser = xpathParser;
         this.node = node;
@@ -48,6 +52,10 @@ public class XNode {
         return new XNode(xpathParser, node, variables);
     }
 
+    /**
+     * 节点获取,核心是w3c xml 解析node后对解析结果包装成 {@link XNode}
+     * @return
+     */
     public XNode getParent() {
         Node parent = node.getParentNode();
         if (!(parent instanceof Element)) {
@@ -57,6 +65,10 @@ public class XNode {
         }
     }
 
+    /**
+     * 获取全路径
+     * @return
+     */
     public String getPath() {
         StringBuilder builder = new StringBuilder();
         Node current = node;
@@ -70,6 +82,10 @@ public class XNode {
         return builder.toString();
     }
 
+    /**
+     * 外部调用,服务于 resultMap 标签
+     * @return
+     */
     public String getValueBasedIdentifier() {
         StringBuilder builder = new StringBuilder();
         XNode current = this;
@@ -77,6 +93,7 @@ public class XNode {
             if (current != this) {
                 builder.insert(0, "_");
             }
+            // 数据获取, 获取顺序id\value\property
             String value = current.getStringAttribute("id",
                     current.getStringAttribute("value",
                             current.getStringAttribute("property", null)));
@@ -357,6 +374,11 @@ public class XNode {
         }
     }
 
+    /**
+     * 构造方法中的函数,解析系欸但中的数据返回一个 Properties 对象
+     * @param n
+     * @return
+     */
     private Properties parseAttributes(Node n) {
         Properties attributes = new Properties();
         NamedNodeMap attributeNodes = n.getAttributes();

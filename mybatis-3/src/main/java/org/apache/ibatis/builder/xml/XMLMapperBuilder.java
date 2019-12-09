@@ -263,6 +263,7 @@ public class XMLMapperBuilder extends BaseBuilder {
                 resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
             }
         }
+        // 解析xml 中的resultMap标签
         String id = resultMapNode.getStringAttribute("id",
                 resultMapNode.getValueBasedIdentifier());
         String extend = resultMapNode.getStringAttribute("extends");
