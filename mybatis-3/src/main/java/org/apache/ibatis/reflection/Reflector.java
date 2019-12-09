@@ -26,31 +26,68 @@ import java.util.Map.Entry;
 /**
  * This class represents a cached set of class definition information that
  * allows for easy mapping between property names and getter/setter methods.
+ * <p>
+ * 反射类
  *
  * @author Clinton Begin
  */
 public class Reflector {
 
+    /**
+     * 实体类.class
+     */
     private final Class<?> type;
+    /**
+     * get 属性
+     */
     private final String[] readablePropertyNames;
+    /**
+     * set 属性值
+     */
     private final String[] writablePropertyNames;
+    /**
+     * set 方法列表
+     */
     private final Map<String, Invoker> setMethods = new HashMap<>();
+    /**
+     * get 方法列表
+     */
     private final Map<String, Invoker> getMethods = new HashMap<>();
+    /**
+     * set 的数据类型
+     */
     private final Map<String, Class<?>> setTypes = new HashMap<>();
+    /**
+     * get 的数据类型
+     */
     private final Map<String, Class<?>> getTypes = new HashMap<>();
+    /**
+     * 构造函数
+     */
     private Constructor<?> defaultConstructor;
 
+    /**
+     * 缓存数据, 大写KEY
+     */
     private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
+    /**
+     * @param clazz 待解析类的字节码
+     */
     public Reflector(Class<?> clazz) {
         type = clazz;
+        // 构造方法
         addDefaultConstructor(clazz);
+        // get 方法
         addGetMethods(clazz);
+        // set 方法
         addSetMethods(clazz);
+        // 字段值
         addFields(clazz);
         readablePropertyNames = getMethods.keySet().toArray(new String[0]);
         writablePropertyNames = setMethods.keySet().toArray(new String[0]);
         for (String propName : readablePropertyNames) {
+            // 循环操作设置到缓存中,
             caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
         }
         for (String propName : writablePropertyNames) {
@@ -77,14 +114,24 @@ public class Reflector {
     }
 
     private void addDefaultConstructor(Class<?> clazz) {
+
+        // 获取类里面的所有构造方法
         Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+        // 过滤得到空参构造 constructor -> constructor.getParameterTypes().length == 0
         Arrays.stream(constructors).filter(constructor -> constructor.getParameterTypes().length == 0)
                 .findAny().ifPresent(constructor -> this.defaultConstructor = constructor);
     }
 
+    /**
+     * {@link Reflector#addGetMethods(java.lang.Class) } 和 {@link Reflector#addSetMethods(java.lang.Class)} 方法逻辑相同
+     *
+     * @param clazz
+     */
     private void addGetMethods(Class<?> clazz) {
+        // 反射方法
         Map<String, List<Method>> conflictingGetters = new HashMap<>();
         Method[] methods = getClassMethods(clazz);
+        // JDK8 filter 过滤get 开头的方法
         Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
                 .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
         resolveGetterConflicts(conflictingGetters);
