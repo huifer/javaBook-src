@@ -196,7 +196,7 @@ class HfReflectorTest {
       }
   ```
 
-- `resolveGetterConflicts`方法后续介绍
+- `resolveGetterConflicts`方法解决冲突,看的不是很明白
 
 
 
@@ -352,3 +352,82 @@ class HfReflectorTest {
   ![1575892763661](assets/1575892763661.png)
 
   可以看到父类的方法也都存在了
+
+## resolveGetterConflicts
+
+- `org.apache.ibatis.reflection.Reflector#resolveGetterConflicts`
+
+  这个方法解决了`get`方法的冲突问题,同名方法不同返回值
+
+  ```java
+  private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
+          for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
+              Method winner = null;
+              String propName = entry.getKey();
+              boolean isAmbiguous = false;
+              for (Method candidate : entry.getValue()) {
+                  if (winner == null) {
+                      winner = candidate;
+                      continue;
+                  }
+                  Class<?> winnerType = winner.getReturnType();
+                  Class<?> candidateType = candidate.getReturnType();
+                  if (candidateType.equals(winnerType)) {
+                      if (!boolean.class.equals(candidateType)) {
+                          isAmbiguous = true;
+                          break;
+                      } else if (candidate.getName().startsWith("is")) {
+                          winner = candidate;
+                      }
+                  } else if (candidateType.isAssignableFrom(winnerType)) {
+                      // OK getter type is descendant
+                  } else if (winnerType.isAssignableFrom(candidateType)) {
+                      winner = candidate;
+                  } else {
+                      isAmbiguous = true;
+                      break;
+                  }
+              }
+              addGetMethod(propName, winner, isAmbiguous);
+          }
+      }
+  ```
+
+  
+
+## addFields
+
+- `org.apache.ibatis.reflection.Reflector#addFields`
+
+  获取类的所有字段没什么好说的直接递归就可以获取了.
+
+  ```jade
+      private void addFields(Class<?> clazz) {
+          Field[] fields = clazz.getDeclaredFields();
+          for (Field field : fields) {
+              if (!setMethods.containsKey(field.getName())) {
+                  // issue #379 - removed the check for final because JDK 1.5 allows
+                  // modification of final fields through reflection (JSR-133). (JGB)
+                  // pr #16 - final static can only be set by the classloader
+                  int modifiers = field.getModifiers();
+                  if (!(Modifier.isFinal(modifiers) && Modifier.isStatic(modifiers))) {
+                      addSetField(field);
+                  }
+              }
+              if (!getMethods.containsKey(field.getName())) {
+                  addGetField(field);
+              }
+          }
+          if (clazz.getSuperclass() != null) {
+              addFields(clazz.getSuperclass());
+          }
+      }
+  ```
+
+  
+
+## 属性查看
+
+- 下图为一个类的解析结果
+
+![1575894218362](assets/1575894218362.png)
