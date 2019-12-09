@@ -93,6 +93,7 @@ public class Reflector {
         for (String propName : writablePropertyNames) {
             caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
         }
+        System.out.println();
     }
 
     /**
@@ -144,7 +145,8 @@ public class Reflector {
     }
 
     /**
-     * 解决冲突
+     * 解决冲突,
+     * 找到子类的方法返回
      *
      * @param conflictingGetters
      */
@@ -199,6 +201,12 @@ public class Reflector {
         resolveSetterConflicts(conflictingSetters);
     }
 
+    /**
+     * 一个名称多个方法
+     * @param conflictingMethods
+     * @param name
+     * @param method
+     */
     private void addMethodConflict(Map<String, List<Method>> conflictingMethods, String name, Method method) {
         if (isValidPropertyName(name)) {
             List<Method> list = conflictingMethods.computeIfAbsent(name, k -> new ArrayList<>());
@@ -369,6 +377,7 @@ public class Reflector {
                 // check to see if the method is already known
                 // if it is known, then an extended class must have
                 // overridden a method
+                // 如果存在则不添加
                 if (!uniqueMethods.containsKey(signature)) {
                     uniqueMethods.put(signature, currentMethod);
                 }
