@@ -38,11 +38,11 @@ public class Reflector {
      */
     private final Class<?> type;
     /**
-     * get 属性
+     * 可读 属性
      */
     private final String[] readablePropertyNames;
     /**
-     * set 属性值
+     * 可写 属性值
      */
     private final String[] writablePropertyNames;
     /**
@@ -97,6 +97,9 @@ public class Reflector {
 
     /**
      * Checks whether can control member accessible.
+     * 检查是否可以访问控制器成员。
+     * <p>
+     * {@link SecurityManager} JDK提供的校验器
      *
      * @return If can control member accessible, it return {@literal true}
      * @since 3.5.0
@@ -119,7 +122,10 @@ public class Reflector {
         Constructor<?>[] constructors = clazz.getDeclaredConstructors();
         // 过滤得到空参构造 constructor -> constructor.getParameterTypes().length == 0
         Arrays.stream(constructors).filter(constructor -> constructor.getParameterTypes().length == 0)
-                .findAny().ifPresent(constructor -> this.defaultConstructor = constructor);
+                .findAny().ifPresent(constructor -> {
+            System.out.println("有空参构造");
+            this.defaultConstructor = constructor;
+        });
     }
 
     /**
@@ -137,6 +143,11 @@ public class Reflector {
         resolveGetterConflicts(conflictingGetters);
     }
 
+    /**
+     * 解决冲突
+     *
+     * @param conflictingGetters
+     */
     private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
         for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
             Method winner = null;
@@ -319,18 +330,23 @@ public class Reflector {
      * @return An array containing all methods in this class
      */
     private Method[] getClassMethods(Class<?> clazz) {
+        // 方法唯一标识: 方法
         Map<String, Method> uniqueMethods = new HashMap<>();
         Class<?> currentClass = clazz;
         while (currentClass != null && currentClass != Object.class) {
+            // getDeclaredMethods 获取 public ,private , protcted 方法
             addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
             // we also need to look for interface methods -
             // because the class may be abstract
+            // 当前类是否继承别的类(实现接口)如果继承则需要进行操作
             Class<?>[] interfaces = currentClass.getInterfaces();
             for (Class<?> anInterface : interfaces) {
+                // getMethods 获取本身和父类的 public 方法
                 addUniqueMethods(uniqueMethods, anInterface.getMethods());
             }
 
+            // 循环往上一层一层寻找最后回到 Object 类 的上级为null 结束
             currentClass = currentClass.getSuperclass();
         }
 
@@ -339,9 +355,16 @@ public class Reflector {
         return methods.toArray(new Method[0]);
     }
 
+    /**
+     * @param uniqueMethods
+     * @param methods
+     */
     private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
         for (Method currentMethod : methods) {
+            // 桥接, 具体还不知道
+            // TODO: 2019/12/9 JAVA 桥接方法
             if (!currentMethod.isBridge()) {
+                // 方法的唯一标识
                 String signature = getSignature(currentMethod);
                 // check to see if the method is already known
                 // if it is known, then an extended class must have
@@ -353,6 +376,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * 方法唯一标识,返回值类型#方法名称：参数列表
+     *
+     * @param method
+     * @return
+     */
     private String getSignature(Method method) {
         StringBuilder sb = new StringBuilder();
         Class<?> returnType = method.getReturnType();
@@ -380,6 +409,7 @@ public class Reflector {
         if (defaultConstructor != null) {
             return defaultConstructor;
         } else {
+            // 如果没有空参构造抛出的异常
             throw new ReflectionException("There is no default constructor for " + type);
         }
     }
