@@ -136,6 +136,12 @@ public class XPathParser {
         return evalString(document, expression);
     }
 
+    /**
+     * string 解析
+     * @param root
+     * @param expression
+     * @return
+     */
     public String evalString(Object root, String expression) {
         String result = (String) evaluate(expression, root, XPathConstants.STRING);
         result = PropertyParser.parse(result, variables);

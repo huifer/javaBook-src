@@ -18,6 +18,7 @@ package org.apache.ibatis.parsing;
 import org.apache.ibatis.exceptions.PersistenceException;
 
 /**
+ * 解析异常
  * @author Clinton Begin
  */
 public class ParsingException extends PersistenceException {

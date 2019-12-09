@@ -26,7 +26,7 @@ import java.util.Locale;
 
 /**
  * Offline entity resolver for the MyBatis DTDs.
- *
+ *  离线加载dtd文件
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

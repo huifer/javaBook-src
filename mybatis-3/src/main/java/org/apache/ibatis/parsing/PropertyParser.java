@@ -53,6 +53,7 @@ public class PropertyParser {
 
     public static String parse(String string, Properties variables) {
         VariableTokenHandler handler = new VariableTokenHandler(variables);
+        // 通用占位符修改器 ${}
         GenericTokenParser parser = new GenericTokenParser("${", "}", handler);
         return parser.parse(string);
     }
@@ -75,6 +76,11 @@ public class PropertyParser {
             return (variables == null) ? defaultValue : variables.getProperty(key, defaultValue);
         }
 
+        /**
+         * 处理标记
+         * @param content
+         * @return
+         */
         @Override
         public String handleToken(String content) {
             if (variables != null) {
