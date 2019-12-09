@@ -299,3 +299,56 @@ class HfReflectorTest {
   ![1575892167982](assets/1575892167982.png)
 
   方法签名:方法
+
+  目前完成了一部分还有一个继承问题需要debug看一下, 编写一个`Man`继承`People` 还需要实现接口
+
+  ```java
+  public class Man extends People implements TestManInterface {
+      @Override
+      public Integer inte() {
+          return 1;
+      }
+  
+      public String hello() {
+          return "hello";
+      }
+  }
+  
+  ```
+
+  ```java
+  public interface TestManInterface {
+      public Integer inte();
+  }
+  ```
+
+  目标明确了就直接在
+
+  ![1575892414120](assets/1575892414120.png)
+
+  这里打断点了
+
+  ![1575892511471](assets/1575892511471.png)
+
+  在进入循环之前回率先加载本类的所有可见方法
+
+  ```java
+       if (!uniqueMethods.containsKey(signature)) {
+           // 如果存在该方法唯一签名则不添加
+                      uniqueMethods.put(signature, currentMethod);
+                  }
+  ```
+
+  接下来断点继续往下走
+
+  ![1575892645405](assets/1575892645405.png)
+
+  走到这一步我们来看看`currentClass.getSuperclass()`是不是上一级的类
+
+  ![1575892687076](assets/1575892687076.png)
+
+  通过断点可见这个`currentClass`现在是`People`类,根据之前所说的最终`uniqueMethods`应该存在父类的方法
+
+  ![1575892763661](assets/1575892763661.png)
+
+  可以看到父类的方法也都存在了
