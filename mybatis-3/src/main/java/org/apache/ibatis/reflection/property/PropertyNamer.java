@@ -48,10 +48,23 @@ public final class PropertyNamer {
         return isGetter(name) || isSetter(name);
     }
 
+    /**
+     * 判断是什么开头的方法
+     *
+     * @param name
+     * @return true get  开头
+     */
     public static boolean isGetter(String name) {
+        // 在语义上 is 开头的也是get开头的
         return (name.startsWith("get") && name.length() > 3) || (name.startsWith("is") && name.length() > 2);
     }
 
+    /**
+     * 判断是什么开头的方法
+     *
+     * @param name
+     * @return true set  开头
+     */
     public static boolean isSetter(String name) {
         return name.startsWith("set") && name.length() > 3;
     }

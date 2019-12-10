@@ -26,40 +26,81 @@ import java.util.Map.Entry;
 /**
  * This class represents a cached set of class definition information that
  * allows for easy mapping between property names and getter/setter methods.
+ * <p>
+ * 反射类
  *
  * @author Clinton Begin
  */
 public class Reflector {
 
+    /**
+     * 实体类.class
+     */
     private final Class<?> type;
+    /**
+     * 可读 属性
+     */
     private final String[] readablePropertyNames;
+    /**
+     * 可写 属性值
+     */
     private final String[] writablePropertyNames;
+    /**
+     * set 方法列表
+     */
     private final Map<String, Invoker> setMethods = new HashMap<>();
+    /**
+     * get 方法列表
+     */
     private final Map<String, Invoker> getMethods = new HashMap<>();
+    /**
+     * set 的数据类型
+     */
     private final Map<String, Class<?>> setTypes = new HashMap<>();
+    /**
+     * get 的数据类型
+     */
     private final Map<String, Class<?>> getTypes = new HashMap<>();
+    /**
+     * 构造函数
+     */
     private Constructor<?> defaultConstructor;
 
+    /**
+     * 缓存数据, 大写KEY
+     */
     private Map<String, String> caseInsensitivePropertyMap = new HashMap<>();
 
+    /**
+     * @param clazz 待解析类的字节码
+     */
     public Reflector(Class<?> clazz) {
         type = clazz;
+        // 构造方法
         addDefaultConstructor(clazz);
+        // get 方法
         addGetMethods(clazz);
+        // set 方法
         addSetMethods(clazz);
+        // 字段值
         addFields(clazz);
         readablePropertyNames = getMethods.keySet().toArray(new String[0]);
         writablePropertyNames = setMethods.keySet().toArray(new String[0]);
         for (String propName : readablePropertyNames) {
+            // 循环操作设置到缓存中,
             caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
         }
         for (String propName : writablePropertyNames) {
             caseInsensitivePropertyMap.put(propName.toUpperCase(Locale.ENGLISH), propName);
         }
+        System.out.println();
     }
 
     /**
      * Checks whether can control member accessible.
+     * 检查是否可以访问控制器成员。
+     * <p>
+     * {@link SecurityManager} JDK提供的校验器
      *
      * @return If can control member accessible, it return {@literal true}
      * @since 3.5.0
@@ -77,19 +118,38 @@ public class Reflector {
     }
 
     private void addDefaultConstructor(Class<?> clazz) {
+
+        // 获取类里面的所有构造方法
         Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+        // 过滤得到空参构造 constructor -> constructor.getParameterTypes().length == 0
         Arrays.stream(constructors).filter(constructor -> constructor.getParameterTypes().length == 0)
-                .findAny().ifPresent(constructor -> this.defaultConstructor = constructor);
+                .findAny().ifPresent(constructor -> {
+            System.out.println("有空参构造");
+            this.defaultConstructor = constructor;
+        });
     }
 
+    /**
+     * {@link Reflector#addGetMethods(java.lang.Class) } 和 {@link Reflector#addSetMethods(java.lang.Class)} 方法逻辑相同
+     *
+     * @param clazz
+     */
     private void addGetMethods(Class<?> clazz) {
+        // 反射方法
         Map<String, List<Method>> conflictingGetters = new HashMap<>();
         Method[] methods = getClassMethods(clazz);
+        // JDK8 filter 过滤get 开头的方法
         Arrays.stream(methods).filter(m -> m.getParameterTypes().length == 0 && PropertyNamer.isGetter(m.getName()))
                 .forEach(m -> addMethodConflict(conflictingGetters, PropertyNamer.methodToProperty(m.getName()), m));
         resolveGetterConflicts(conflictingGetters);
     }
 
+    /**
+     * 解决冲突,
+     * 找到子类的方法返回
+     *
+     * @param conflictingGetters
+     */
     private void resolveGetterConflicts(Map<String, List<Method>> conflictingGetters) {
         for (Entry<String, List<Method>> entry : conflictingGetters.entrySet()) {
             Method winner = null;
@@ -141,6 +201,12 @@ public class Reflector {
         resolveSetterConflicts(conflictingSetters);
     }
 
+    /**
+     * 一个名称多个方法
+     * @param conflictingMethods
+     * @param name
+     * @param method
+     */
     private void addMethodConflict(Map<String, List<Method>> conflictingMethods, String name, Method method) {
         if (isValidPropertyName(name)) {
             List<Method> list = conflictingMethods.computeIfAbsent(name, k -> new ArrayList<>());
@@ -272,18 +338,23 @@ public class Reflector {
      * @return An array containing all methods in this class
      */
     private Method[] getClassMethods(Class<?> clazz) {
+        // 方法唯一标识: 方法
         Map<String, Method> uniqueMethods = new HashMap<>();
         Class<?> currentClass = clazz;
         while (currentClass != null && currentClass != Object.class) {
+            // getDeclaredMethods 获取 public ,private , protcted 方法
             addUniqueMethods(uniqueMethods, currentClass.getDeclaredMethods());
 
             // we also need to look for interface methods -
             // because the class may be abstract
+            // 当前类是否继承别的类(实现接口)如果继承则需要进行操作
             Class<?>[] interfaces = currentClass.getInterfaces();
             for (Class<?> anInterface : interfaces) {
+                // getMethods 获取本身和父类的 public 方法
                 addUniqueMethods(uniqueMethods, anInterface.getMethods());
             }
 
+            // 循环往上一层一层寻找最后回到 Object 类 的上级为null 结束
             currentClass = currentClass.getSuperclass();
         }
 
@@ -292,13 +363,21 @@ public class Reflector {
         return methods.toArray(new Method[0]);
     }
 
+    /**
+     * @param uniqueMethods
+     * @param methods
+     */
     private void addUniqueMethods(Map<String, Method> uniqueMethods, Method[] methods) {
         for (Method currentMethod : methods) {
+            // 桥接, 具体还不知道
+            // TODO: 2019/12/9 JAVA 桥接方法
             if (!currentMethod.isBridge()) {
+                // 方法的唯一标识
                 String signature = getSignature(currentMethod);
                 // check to see if the method is already known
                 // if it is known, then an extended class must have
                 // overridden a method
+                // 如果存在则不添加
                 if (!uniqueMethods.containsKey(signature)) {
                     uniqueMethods.put(signature, currentMethod);
                 }
@@ -306,6 +385,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * 方法唯一标识,返回值类型#方法名称：参数列表
+     *
+     * @param method
+     * @return
+     */
     private String getSignature(Method method) {
         StringBuilder sb = new StringBuilder();
         Class<?> returnType = method.getReturnType();
@@ -333,6 +418,7 @@ public class Reflector {
         if (defaultConstructor != null) {
             return defaultConstructor;
         } else {
+            // 如果没有空参构造抛出的异常
             throw new ReflectionException("There is no default constructor for " + type);
         }
     }
