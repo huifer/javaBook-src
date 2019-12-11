@@ -244,7 +244,7 @@ private void parseConfiguration(XNode root) {
   </properties>
 ```
 
-![1576027453035](asserts/1576027453035.png)
+![1576027453035](assets/1576027453035.png)
 
 可以看到`defaults`就是我们配置的标签属性值了
 
@@ -255,7 +255,7 @@ k=java
 
 ```
 
-![1576027589468](asserts/1576027589468.png)
+![1576027589468](assets/1576027589468.png)
 
 可以看到这段话
 
@@ -275,7 +275,7 @@ k=java
 
 `defaults.putAll()`方法将会读取`properties`文件中的内容. 并且覆盖`<properties>`标签的子节点
 
-![1576027736912](asserts/1576027736912.png)
+![1576027736912](assets/1576027736912.png)
 
 最终设置结果`k`的属性值修改了:happy:
 
@@ -320,7 +320,7 @@ private void typeAliasesElement(XNode parent) {
     }
 ```
 
-![1576028186530](asserts/1576028186530.png)
+![1576028186530](assets/1576028186530.png)
 
 目前解析的内容为`Person`这个实体
 
@@ -366,8 +366,8 @@ private void typeAliasesElement(XNode parent) {
 
 
 
-![1576028554094](asserts/1576028554094.png)
+![1576028554094](assets/1576028554094.png)
 
 `typeAaliases`放在`this.configuration.typeAliasRegistry.typeAliases`中
 
-![1576028709743](asserts/1576028709743.png)
+![1576028709743](assets/1576028709743.png)
