@@ -501,3 +501,131 @@ private void typeAliasesElement(XNode parent) {
   ![1576041889664](assets/1576041889664.png)
 
 - 此时该日志为： `org.apache.ibatis.logging.log4j.Log4jImpl`
+
+
+
+
+
+## pluginElement
+
+- `org.apache.ibatis.builder.xml.XMLConfigBuilder#pluginElement`
+
+- 准备一个插件类测试用
+
+  ```java
+  package com.huifer.mybatis.plugins;
+  
+  import org.apache.ibatis.plugin.Interceptor;
+  import org.apache.ibatis.plugin.Invocation;
+  import org.apache.ibatis.plugin.Plugin;
+  
+  import java.util.Properties;
+  
+  //@Intercepts({
+  //        @Signature(
+  //                type = Executor.class,
+  //                method = "query",
+  //                args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}
+  //        )
+  //})
+  public class TestPlugin implements Interceptor {
+      @Override
+      public Object intercept(Invocation invocation) throws Throwable {
+  
+          return invocation.proceed();
+      }
+  
+      @Override
+      public Object plugin(Object target) {
+          return Plugin.wrap(target, this);
+      }
+  
+      @Override
+      public void setProperties(Properties properties) {
+          System.out.println(properties);
+      }
+  }
+  
+  ```
+
+
+
+修改 `mybatis-config.xml`
+
+```xml
+  <plugins>
+    <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin">
+      <property name="testPlugins" value="tPl"/>
+    </plugin>
+  </plugins>
+```
+
+
+
+```java
+    /**
+     * 记载 plugins 标签内容
+     * @param parent
+     * @throws Exception
+     */
+    private void pluginElement(XNode parent) throws Exception {
+        if (parent != null) {
+            for (XNode child : parent.getChildren()) {
+                //     <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin"> 获取 interceptor 值
+                String interceptor = child.getStringAttribute("interceptor");
+                // 获取plugin 下面的 property 标签数据
+                Properties properties = child.getChildrenAsProperties();
+                Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
+                interceptorInstance.setProperties(properties);
+                configuration.addInterceptor(interceptorInstance);
+            }
+        }
+    }
+
+```
+
+先看`interceptor` 和 `properties` 
+
+![1576050247445](assets/1576050247445.png)
+
+
+
+- `Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();`这段内容其实是通过反射获取对应的实例 ， 
+
+- 注意：**`org.apache.ibatis.plugin.Interceptor`的`setProperties`方法是空的实现类需要实现. 现在的实现方式是输出参数`properties`**
+
+```java
+public interface Interceptor {
+
+    Object intercept(Invocation invocation) throws Throwable;
+
+    default Object plugin(Object target) {
+        return Plugin.wrap(target, this);
+    }
+
+    default void setProperties(Properties properties) {
+        // NOP
+    }
+
+}
+
+```
+
+![1576050482190](assets/1576050482190.png)
+
+- 跳出这个方法，通过 debug 查看下面这个方法的返回值
+
+  ```java
+  this.configuration.getInterceptors()
+  ```
+
+![1576050580581](assets/1576050580581.png)
+
+- 指向了我们刚才编写的插件类，为了测试在插件类编写
+
+  ```java
+  public String hello() {    return "hello-mybatis-plugins";}
+  ```
+- `((TestPlugin) this.configuration.getInterceptors().get(0)).hello()`
+
+![1576050742205](assets/1576050742205.png)

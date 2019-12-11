@@ -214,10 +214,17 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 记载 plugins 标签内容
+     * @param parent
+     * @throws Exception
+     */
     private void pluginElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
+                //     <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin"> 获取 interceptor 值
                 String interceptor = child.getStringAttribute("interceptor");
+                // 获取plugin 下面的 property 标签数据
                 Properties properties = child.getChildrenAsProperties();
                 Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
                 interceptorInstance.setProperties(properties);
