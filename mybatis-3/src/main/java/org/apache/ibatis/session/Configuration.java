@@ -87,13 +87,20 @@ public class Configuration {
     protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     protected final LanguageDriverRegistry languageRegistry = new LanguageDriverRegistry();
+    // mapper 标签下的属性
     protected final Map<String, MappedStatement> mappedStatements = new StrictMap<MappedStatement>("Mapped Statements collection")
             .conflictMessageProducer((savedValue, targetValue) ->
                     ". please check " + savedValue.getResource() + " and " + targetValue.getResource());
+    // mapper 标签下的属性
     protected final Map<String, Cache> caches = new StrictMap<>("Caches collection");
+    // mapper 标签下的属性
     protected final Map<String, ResultMap> resultMaps = new StrictMap<>("Result Maps collection");
+    // mapper 标签下的属性
     protected final Map<String, ParameterMap> parameterMaps = new StrictMap<>("Parameter Maps collection");
+    // mapper 标签下的属性
     protected final Map<String, KeyGenerator> keyGenerators = new StrictMap<>("Key Generators collection");
+
+
     protected final Set<String> loadedResources = new HashSet<>();
     protected final Map<String, XNode> sqlFragments = new StrictMap<>("XML fragments parsed from previous mappers");
     protected final Collection<XMLStatementBuilder> incompleteStatements = new LinkedList<>();

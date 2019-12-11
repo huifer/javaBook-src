@@ -40,13 +40,33 @@ public class SqlSessionFactoryBuilder {
         return build(reader, environment, null);
     }
 
+    /**
+     * 创建方法
+     *
+     * @param reader     暂时理解为 xml inputStream
+     * @param properties 属性
+     * @return
+     */
     public SqlSessionFactory build(Reader reader, Properties properties) {
         return build(reader, null, properties);
     }
 
+    /**
+     * 真正的创建方法
+     *
+     * @param reader inputStream
+     * @param environment
+     * @param properties 属性值
+     * @return
+     */
     public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
         try {
+            // 通过 XMLConfigBuilder 解析成一个 XMLConfigBuilder
             XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
+            // 往下点进去看方法
+            // 1. org.apache.ibatis.session.SqlSessionFactoryBuilder.build(org.apache.ibatis.session.Configuration)
+            // 2. org.apache.ibatis.session.defaults.DefaultSqlSessionFactory.DefaultSqlSessionFactory
+            // 3. 第二步的构造方法中生成了 `org.apache.ibatis.session.Configuration`对象
             return build(parser.parse());
         } catch (Exception e) {
             throw ExceptionFactory.wrapException("Error building SqlSession.", e);

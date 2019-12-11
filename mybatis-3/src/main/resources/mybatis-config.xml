@@ -3,27 +3,33 @@
     PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-  <settings>
+  <properties resource="test.properties" >
+      <property name="hello" value="world"/>
+      <property name="k" value="v"/>
+  </properties>
 
+  <settings>
     <!--    缓存,默认开启-->
-    <setting name="cacheEnabled" value="true" />
-<!--全局启用或禁用延迟加载。当禁用时, 所有关联对象都会即时加载 懒加载,默认关闭-->
-    <setting name="lazyLoadingEnabled" value="true" />
-<!--    允许或不允许多种结果集从一个单独的语句中返回-->
-    <setting name="multipleResultSetsEnabled" value="true" />
-    <setting name="useColumnLabel" value="true" />
-    <setting name="useGeneratedKeys" value="false" />
-    <setting name="autoMappingBehavior" value="PARTIAL" />
-    <setting name="defaultExecutorType" value="SIMPLE" />
+    <setting name="cacheEnabled" value="true"/>
+    <!--全局启用或禁用延迟加载。当禁用时, 所有关联对象都会即时加载 懒加载,默认关闭-->
+    <setting name="lazyLoadingEnabled" value="true"/>
+    <!--    允许或不允许多种结果集从一个单独的语句中返回-->
+    <setting name="multipleResultSetsEnabled" value="true"/>
+    <setting name="useColumnLabel" value="true"/>
+    <setting name="useGeneratedKeys" value="false"/>
+    <setting name="autoMappingBehavior" value="PARTIAL"/>
+    <setting name="defaultExecutorType" value="SIMPLE"/>
     <!--    查询超时-->
-    <setting name="defaultStatementTimeout" value="25" />
-    <setting name="safeRowBoundsEnabled" value="false" />
-    <setting name="mapUnderscoreToCamelCase" value="false" />
-    <setting name="localCacheScope" value="SESSION" />
-    <setting name="jdbcTypeForNull" value="OTHER" />
-    <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
+    <setting name="defaultStatementTimeout" value="25"/>
+    <setting name="safeRowBoundsEnabled" value="false"/>
+    <setting name="mapUnderscoreToCamelCase" value="false"/>
+    <setting name="localCacheScope" value="SESSION"/>
+    <setting name="jdbcTypeForNull" value="OTHER"/>
+    <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString"/>
 
   </settings>
+
+
 
   <typeAliases>
     <!--    <package name="com.huifer.mybatis.entity"/>-->

@@ -91,6 +91,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             throw new BuilderException("Each XMLConfigBuilder can only be used once.");
         }
         parsed = true;
+        // 加载<configuration> 标签 , Xnode.evalNode("....") 方法的目的就是加载指定标签
         parseConfiguration(parser.evalNode("/configuration"));
         return configuration;
     }
@@ -98,14 +99,21 @@ public class XMLConfigBuilder extends BaseBuilder {
     private void parseConfiguration(XNode root) {
         try {
             //issue #117 read properties first
+            // 加载 properties 标签
             propertiesElement(root.evalNode("properties"));
+            // 加载 setting 标签
             Properties settings = settingsAsProperties(root.evalNode("settings"));
             loadCustomVfs(settings);
             loadCustomLogImpl(settings);
+            // 加载 typeAliases 标签
             typeAliasesElement(root.evalNode("typeAliases"));
+            // 加载 plugins 标签
             pluginElement(root.evalNode("plugins"));
+            // 加载 objectFactory 标签
             objectFactoryElement(root.evalNode("objectFactory"));
+            // 加载 objectWrapperFactory 标签
             objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
+            // 加载 reflectorFactory 标签
             reflectorFactoryElement(root.evalNode("reflectorFactory"));
             settingsElement(settings);
             // read it after objectFactory and objectWrapperFactory issue #631
@@ -152,6 +160,10 @@ public class XMLConfigBuilder extends BaseBuilder {
         configuration.setLogImpl(logImpl);
     }
 
+    /**
+     * 别名加载
+     * @param parent
+     */
     private void typeAliasesElement(XNode parent) {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
@@ -214,17 +226,27 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 加载 properties 标签内容
+     *
+     * @param context
+     * @throws Exception
+     */
     private void propertiesElement(XNode context) throws Exception {
         if (context != null) {
+            // 加载下级标签,解析属性
             Properties defaults = context.getChildrenAsProperties();
             String resource = context.getStringAttribute("resource");
             String url = context.getStringAttribute("url");
             if (resource != null && url != null) {
+                // 不会同时设置 resource 和 url 的属性值
                 throw new BuilderException("The properties element cannot specify both a URL and a resource based property file reference.  Please specify one or the other.");
             }
             if (resource != null) {
+                // 覆盖子节点属性
                 defaults.putAll(Resources.getResourceAsProperties(resource));
             } else if (url != null) {
+                // 覆盖子节点属性
                 defaults.putAll(Resources.getUrlAsProperties(url));
             }
             Properties vars = configuration.getVariables();
@@ -232,6 +254,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                 defaults.putAll(vars);
             }
             parser.setVariables(defaults);
+            // 设置到 全局的 configuration 中
             configuration.setVariables(defaults);
         }
     }

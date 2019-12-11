@@ -315,6 +315,10 @@ public class XNode {
         return children;
     }
 
+    /**
+     * 解析配置文件xml的标签将返回 {name:value}
+     * @return
+     */
     public Properties getChildrenAsProperties() {
         Properties properties = new Properties();
         for (XNode child : getChildren()) {

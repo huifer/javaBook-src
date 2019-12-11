@@ -209,6 +209,11 @@ public class XPathParser {
         return xnodes;
     }
 
+    /**
+     * 加载指定标签名下的内容
+     * @param expression
+     * @return
+     */
     public XNode evalNode(String expression) {
         return evalNode(document, expression);
     }

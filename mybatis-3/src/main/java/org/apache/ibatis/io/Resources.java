@@ -146,13 +146,14 @@ public class Resources {
     /**
      * Returns a resource on the classpath as a Reader object
      *
-     * @param resource The resource to find
+     * @param resource The resource to find, 文件地址
      * @return The resource
      * @throws java.io.IOException If the resource cannot be found or read
      */
     public static Reader getResourceAsReader(String resource) throws IOException {
         Reader reader;
         if (charset == null) {
+            // 解析成 inputStream
             reader = new InputStreamReader(getResourceAsStream(resource));
         } else {
             reader = new InputStreamReader(getResourceAsStream(resource), charset);
