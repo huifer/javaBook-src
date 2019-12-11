@@ -187,7 +187,7 @@ private void parseConfiguration(XNode root) {
         System.out.println();
     }
 ```
-### propertiesElement 
+## propertiesElement 
 - properties 标签属性加载
 ```java
    private void propertiesElement(XNode context) throws Exception {
@@ -371,3 +371,133 @@ private void typeAliasesElement(XNode parent) {
 `typeAaliases`放在`this.configuration.typeAliasRegistry.typeAliases`中
 
 ![1576028709743](assets/1576028709743.png)
+
+
+
+
+
+## settingsAsProperties
+
+- `org.apache.ibatis.builder.xml.XMLConfigBuilder#parseConfiguration`
+
+- 设置 setting 标签下的属性相关代码
+
+  ```java
+              Properties settings = settingsAsProperties(root.evalNode("settings"));
+              // vfs 虚拟文件相关属性
+              loadCustomVfs(settings);
+              // 日志实现类
+              loadCustomLogImpl(settings);
+  ```
+
+  
+
+
+
+```JAVA
+    private Properties settingsAsProperties(XNode context) {
+        if (context == null) {
+            // 返回一个空的 Properties
+            return new Properties();
+        }
+        Properties props = context.getChildrenAsProperties();
+        // Check that all settings are known to the configuration class
+        MetaClass metaConfig = MetaClass.forClass(Configuration.class, localReflectorFactory);
+        for (Object key : props.keySet()) {
+            if (!metaConfig.hasSetter(String.valueOf(key))) {
+                throw new BuilderException("The setting " + key + " is not known.  Make sure you spelled it correctly (case sensitive).");
+            }
+        }
+        return props;
+    }
+```
+
+返回结果就是`Properties` 对象
+
+- 修改`mybatis-config.xml`
+
+  ```xml
+  <setting name="logImpl" value="LOG4J"/>
+  ```
+
+
+
+![1576041628806](assets/1576041628806.png)
+
+
+
+### loadCustomLogImpl
+
+- `org.apache.ibatis.builder.xml.XMLConfigBuilder#loadCustomLogImpl`
+
+```java
+    private void loadCustomLogImpl(Properties props) {
+        Class<? extends Log> logImpl = resolveClass(props.getProperty("logImpl"));
+        configuration.setLogImpl(logImpl);
+    }
+```
+
+- 熟悉的方法他来了
+
+  ```java
+      /**
+       * 通过别名查询
+       * @param alias
+       * @param <T>
+       * @return
+       */
+      protected <T> Class<? extends T> resolveClass(String alias) {
+          if (alias == null) {
+              return null;
+          }
+          try {
+              return resolveAlias(alias);
+          } catch (Exception e) {
+              throw new BuilderException("Error resolving class. Cause: " + e, e);
+          }
+      }
+  
+  ```
+
+  ```java
+     protected <T> Class<? extends T> resolveAlias(String alias) {
+          return typeAliasRegistry.resolveAlias(alias);
+      }
+  ```
+
+  ```java
+      /**
+       * 获取别名的value
+       *
+       * @param string 别名名称
+       * @param <T>
+       * @return
+       */
+      @SuppressWarnings("unchecked")
+      // throws class cast exception as well if types cannot be assigned
+      public <T> Class<T> resolveAlias(String string) {
+          try {
+              if (string == null) {
+                  return null;
+              }
+              // issue #748
+              String key = string.toLowerCase(Locale.ENGLISH);
+              Class<T> value;
+              if (typeAliases.containsKey(key)) {
+                  value = (Class<T>) typeAliases.get(key);
+              } else {
+                  value = (Class<T>) Resources.classForName(string);
+              }
+              return value;
+          } catch (ClassNotFoundException e) {
+              throw new TypeException("Could not resolve type alias '" + string + "'.  Cause: " + e, e);
+          }
+      }
+  
+  ```
+
+  从别名`private final Map<String, Class<?>> typeAliases = new HashMap<>();`存储空间获取存储的实体直接返回
+
+  ![1576041889664](assets/1576041889664.png)
+
+- 此时该日志为： `org.apache.ibatis.logging.log4j.Log4jImpl`

@@ -103,7 +103,9 @@ public class XMLConfigBuilder extends BaseBuilder {
             propertiesElement(root.evalNode("properties"));
             // 加载 setting 标签
             Properties settings = settingsAsProperties(root.evalNode("settings"));
+            // vfs 虚拟文件相关属性
             loadCustomVfs(settings);
+            // 日志实现类
             loadCustomLogImpl(settings);
             // 加载 typeAliases 标签
             typeAliasesElement(root.evalNode("typeAliases"));
@@ -126,8 +128,15 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 加载 setting 标签
+     *
+     * @param context
+     * @return
+     */
     private Properties settingsAsProperties(XNode context) {
         if (context == null) {
+            // 返回一个空的 Properties
             return new Properties();
         }
         Properties props = context.getChildrenAsProperties();
@@ -141,6 +150,12 @@ public class XMLConfigBuilder extends BaseBuilder {
         return props;
     }
 
+    /**
+     * vfs 的子类
+     *
+     * @param props
+     * @throws ClassNotFoundException
+     */
     private void loadCustomVfs(Properties props) throws ClassNotFoundException {
         String value = props.getProperty("vfsImpl");
         if (value != null) {
@@ -155,6 +170,11 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 日志实现
+     *    <setting name="logImpl" value="LOG4J"/>
+     * @param props
+     */
     private void loadCustomLogImpl(Properties props) {
         Class<? extends Log> logImpl = resolveClass(props.getProperty("logImpl"));
         configuration.setLogImpl(logImpl);
