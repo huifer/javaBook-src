@@ -41,6 +41,7 @@
       <property name="testPlugins" value="tPl"/>
     </plugin>
   </plugins>
+  <objectFactory type=""></objectFactory>
 
   <!-- 定义数据库的信息，默认使用development数据库构建环境 -->
   <environments default="development">

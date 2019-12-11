@@ -13,7 +13,8 @@ import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
-        String resource = "mybatis-config-demo.xml";
+//        String resource = "mybatis-config-demo.xml";
+        String resource = "mybatis-config.xml";
         InputStream inputStream = null;
         try {
             inputStream = Resources.getResourceAsStream(resource);

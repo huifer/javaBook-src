@@ -107,7 +107,6 @@ public class XMLConfigBuilder extends BaseBuilder {
             loadCustomVfs(settings);
             // 日志实现类
             loadCustomLogImpl(settings);
-            settingsElement(settings);
             // 加载 typeAliases 标签
             typeAliasesElement(root.evalNode("typeAliases"));
             // 加载 plugins 标签
@@ -120,7 +119,7 @@ public class XMLConfigBuilder extends BaseBuilder {
             reflectorFactoryElement(root.evalNode("reflectorFactory"));
             // 设置 settings 标签的属性值放入 configuration 中
             // 不明白为什么放在下面,应该放在 loadCustomLogImpl 方法之后. 可读性会更好
-//            settingsElement(settings);
+            settingsElement(settings);
             // read it after objectFactory and objectWrapperFactory issue #631
             environmentsElement(root.evalNode("environments"));
             databaseIdProviderElement(root.evalNode("databaseIdProvider"));
