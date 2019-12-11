@@ -9,10 +9,11 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 public class Main {
     public static void main(String[] args) {
-        String resource = "mybatis-config.xml";
+        String resource = "mybatis-config-demo.xml";
         InputStream inputStream = null;
         try {
             inputStream = Resources.getResourceAsStream(resource);
@@ -30,7 +31,7 @@ public class Main {
             p.setAge(11);
             p.setPhone("123");
             p.setEmail("123@qq.com");
-            p.setAddress("china");
+            p.setAddress(new Date().toString());
 
             roleMapper.insert(p);
 
