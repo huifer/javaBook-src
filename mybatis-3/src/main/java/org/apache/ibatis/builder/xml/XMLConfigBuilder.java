@@ -117,6 +117,8 @@ public class XMLConfigBuilder extends BaseBuilder {
             objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
             // 加载 reflectorFactory 标签
             reflectorFactoryElement(root.evalNode("reflectorFactory"));
+            // 设置 settings 标签的属性值放入 configuration 中
+            // 不明白为什么放在下面,应该放在 loadCustomLogImpl 方法之后. 可读性会更好
             settingsElement(settings);
             // read it after objectFactory and objectWrapperFactory issue #631
             environmentsElement(root.evalNode("environments"));
@@ -172,7 +174,8 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 日志实现
-     *    <setting name="logImpl" value="LOG4J"/>
+     * <setting name="logImpl" value="LOG4J"/>
+     *
      * @param props
      */
     private void loadCustomLogImpl(Properties props) {
@@ -216,6 +219,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 记载 plugins 标签内容
+     *
      * @param parent
      * @throws Exception
      */
@@ -292,6 +296,11 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 该方法将settings标签内的数据放到 {@link Configuration}
+     *
+     * @param props settings 标签的内容
+     */
     private void settingsElement(Properties props) {
         configuration.setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
         configuration.setAutoMappingUnknownColumnBehavior(AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
