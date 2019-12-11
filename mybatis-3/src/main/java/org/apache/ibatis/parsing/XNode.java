@@ -223,6 +223,11 @@ public class XNode {
         }
     }
 
+    /**
+     * 通过标签的name属性获取值
+     * @param name
+     * @return
+     */
     public String getStringAttribute(String name) {
         return getStringAttribute(name, null);
     }

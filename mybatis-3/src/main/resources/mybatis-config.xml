@@ -3,9 +3,9 @@
     PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-  <properties resource="test.properties" >
-      <property name="hello" value="world"/>
-      <property name="k" value="v"/>
+  <properties resource="test.properties">
+    <property name="hello" value="world"/>
+    <property name="k" value="v"/>
   </properties>
 
   <settings>
@@ -30,9 +30,8 @@
   </settings>
 
 
-
   <typeAliases>
-    <!--    <package name="com.huifer.mybatis.entity"/>-->
+<!--    <package name="com.huifer.mybatis.entity"/>-->
     <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
   </typeAliases>
 

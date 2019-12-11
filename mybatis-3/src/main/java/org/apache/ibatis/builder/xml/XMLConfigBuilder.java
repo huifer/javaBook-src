@@ -162,22 +162,28 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 别名加载
+     *
      * @param parent
      */
     private void typeAliasesElement(XNode parent) {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
                 if ("package".equals(child.getName())) {
+                    // 解析 package 标签
                     String typeAliasPackage = child.getStringAttribute("name");
                     configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
                 } else {
+                    // 解析 typeAliases 标签
                     String alias = child.getStringAttribute("alias");
                     String type = child.getStringAttribute("type");
                     try {
+                        // 将 type 中的全类名解析成字节码
                         Class<?> clazz = Resources.classForName(type);
+                        // 别名注册
                         if (alias == null) {
                             typeAliasRegistry.registerAlias(clazz);
                         } else {
+                            // 向 typeAliases put(别名名称,字节码)
                             typeAliasRegistry.registerAlias(alias, clazz);
                         }
                     } catch (ClassNotFoundException e) {

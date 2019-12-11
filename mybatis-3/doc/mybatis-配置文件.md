@@ -279,3 +279,95 @@ k=java
 
 最终设置结果`k`的属性值修改了:happy:
 
+
+
+## typeAliasesElement
+
+- 别名加载,配置文件在下方,在debug阶段选择开启不同的别名方式进行源码查看
+```xml
+  <typeAliases>
+<!--    <package name="com.huifer.mybatis.entity"/>-->
+    <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
+  </typeAliases>
+```
+```java
+private void typeAliasesElement(XNode parent) {
+        if (parent != null) {
+            for (XNode child : parent.getChildren()) {
+                if ("package".equals(child.getName())) {
+                    // 解析 package 标签
+                    String typeAliasPackage = child.getStringAttribute("name");
+                    configuration.getTypeAliasRegistry().registerAliases(typeAliasPackage);
+                } else {
+                    // 解析 typeAliases 标签
+                    String alias = child.getStringAttribute("alias");
+                    String type = child.getStringAttribute("type");
+                    try {
+                        Class<?> clazz = Resources.classForName(type);
+                        // 别名注册
+                        if (alias == null) {
+                            typeAliasRegistry.registerAlias(clazz);
+                        } else {
+                            
+                            typeAliasRegistry.registerAlias(alias, clazz);
+                        }
+                    } catch (ClassNotFoundException e) {
+                        throw new BuilderException("Error registering typeAlias for '" + alias + "'. Cause: " + e, e);
+                    }
+                }
+            }
+        }
+    }
+```
+
+![1576028186530](asserts/1576028186530.png)
+
+目前解析的内容为`Person`这个实体
+
+- 别名加载方法
+
+```java
+    /**
+     * 别名注册,
+     * typeAliases 是一个map key=>别名,value=>字节码
+     *
+     * @param alias 别名名称
+     * @param value 别名的字节码
+     */
+    public void registerAlias(String alias, Class<?> value) {
+        if (alias == null) {
+            throw new TypeException("The parameter alias cannot be null");
+        }
+        // issue #748
+        String key = alias.toLowerCase(Locale.ENGLISH);
+        if (typeAliases.containsKey(key) && typeAliases.get(key) != null && !typeAliases.get(key).equals(value)) {
+            throw new TypeException("The alias '" + alias + "' is already mapped to the value '" + typeAliases.get(key).getName() + "'.");
+        }
+        typeAliases.put(key, value);
+    }
+
+```
+
+完成了`properties`标签和`typeAliases`看一下此时的`configuration`是什么
+
+通过下面的代码我们知道`properties`属性放置在` configuration.variables`
+
+```java
+            configuration.setVariables(defaults);
+```
+
+```java
+    public void setVariables(Properties variables) {
+        this.variables = variables;
+    }
+```
+
+
+
+
+
+![1576028554094](asserts/1576028554094.png)
+
+`typeAaliases`放在`this.configuration.typeAliasRegistry.typeAliases`中
+
+![1576028709743](asserts/1576028709743.png)

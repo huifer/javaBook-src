@@ -28,6 +28,10 @@ import java.util.*;
  */
 public class TypeAliasRegistry {
 
+    /**
+     * 别名存放仓库
+     * 是一个map key=>别名,value=>字节码
+     */
     private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
     public TypeAliasRegistry() {
@@ -91,6 +95,13 @@ public class TypeAliasRegistry {
         registerAlias("ResultSet", ResultSet.class);
     }
 
+    /**
+     * 获取别名的value
+     *
+     * @param string 别名名称
+     * @param <T>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     // throws class cast exception as well if types cannot be assigned
     public <T> Class<T> resolveAlias(String string) {
@@ -129,6 +140,11 @@ public class TypeAliasRegistry {
         }
     }
 
+    /**
+     * 加载{@link Alias} 注解的内容
+     *
+     * @param type
+     */
     public void registerAlias(Class<?> type) {
         String alias = type.getSimpleName();
         Alias aliasAnnotation = type.getAnnotation(Alias.class);
@@ -138,6 +154,13 @@ public class TypeAliasRegistry {
         registerAlias(alias, type);
     }
 
+    /**
+     * 别名注册,
+     * typeAliases 是一个map key=>别名,value=>字节码
+     *
+     * @param alias 别名名称
+     * @param value 别名的字节码
+     */
     public void registerAlias(String alias, Class<?> value) {
         if (alias == null) {
             throw new TypeException("The parameter alias cannot be null");
