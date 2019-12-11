@@ -1,28 +1,15 @@
+# mybatis 配置文件
+> 通常情况下使用`mybatis`的时候我们会添加一个`mybatis-config.xml`的文件. 这个文件是如何解析的呢?
+## 解析
+- 先编辑一个`mybatis-config.xml`文件放在`src\resources`目录下,具体内容如下
+```xml
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
     PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
   <settings>
-
-    <!--    缓存,默认开启-->
-    <setting name="cacheEnabled" value="true" />
-<!--全局启用或禁用延迟加载。当禁用时, 所有关联对象都会即时加载 懒加载,默认关闭-->
-    <setting name="lazyLoadingEnabled" value="true" />
-<!--    允许或不允许多种结果集从一个单独的语句中返回-->
-    <setting name="multipleResultSetsEnabled" value="true" />
-    <setting name="useColumnLabel" value="true" />
-    <setting name="useGeneratedKeys" value="false" />
-    <setting name="autoMappingBehavior" value="PARTIAL" />
-    <setting name="defaultExecutorType" value="SIMPLE" />
-    <!--    查询超时-->
-    <setting name="defaultStatementTimeout" value="25" />
-    <setting name="safeRowBoundsEnabled" value="false" />
-    <setting name="mapUnderscoreToCamelCase" value="false" />
-    <setting name="localCacheScope" value="SESSION" />
-    <setting name="jdbcTypeForNull" value="OTHER" />
-    <setting name="lazyLoadTriggerMethods" value="equals,clone,hashCode,toString" />
-
+    <setting name="lazyLoadingEnabled" value="true"/>
   </settings>
 
   <typeAliases>
@@ -47,3 +34,16 @@
     <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>
   </mappers>
 </configuration>
+
+```
+- 目前已知的条件: 这是一个配置文件,应该有一个对应的JAVA类来存储`org.apache.ibatis.session.Configuration`
+```xml
+  <settings>
+    <setting name="lazyLoadingEnabled" value="true"/>
+  </settings>
+```
+看上述的xml文件标签内容是否在`org.apache.ibatis.session.Configuration`存在,搜索`lazyLoadingEnabled`属性
+```java
+protected boolean lazyLoadingEnabled = false;
+```
+- 其他的一些属性应该也会有对应的比如查询超时`defaultStatementTimeout`等等.

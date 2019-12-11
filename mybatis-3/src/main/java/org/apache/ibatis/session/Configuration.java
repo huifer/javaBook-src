@@ -77,6 +77,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 /**
+ * mybatis-config.xml 文件的java实体
  * @author Clinton Begin
  */
 public class Configuration {
@@ -113,6 +114,10 @@ public class Configuration {
     protected boolean multipleResultSetsEnabled = true;
     protected boolean useGeneratedKeys;
     protected boolean useColumnLabel = true;
+    /**
+     * 缓存 默认开启
+     *     <setting name="cacheEnabled" value="true"/>
+     */
     protected boolean cacheEnabled = true;
     protected boolean callSettersOnNulls;
     protected boolean useActualParamName = true;
@@ -123,6 +128,10 @@ public class Configuration {
     protected LocalCacheScope localCacheScope = LocalCacheScope.SESSION;
     protected JdbcType jdbcTypeForNull = JdbcType.OTHER;
     protected Set<String> lazyLoadTriggerMethods = new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString"));
+    /**
+     * 查询超时
+     *     <setting name="defaultStatementTimeout" value="100"/>
+     */
     protected Integer defaultStatementTimeout;
     protected Integer defaultFetchSize;
     protected ResultSetType defaultResultSetType;
