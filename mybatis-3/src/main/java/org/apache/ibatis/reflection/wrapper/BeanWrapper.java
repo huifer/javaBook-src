@@ -28,8 +28,14 @@ import java.util.List;
 public class BeanWrapper extends BaseWrapper {
 
     private final Object object;
+
     private final MetaClass metaClass;
 
+    /**
+     * 构造
+     * @param metaObject
+     * @param object
+     */
     public BeanWrapper(MetaObject metaObject, Object object) {
         super(metaObject);
         this.object = object;
@@ -39,6 +45,7 @@ public class BeanWrapper extends BaseWrapper {
     @Override
     public Object get(PropertyTokenizer prop) {
         if (prop.getIndex() != null) {
+            // 实例化集合对象
             Object collection = resolveCollection(prop, object);
             return getCollectionValue(prop, collection);
         } else {

@@ -28,7 +28,13 @@ import java.util.Map;
  */
 public class MetaObject {
 
+    /**
+     * 原始的数据对象,初始化时的对象
+     */
     private final Object originalObject;
+    /**
+     * 对象包装
+     */
     private final ObjectWrapper objectWrapper;
     private final ObjectFactory objectFactory;
     private final ObjectWrapperFactory objectWrapperFactory;
@@ -40,6 +46,7 @@ public class MetaObject {
         this.objectWrapperFactory = objectWrapperFactory;
         this.reflectorFactory = reflectorFactory;
 
+        // 根据object不同实例进行不同的实例化方式
         if (object instanceof ObjectWrapper) {
             this.objectWrapper = (ObjectWrapper) object;
         } else if (objectWrapperFactory.hasWrapperFor(object)) {
@@ -105,11 +112,17 @@ public class MetaObject {
         return objectWrapper.hasGetter(name);
     }
 
+    /**
+     * 获取value
+     * @param name 属性值名称
+     * @return
+     */
     public Object getValue(String name) {
         PropertyTokenizer prop = new PropertyTokenizer(name);
         if (prop.hasNext()) {
             MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
             if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+                // 判断是否是空的metaObject
                 return null;
             } else {
                 return metaValue.getValue(prop.getChildren());
@@ -119,18 +132,29 @@ public class MetaObject {
         }
     }
 
+    /**
+     * metaObject 设置属性值方法
+     * {name:value}
+     *
+     * @param name  属性值名称
+     * @param value 属性值
+     */
     public void setValue(String name, Object value) {
         PropertyTokenizer prop = new PropertyTokenizer(name);
         if (prop.hasNext()) {
+            // 获取属性实力
             MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
             if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
                 if (value == null) {
+                    // value 空则返回
                     // don't instantiate child path if value is null
                     return;
                 } else {
+                    // 创建属性值
                     metaValue = objectWrapper.instantiatePropertyValue(name, prop, objectFactory);
                 }
             }
+
             metaValue.setValue(prop.getChildren(), value);
         } else {
             objectWrapper.set(prop, value);

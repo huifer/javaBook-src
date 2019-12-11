@@ -52,6 +52,7 @@ class HfMetaObjectTest {
 
     }
 
+
     public static class TestJavaBean {
         private String name;
 

@@ -27,7 +27,11 @@ public final class SystemMetaObject {
 
     public static final ObjectFactory DEFAULT_OBJECT_FACTORY = new DefaultObjectFactory();
     public static final ObjectWrapperFactory DEFAULT_OBJECT_WRAPPER_FACTORY = new DefaultObjectWrapperFactory();
-    public static final MetaObject NULL_META_OBJECT = MetaObject.forObject(NullObject.class, DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
+    /**
+     * null 元数据
+     */
+    public static final MetaObject NULL_META_OBJECT = MetaObject.forObject(NullObject.class,
+            DEFAULT_OBJECT_FACTORY, DEFAULT_OBJECT_WRAPPER_FACTORY, new DefaultReflectorFactory());
 
     private SystemMetaObject() {
         // Prevent Instantiation of Static Class
