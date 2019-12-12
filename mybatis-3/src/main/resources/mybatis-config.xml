@@ -37,14 +37,15 @@
     <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
   </typeAliases>
 
-<!--  <typeHandlers>-->
-<!--    <typeHandler javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>-->
-<!--  </typeHandlers>-->
+  <!--  <typeHandlers>-->
+  <!--    <typeHandler javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>-->
+  <!--  </typeHandlers>-->
   <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">
     <property name="data" value="100"/>
   </objectFactory>
 
-
+  <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>
+  <reflectorFactory type="org.apache.ibatis.reflection.DefaultReflectorFactory"/>
   <plugins>
     <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin">
       <property name="testPlugins" value="tPl"/>

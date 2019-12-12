@@ -636,7 +636,7 @@ public interface Interceptor {
 
 ## objectFactoryElement
 
-- 标签`<objectFactory> 的解析
+- 标签`<objectFactory>` 的解析
 
 - 在`mybatis-config.xml`中写入
 
@@ -734,3 +734,101 @@ public interface Interceptor {
 ```
 
 ![1576110788523](assets/1576110788523.png)
+
+
+
+## objectWrapperFactoryElement
+
+- 解析`<objectWrapperFactory>`标签
+
+- 修改`mybatis-config.xml`
+
+  ```xml
+    <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>
+  
+  ```
+
+```java
+    private void objectWrapperFactoryElement(XNode context) throws Exception {
+        if (context != null) {
+            // 获取 objectWrapperFactory 标签 type 的值
+            String type = context.getStringAttribute("type");
+            // 别名 mao 中获取
+            ObjectWrapperFactory factory = (ObjectWrapperFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            // 在 configuration 设置
+            configuration.setObjectWrapperFactory(factory);
+        }
+    }
+
+```
+
+![1576111307305](assets/1576111307305.png)
+
+
+
+## reflectorFactoryElement
+
+- 解析`<reflectorFactoryElement>`标签
+
+- 修改`mybatis-config.xml`
+```xml
+<reflectorFactory type="org.apache.ibatis.reflection.DefaultReflectorFactory"/>
+```
+- 源码和`objectWrapperFactoryElement`方法相同的解析过程.
+```java
+    /**
+     * 解析 reflectorFactory 标签
+     *
+     * @param context
+     * @throws Exception
+     */
+    private void reflectorFactoryElement(XNode context) throws Exception {
+        if (context != null) {
+            // 获取 reflectorFactory 标签 type 的值
+            String type = context.getStringAttribute("type");
+            // 别名 mao 中获取
+            ReflectorFactory factory = (ReflectorFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            // 在 configuration 设置
+            configuration.setReflectorFactory(factory);
+        }
+    }
+```
+## settingsElement
+- 这个方法的作用是将xml解析道德内容放入 `org.apache.ibatis.session.Configuration` 中
+```java
+    /**
+     * 该方法将settings标签内的数据放到 {@link Configuration}
+     *
+     * @param props settings 标签的内容
+     */
+    private void settingsElement(Properties props) {
+        configuration.setAutoMappingBehavior(AutoMappingBehavior.valueOf(props.getProperty("autoMappingBehavior", "PARTIAL")));
+        configuration.setAutoMappingUnknownColumnBehavior(AutoMappingUnknownColumnBehavior.valueOf(props.getProperty("autoMappingUnknownColumnBehavior", "NONE")));
+        configuration.setCacheEnabled(booleanValueOf(props.getProperty("cacheEnabled"), true));
+        configuration.setProxyFactory((ProxyFactory) createInstance(props.getProperty("proxyFactory")));
+        configuration.setLazyLoadingEnabled(booleanValueOf(props.getProperty("lazyLoadingEnabled"), false));
+        configuration.setAggressiveLazyLoading(booleanValueOf(props.getProperty("aggressiveLazyLoading"), false));
+        configuration.setMultipleResultSetsEnabled(booleanValueOf(props.getProperty("multipleResultSetsEnabled"), true));
+        configuration.setUseColumnLabel(booleanValueOf(props.getProperty("useColumnLabel"), true));
+        configuration.setUseGeneratedKeys(booleanValueOf(props.getProperty("useGeneratedKeys"), false));
+        configuration.setDefaultExecutorType(ExecutorType.valueOf(props.getProperty("defaultExecutorType", "SIMPLE")));
+        configuration.setDefaultStatementTimeout(integerValueOf(props.getProperty("defaultStatementTimeout"), null));
+        configuration.setDefaultFetchSize(integerValueOf(props.getProperty("defaultFetchSize"), null));
+        configuration.setDefaultResultSetType(resolveResultSetType(props.getProperty("defaultResultSetType")));
+        configuration.setMapUnderscoreToCamelCase(booleanValueOf(props.getProperty("mapUnderscoreToCamelCase"), false));
+        configuration.setSafeRowBoundsEnabled(booleanValueOf(props.getProperty("safeRowBoundsEnabled"), false));
+        configuration.setLocalCacheScope(LocalCacheScope.valueOf(props.getProperty("localCacheScope", "SESSION")));
+        configuration.setJdbcTypeForNull(JdbcType.valueOf(props.getProperty("jdbcTypeForNull", "OTHER")));
+        configuration.setLazyLoadTriggerMethods(stringSetValueOf(props.getProperty("lazyLoadTriggerMethods"), "equals,clone,hashCode,toString"));
+        configuration.setSafeResultHandlerEnabled(booleanValueOf(props.getProperty("safeResultHandlerEnabled"), true));
+        configuration.setDefaultScriptingLanguage(resolveClass(props.getProperty("defaultScriptingLanguage")));
+        configuration.setDefaultEnumTypeHandler(resolveClass(props.getProperty("defaultEnumTypeHandler")));
+        configuration.setCallSettersOnNulls(booleanValueOf(props.getProperty("callSettersOnNulls"), false));
+        configuration.setUseActualParamName(booleanValueOf(props.getProperty("useActualParamName"), true));
+        configuration.setReturnInstanceForEmptyRow(booleanValueOf(props.getProperty("returnInstanceForEmptyRow"), false));
+        configuration.setLogPrefix(props.getProperty("logPrefix"));
+        configuration.setConfigurationFactory(resolveClass(props.getProperty("configurationFactory")));
+    }
+
+```
+## environmentsElement

@@ -237,6 +237,12 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析 objectFactory 标签
+     *
+     * @param context
+     * @throws Exception
+     */
     private void objectFactoryElement(XNode context) throws Exception {
         if (context != null) {
             // 获取标签 objectFactory 中的 type 属性
@@ -251,18 +257,36 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析 objectWrapperFactory 标签
+     *
+     * @param context
+     * @throws Exception
+     */
     private void objectWrapperFactoryElement(XNode context) throws Exception {
         if (context != null) {
+            // 获取 objectWrapperFactory 标签 type 的值
             String type = context.getStringAttribute("type");
+            // 别名 mao 中获取
             ObjectWrapperFactory factory = (ObjectWrapperFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            // 在 configuration 设置
             configuration.setObjectWrapperFactory(factory);
         }
     }
 
+    /**
+     * 解析 reflectorFactory 标签
+     *
+     * @param context
+     * @throws Exception
+     */
     private void reflectorFactoryElement(XNode context) throws Exception {
         if (context != null) {
+            // 获取 reflectorFactory 标签 type 的值
             String type = context.getStringAttribute("type");
+            // 别名 mao 中获取
             ReflectorFactory factory = (ReflectorFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            // 在 configuration 设置
             configuration.setReflectorFactory(factory);
         }
     }
