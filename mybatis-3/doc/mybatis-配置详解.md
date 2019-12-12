@@ -94,3 +94,13 @@
 | `MonthTypeHandler`           | `java.time.Month`               | `INTEGER`                                                    |
 | `YearMonthTypeHandler`       | `java.time.YearMonth`           | `VARCHAR` 或 `LONGVARCHAR`                                   |
 | `JapaneseDateTypeHandler`    | `java.time.chrono.JapaneseDate` | `DATE`                                                       |
+
+
+
+
+## dtd 文件和 xsd 文件
+- org/apache/ibatis/builder/xml/mybatis-3-config.dtd
+- org/apache/ibatis/builder/xml/mybatis-3-mapper.dtd
+- org/apache/ibatis/builder/xml/mybatis-config.xsd
+- org/apache/ibatis/builder/xml/mybatis-mapper.xsd
+- 根据这些文件我们可以知道`mybatis-config.xml`和`mapper.xml`的编写规则,如标签顺序等
