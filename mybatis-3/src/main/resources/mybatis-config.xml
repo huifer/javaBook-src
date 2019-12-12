@@ -36,13 +36,20 @@
     <!--    <package name="com.huifer.mybatis.entity"/>-->
     <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
   </typeAliases>
+
+<!--  <typeHandlers>-->
+<!--    <typeHandler javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>-->
+<!--  </typeHandlers>-->
+  <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">
+    <property name="data" value="100"/>
+  </objectFactory>
+
+
   <plugins>
     <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin">
       <property name="testPlugins" value="tPl"/>
     </plugin>
   </plugins>
-  <objectFactory type=""></objectFactory>
-
   <!-- 定义数据库的信息，默认使用development数据库构建环境 -->
   <environments default="development">
     <environment id="development">

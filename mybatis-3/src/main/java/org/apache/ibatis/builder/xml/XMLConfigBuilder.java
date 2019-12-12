@@ -239,10 +239,14 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     private void objectFactoryElement(XNode context) throws Exception {
         if (context != null) {
+            // 获取标签 objectFactory 中的 type 属性
             String type = context.getStringAttribute("type");
             Properties properties = context.getChildrenAsProperties();
+            // 去别名 MAP 中获取实例
             ObjectFactory factory = (ObjectFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            // 设置属性值
             factory.setProperties(properties);
+            // 在 configuration 中放入该工厂
             configuration.setObjectFactory(factory);
         }
     }

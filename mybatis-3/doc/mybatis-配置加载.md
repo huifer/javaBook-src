@@ -629,3 +629,108 @@ public interface Interceptor {
 - `((TestPlugin) this.configuration.getInterceptors().get(0)).hello()`
 
 ![1576050742205](assets/1576050742205.png)
+
+
+
+
+
+## objectFactoryElement
+
+- 标签`<objectFactory> 的解析
+
+- 在`mybatis-config.xml`中写入
+
+  ```xml
+    <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">
+      <property name="data" value="100"/>
+    </objectFactory>
+  ```
+
+  ```java
+  package com.huifer.mybatis.factory;
+  
+  import org.apache.ibatis.reflection.factory.ObjectFactory;
+  
+  import java.util.List;
+  import java.util.Properties;
+  
+  public class TestObjectFactory implements ObjectFactory {
+      private String data;
+  
+      public String getData() {
+          return data;
+      }
+  
+      public void setData(String data) {
+          this.data = data;
+      }
+  
+      /**
+       * Sets configuration properties.
+       *
+       * @param properties configuration properties
+       */
+      @Override
+      public void setProperties(Properties properties) {
+          this.data = properties.getProperty("data");
+      }
+  
+      /**
+       * Creates a new object with default constructor.
+       *
+       * @param type Object type
+       * @return
+       */
+      @Override
+      public <T> T create(Class<T> type) {
+          return null;
+      }
+  
+      /**
+       * Creates a new object with the specified constructor and params.
+       *
+       * @param type                Object type
+       * @param constructorArgTypes Constructor argument types
+       * @param constructorArgs     Constructor argument values
+       * @return
+       */
+      @Override
+      public <T> T create(Class<T> type, List<Class<?>> constructorArgTypes, List<Object> constructorArgs) {
+          return null;
+      }
+  
+      /**
+       * Returns true if this object can have a set of other objects.
+       * It's main purpose is to support non-java.util.Collection objects like Scala collections.
+       *
+       * @param type Object type
+       * @return whether it is a collection or not
+       * @since 3.1.0
+       */
+      @Override
+      public <T> boolean isCollection(Class<T> type) {
+          return false;
+      }
+  }
+  
+  ```
+
+- `objectFactoryElement`方法的内容和其他标签的解析方式基本相同
+
+```java
+    private void objectFactoryElement(XNode context) throws Exception {
+        if (context != null) {
+            // 获取标签 objectFactory 中的 type 属性
+            String type = context.getStringAttribute("type");
+            Properties properties = context.getChildrenAsProperties();
+            // 去别名 MAP 中获取实例
+            ObjectFactory factory = (ObjectFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            // 设置属性值
+            factory.setProperties(properties);
+            // 在 configuration 中放入该工厂
+            configuration.setObjectFactory(factory);
+        }
+    }
+```
+
+![1576110788523](assets/1576110788523.png)
