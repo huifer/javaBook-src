@@ -36,6 +36,11 @@ public abstract class BaseBuilder {
     protected final TypeAliasRegistry typeAliasRegistry;
     protected final TypeHandlerRegistry typeHandlerRegistry;
 
+    /**
+     * 从全局配置中获取属性
+     *
+     * @param configuration
+     */
     public BaseBuilder(Configuration configuration) {
         this.configuration = configuration;
         this.typeAliasRegistry = this.configuration.getTypeAliasRegistry();
@@ -110,6 +115,7 @@ public abstract class BaseBuilder {
 
     /**
      * 通过别名查询
+     *
      * @param alias
      * @param <T>
      * @return

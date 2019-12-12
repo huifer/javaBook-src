@@ -3,7 +3,18 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.huifer.mybatis.mapper.PersonMapper">
+  <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+  <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+    <id column="ID" jdbcType="VARCHAR" property="id"/>
+    <result column="age" jdbcType="INTEGER" property="age"/>
+  </resultMap>
 
+  <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+    <parameter property="name" resultMap="base"/>
+  </parameterMap>
+  <sql id="Base_List">
+name,age,phone,email,address
+</sql>
   <insert id="insert" parameterType="Person" keyProperty="id"
           useGeneratedKeys="true">
         INSERT INTO person (name, age, phone, email, address)

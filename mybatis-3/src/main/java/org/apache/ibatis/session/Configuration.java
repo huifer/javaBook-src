@@ -301,6 +301,12 @@ public class Configuration {
         loadedResources.add(resource);
     }
 
+    /**
+     * 判断 是否有这个 mapper 在 {@link Configuration#loadedResources}中
+     *
+     * @param resource
+     * @return
+     */
     public boolean isResourceLoaded(String resource) {
         return loadedResources.contains(resource);
     }

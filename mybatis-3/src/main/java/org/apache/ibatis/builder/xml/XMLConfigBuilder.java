@@ -525,11 +525,11 @@ public class XMLConfigBuilder extends BaseBuilder {
                     // 注册
                     typeHandlerRegistry.register(typeHandlerPackage);
                 } else {
-                  // 获取 javaType 属性值
+                    // 获取 javaType 属性值
                     String javaTypeName = child.getStringAttribute("javaType");
-                  // 获取 jdbcType 属性值
+                    // 获取 jdbcType 属性值
                     String jdbcTypeName = child.getStringAttribute("jdbcType");
-                  // 获取 handler 属性值
+                    // 获取 handler 属性值
                     String handlerTypeName = child.getStringAttribute("handler");
                     // org.apache.ibatis.type.TypeAliasRegistry.TypeAliasRegistry 构造方法中有默认的
                     // 从别名中获取
@@ -550,6 +550,12 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析 mappers
+     *
+     * @param parent
+     * @throws Exception
+     */
     private void mapperElement(XNode parent) throws Exception {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
@@ -557,12 +563,17 @@ public class XMLConfigBuilder extends BaseBuilder {
                     String mapperPackage = child.getStringAttribute("name");
                     configuration.addMappers(mapperPackage);
                 } else {
+                    // 读取 resource 属性
                     String resource = child.getStringAttribute("resource");
+                    // 读取 url 属性
                     String url = child.getStringAttribute("url");
+                    // 读取 class 属性
                     String mapperClass = child.getStringAttribute("class");
                     if (resource != null && url == null && mapperClass == null) {
+                        // 加载 resource 内容
                         ErrorContext.instance().resource(resource);
                         InputStream inputStream = Resources.getResourceAsStream(resource);
+                        // 解析 mapper.xml 文件
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
                         mapperParser.parse();
                     } else if (resource == null && url != null && mapperClass == null) {

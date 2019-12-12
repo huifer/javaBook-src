@@ -59,6 +59,12 @@ public class XMLMapperBuilder extends BaseBuilder {
         this.builderAssistant.setCurrentNamespace(namespace);
     }
 
+    /**
+     * @param inputStream   mapper.xml 文件流
+     * @param configuration 全局的配置文件
+     * @param resource      mapper.xml 文件路径/com/../..
+     * @param sqlFragments  配置里面的内容
+     */
     public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
         this(new XPathParser(inputStream, true, configuration.getVariables(), new XMLMapperEntityResolver()),
                 configuration, resource, sqlFragments);
@@ -88,17 +94,51 @@ public class XMLMapperBuilder extends BaseBuilder {
         return sqlFragments.get(refid);
     }
 
+    /**
+     * 解析 mapper 标签
+     * <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>
+     * <mapper namespace="com.huifer.mybatis.mapper.PersonMapper">
+     * <p>
+     * <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+     * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     * <id column="ID" jdbcType="VARCHAR" property="id"/>
+     * <result column="age" jdbcType="INTEGER" property="age"/>
+     * </resultMap>
+     *
+     * <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+     * <parameter property="name" resultMap="base"/>
+     * </parameterMap>
+     * <sql id="Base_List">
+     * name,age,phone,email,address
+     * </sql>
+     * <insert id="insert" parameterType="Person" keyProperty="id"
+     * useGeneratedKeys="true">
+     * INSERT INTO person (name, age, phone, email, address)
+     * VALUES(#{name},#{age},#{phone},#{email},#{address})
+     * </insert>
+     * </mapper>
+     *
+     * @param context
+     */
     private void configurationElement(XNode context) {
         try {
+            // 获取 namespace 属性
             String namespace = context.getStringAttribute("namespace");
             if (namespace == null || namespace.equals("")) {
                 throw new BuilderException("Mapper's namespace cannot be empty");
             }
+            // 直接设置 namespace 属性不做其他操作普通的 setter 方法
             builderAssistant.setCurrentNamespace(namespace);
+            //   <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
             cacheRefElement(context.evalNode("cache-ref"));
             cacheElement(context.evalNode("cache"));
+            //   <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+            //   <resultMap id="base" type="com.huifer.mybatis.entity.Person">
             resultMapElements(context.evalNodes("/mapper/resultMap"));
+            //   <sql id="Base_List">
+            //name,age,phone,email,address
+            //</sql>
             sqlElement(context.evalNodes("/mapper/sql"));
             buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
         } catch (Exception e) {
@@ -169,6 +209,11 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析 <cache-ref namespace=""/> 标签的属性
+     *
+     * @param context
+     */
     private void cacheRefElement(XNode context) {
         if (context != null) {
             configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
@@ -196,6 +241,11 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析  parameterMap 标签的内容
+     *
+     * @param list
+     */
     private void parameterMapElement(List<XNode> list) {
         for (XNode parameterMapNode : list) {
             String id = parameterMapNode.getStringAttribute("id");
@@ -222,6 +272,12 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析 resultMap 标签
+     *
+     * @param list
+     * @throws Exception
+     */
     private void resultMapElements(List<XNode> list) throws Exception {
         for (XNode resultMapNode : list) {
             try {
@@ -319,6 +375,10 @@ public class XMLMapperBuilder extends BaseBuilder {
         return builderAssistant.buildDiscriminator(resultType, column, javaTypeClass, jdbcTypeEnum, typeHandlerClass, discriminatorMap);
     }
 
+    /**
+     * 解析 sql 标签
+     * @param list
+     */
     private void sqlElement(List<XNode> list) {
         if (configuration.getDatabaseId() != null) {
             sqlElement(list, configuration.getDatabaseId());
