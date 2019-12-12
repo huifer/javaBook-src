@@ -1356,3 +1356,94 @@ String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource()
 ![1576114996613](assets/1576114996613.png)
 
 最终我们获取到了`mysql `这个字符加载也就结束了
+
+
+## typeHandlerElement
+- 修改`mybatis-config.xml`
+```xml
+    <typeHandlers>
+      <typeHandler jdbcType="varchar" javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>
+    </typeHandlers>
+```
+
+```java
+    /**
+     * 解析 typeHandler
+     * 最终调用方法：{@link TypeHandlerRegistry#register(java.lang.reflect.Type, org.apache.ibatis.type.JdbcType, org.apache.ibatis.type.TypeHandler)}
+     *
+     *
+     * <typeHandlers>
+     * <!--      <package name="com.huifer.mybatis.handler"/>-->
+     * <typeHandler jdbcType="VARCHAR" javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>
+     * </typeHandlers>
+     *
+     * @param parent
+     */
+    private void typeHandlerElement(XNode parent) {
+        if (parent != null) {
+            for (XNode child : parent.getChildren()) {
+                if ("package".equals(child.getName())) {
+                    // 获取 package 的 name 属性
+                    String typeHandlerPackage = child.getStringAttribute("name");
+                    // 注册
+                    typeHandlerRegistry.register(typeHandlerPackage);
+                } else {
+                  // 获取 javaType 属性值
+                    String javaTypeName = child.getStringAttribute("javaType");
+                  // 获取 jdbcType 属性值
+                    String jdbcTypeName = child.getStringAttribute("jdbcType");
+                  // 获取 handler 属性值
+                    String handlerTypeName = child.getStringAttribute("handler");
+                    // org.apache.ibatis.type.TypeAliasRegistry.TypeAliasRegistry 构造方法中有默认的
+                    // 从别名中获取
+                    Class<?> javaTypeClass = resolveClass(javaTypeName);
+                    JdbcType jdbcType = resolveJdbcType(jdbcTypeName);
+                    Class<?> typeHandlerClass = resolveClass(handlerTypeName);
+                    if (javaTypeClass != null) {
+                        if (jdbcType == null) {
+                            typeHandlerRegistry.register(javaTypeClass, typeHandlerClass);
+                        } else {
+                            typeHandlerRegistry.register(javaTypeClass, jdbcType, typeHandlerClass);
+                        }
+                    } else {
+                        typeHandlerRegistry.register(typeHandlerClass);
+                    }
+                }
+            }
+        }
+    }
+
+```
+
+```java
+    /**
+     * * 注册方法 , 将 类型处理字节码注册到 allTypeHandlersMap
+     *
+     * @param javaType
+     * @param jdbcType
+     * @param handler
+     */
+    private void register(Type javaType, JdbcType jdbcType, TypeHandler<?> handler) {
+        if (javaType != null) {
+            // 在 默认的 typeHandlerMap 获取 javaType 的子集
+            Map<JdbcType, TypeHandler<?>> map = typeHandlerMap.get(javaType);
+            if (map == null || map == NULL_TYPE_HANDLER_MAP) {
+                map = new HashMap<>();
+                typeHandlerMap.put(javaType, map);
+            }
+            // 在 所选的 javaType 中注册 TypeHandler
+            map.put(jdbcType, handler);
+        }
+        allTypeHandlersMap.put(handler.getClass(), handler);
+    }
+```
+
+- 默认的TypeHandler
+
+![1576117177349](assets/1576117177349.png)
+
+![1576117195387](assets/1576117195387.png)
+
+- 添加一条自己的TypeHandler
+
+![1576117304942](assets/1576117304942.png)

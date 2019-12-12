@@ -36,6 +36,7 @@ import org.apache.ibatis.reflection.wrapper.ObjectWrapperFactory;
 import org.apache.ibatis.session.*;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import javax.sql.DataSource;
 import java.io.InputStream;
@@ -133,6 +134,10 @@ public class XMLConfigBuilder extends BaseBuilder {
     /**
      * 加载 setting 标签
      *
+     * <settings>
+     * <setting name="cacheEnabled" value="true"/>
+     * </settings>
+     *
      * @param context
      * @return
      */
@@ -185,6 +190,10 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 别名加载
+     * <typeAliases>
+     * <!--    <package name="com.huifer.mybatis.entity"/>-->
+     * <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
+     * </typeAliases>
      *
      * @param parent
      */
@@ -219,6 +228,11 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 记载 plugins 标签内容
+     * <plugins>
+     * <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin">
+     * <property name="testPlugins" value="tPl"/>
+     * </plugin>
+     * </plugins>
      *
      * @param parent
      * @throws Exception
@@ -239,6 +253,9 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 objectFactory 标签
+     * <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">
+     * <property name="data" value="100"/>
+     * </objectFactory>
      *
      * @param context
      * @throws Exception
@@ -259,6 +276,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 objectWrapperFactory 标签
+     * <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>
      *
      * @param context
      * @throws Exception
@@ -276,6 +294,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 reflectorFactory 标签
+     * <reflectorFactory type="org.apache.ibatis.reflection.DefaultReflectorFactory"/>
      *
      * @param context
      * @throws Exception
@@ -293,6 +312,10 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 加载 properties 标签内容
+     * <properties resource="test.properties">
+     * <property name="hello" value="world"/>
+     * <property name="k" value="v"/>
+     * </properties>
      *
      * @param context
      * @throws Exception
@@ -360,6 +383,17 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 environments 标签
+     * <environments default="development">
+     * <environment id="development">
+     * <transactionManager type="JDBC"/>
+     * <dataSource type="POOLED">
+     * <property name="driver" value="com.mysql.jdbc.Driver"/>
+     * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+     * <property name="username" value="root"/>
+     * <property name="password" value="root"/>
+     * </dataSource>
+     * </environment>
+     * </environments>
      *
      * @param context
      * @throws Exception
@@ -393,6 +427,11 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 databaseIdProvider 标签
+     * <databaseIdProvider type="DB_VENDOR">
+     * <property name="Oracle" value="oracle"/>
+     * <property name="MySQL" value="mysql"/>
+     * <property name="DB2" value="d2"/>
+     * </databaseIdProvider>
      *
      * @param context
      * @throws Exception
@@ -465,16 +504,35 @@ public class XMLConfigBuilder extends BaseBuilder {
         throw new BuilderException("Environment declaration requires a DataSourceFactory.");
     }
 
+    /**
+     * 解析 typeHandler
+     * 最终调用方法：{@link TypeHandlerRegistry#register(java.lang.reflect.Type, org.apache.ibatis.type.JdbcType, org.apache.ibatis.type.TypeHandler)}
+     *
+     *
+     * <typeHandlers>
+     * <!--      <package name="com.huifer.mybatis.handler"/>-->
+     * <typeHandler jdbcType="VARCHAR" javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>
+     * </typeHandlers>
+     *
+     * @param parent
+     */
     private void typeHandlerElement(XNode parent) {
         if (parent != null) {
             for (XNode child : parent.getChildren()) {
                 if ("package".equals(child.getName())) {
+                    // 获取 package 的 name 属性
                     String typeHandlerPackage = child.getStringAttribute("name");
+                    // 注册
                     typeHandlerRegistry.register(typeHandlerPackage);
                 } else {
+                  // 获取 javaType 属性值
                     String javaTypeName = child.getStringAttribute("javaType");
+                  // 获取 jdbcType 属性值
                     String jdbcTypeName = child.getStringAttribute("jdbcType");
+                  // 获取 handler 属性值
                     String handlerTypeName = child.getStringAttribute("handler");
+                    // org.apache.ibatis.type.TypeAliasRegistry.TypeAliasRegistry 构造方法中有默认的
+                    // 从别名中获取
                     Class<?> javaTypeClass = resolveClass(javaTypeName);
                     JdbcType jdbcType = resolveJdbcType(jdbcTypeName);
                     Class<?> typeHandlerClass = resolveClass(handlerTypeName);

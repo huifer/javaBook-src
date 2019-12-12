@@ -110,11 +110,14 @@ public class TypeAliasRegistry {
                 return null;
             }
             // issue #748
+            // key = 全类名小写(string)
             String key = string.toLowerCase(Locale.ENGLISH);
             Class<T> value;
             if (typeAliases.containsKey(key)) {
+                // 别名 map 中是否有
                 value = (Class<T>) typeAliases.get(key);
             } else {
+                // 没有构造一个
                 value = (Class<T>) Resources.classForName(string);
             }
             return value;

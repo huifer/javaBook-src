@@ -55,6 +55,7 @@ public final class TypeHandlerRegistry {
 
     /**
      * The constructor that pass the MyBatis configuration.
+     * 构造方法 加载一些默认的 {@link TypeHandler}
      *
      * @param configuration a MyBatis configuration
      * @since 3.5.4
@@ -165,6 +166,7 @@ public final class TypeHandlerRegistry {
     /**
      * Set a default {@link TypeHandler} class for {@link Enum}.
      * A default {@link TypeHandler} is {@link org.apache.ibatis.type.EnumTypeHandler}.
+     *
      * @param typeHandler a type handler class for {@link Enum}
      * @since 3.4.5
      */
@@ -369,13 +371,22 @@ public final class TypeHandlerRegistry {
         register((Type) type, jdbcType, handler);
     }
 
+    /**
+     * * 注册方法 , 将 类型处理字节码注册到 allTypeHandlersMap
+     *
+     * @param javaType
+     * @param jdbcType
+     * @param handler
+     */
     private void register(Type javaType, JdbcType jdbcType, TypeHandler<?> handler) {
         if (javaType != null) {
+            // 在 默认的 typeHandlerMap 获取 javaType 的子集
             Map<JdbcType, TypeHandler<?>> map = typeHandlerMap.get(javaType);
             if (map == null || map == NULL_TYPE_HANDLER_MAP) {
                 map = new HashMap<>();
                 typeHandlerMap.put(javaType, map);
             }
+            // 在 所选的 javaType 中注册 TypeHandler
             map.put(jdbcType, handler);
         }
         allTypeHandlersMap.put(handler.getClass(), handler);
@@ -387,6 +398,12 @@ public final class TypeHandlerRegistry {
 
     // Only handler type
 
+    /**
+     * 注册方法 , 将 类型处理字节码注册到
+     * allTypeHandlersMap
+     *
+     * @param typeHandlerClass
+     */
     public void register(Class<?> typeHandlerClass) {
         boolean mappedTypeFound = false;
         MappedTypes mappedTypes = typeHandlerClass.getAnnotation(MappedTypes.class);
@@ -441,13 +458,20 @@ public final class TypeHandlerRegistry {
 
     // scan
 
+    /**
+     * 类型处理器注册流程
+     *
+     * @param packageName 包名
+     */
     public void register(String packageName) {
         ResolverUtil<Class<?>> resolverUtil = new ResolverUtil<>();
+        // 过滤是 TypeHandler 的类
         resolverUtil.find(new ResolverUtil.IsA(TypeHandler.class), packageName);
         Set<Class<? extends Class<?>>> handlerSet = resolverUtil.getClasses();
         for (Class<?> type : handlerSet) {
             //Ignore inner classes and interfaces (including package-info.java) and abstract classes
             if (!type.isAnonymousClass() && !type.isInterface() && !Modifier.isAbstract(type.getModifiers())) {
+                // 注册
                 register(type);
             }
         }

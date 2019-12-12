@@ -37,9 +37,10 @@
     <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
   </typeAliases>
 
-  <!--  <typeHandlers>-->
-  <!--    <typeHandler javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>-->
-  <!--  </typeHandlers>-->
+    <typeHandlers>
+<!--      <package name="com.huifer.mybatis.handler"/>-->
+      <typeHandler jdbcType="VARCHAR" javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>
+    </typeHandlers>
   <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">
     <property name="data" value="100"/>
   </objectFactory>
