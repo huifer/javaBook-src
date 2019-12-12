@@ -32,5 +32,11 @@ public interface DatabaseIdProvider {
         // NOP
     }
 
+    /**
+     * 获取数据源id
+     * @param dataSource
+     * @return
+     * @throws SQLException
+     */
     String getDatabaseId(DataSource dataSource) throws SQLException;
 }

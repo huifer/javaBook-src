@@ -40,7 +40,6 @@ import org.apache.ibatis.type.JdbcType;
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 /**
@@ -381,17 +380,23 @@ public class XMLConfigBuilder extends BaseBuilder {
                     DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
                     // 获取数据库
                     DataSource dataSource = dsFactory.getDataSource();
-                        // 构建
-                        Environment.Builder environmentBuilder = new Environment.Builder(id)
-                                .transactionFactory(txFactory)
-                                .dataSource(dataSource);
-                        // 在 configuration 设置
-                        configuration.setEnvironment(environmentBuilder.build());
+                    // 构建
+                    Environment.Builder environmentBuilder = new Environment.Builder(id)
+                            .transactionFactory(txFactory)
+                            .dataSource(dataSource);
+                    // 在 configuration 设置
+                    configuration.setEnvironment(environmentBuilder.build());
                 }
             }
         }
     }
 
+    /**
+     * 解析 databaseIdProvider 标签
+     *
+     * @param context
+     * @throws Exception
+     */
     private void databaseIdProviderElement(XNode context) throws Exception {
         DatabaseIdProvider databaseIdProvider = null;
         if (context != null) {
@@ -400,12 +405,14 @@ public class XMLConfigBuilder extends BaseBuilder {
             if ("VENDOR".equals(type)) {
                 type = "DB_VENDOR";
             }
+            // 向 VendorDatabaseIdProvider 放入解析标签后的结果
             Properties properties = context.getChildrenAsProperties();
             databaseIdProvider = (DatabaseIdProvider) resolveClass(type).getDeclaredConstructor().newInstance();
             databaseIdProvider.setProperties(properties);
         }
         Environment environment = configuration.getEnvironment();
         if (environment != null && databaseIdProvider != null) {
+            // 从 configuration 获取 environment 标签的内容 在通过
             String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource());
             configuration.setDatabaseId(databaseId);
         }

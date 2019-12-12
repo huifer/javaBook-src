@@ -27,7 +27,7 @@ import java.util.Properties;
 
 /**
  * Vendor DatabaseId provider.
- *
+ * <p>
  * It returns database product name as a databaseId.
  * If the user provides a properties it uses it to translate database product name
  * key="Microsoft SQL Server", value="ms" will return "ms".
@@ -40,6 +40,18 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
 
     private Properties properties;
 
+    /**
+     * 返回数据源名称
+     * 返回的是 mysql
+     * <databaseIdProvider type="DB_VENDOR">
+     * <property name="Oracle" value="oracle"/>
+     * <property name="MySQL" value="mysql"/>
+     * <property name="DB2" value="d2"/>
+     * </databaseIdProvider>
+     *
+     * @param dataSource
+     * @return
+     */
     @Override
     public String getDatabaseId(DataSource dataSource) {
         if (dataSource == null) {
@@ -58,9 +70,24 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
         this.properties = p;
     }
 
+    /**
+     * 通过数据源获取数据库类型名称
+     *
+     * @param dataSource
+     * @return
+     * @throws SQLException
+     */
     private String getDatabaseName(DataSource dataSource) throws SQLException {
         String productName = getDatabaseProductName(dataSource);
         if (this.properties != null) {
+            // 通过获取到的数据库类型 获取 属性值的小写
+            // properties 就是
+            //  <databaseIdProvider type="DB_VENDOR">
+            //    <property name="Oracle" value="oracle"/>
+            //    <property name="MySQL" value="mysql"/>
+            //    <property name="DB2" value="d2"/>
+            //  </databaseIdProvider>
+
             for (Map.Entry<Object, Object> property : properties.entrySet()) {
                 if (productName.contains((String) property.getKey())) {
                     return (String) property.getValue();
@@ -72,6 +99,16 @@ public class VendorDatabaseIdProvider implements DatabaseIdProvider {
         return productName;
     }
 
+    /**
+     * 获取数据库名称 MySQL
+     * 核心内容是JDBC 相关的 java.sql
+     * 返回内容根据 mysql-connector-java 的 DatabaseMetaData 来
+     * {@link com.mysql.jdbc.DatabaseMetaData#getDatabaseProductName()}
+     *
+     * @param dataSource
+     * @return
+     * @throws SQLException
+     */
     private String getDatabaseProductName(DataSource dataSource) throws SQLException {
         Connection con = null;
         try {

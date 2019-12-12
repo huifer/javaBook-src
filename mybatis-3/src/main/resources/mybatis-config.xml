@@ -63,6 +63,11 @@
       </dataSource>
     </environment>
   </environments>
+  <databaseIdProvider type="DB_VENDOR">
+    <property name="Oracle" value="oracle"/>
+    <property name="MySQL" value="mysql"/>
+    <property name="DB2" value="d2"/>
+  </databaseIdProvider>
   <!-- 定义映射器 -->
   <mappers>
     <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>
