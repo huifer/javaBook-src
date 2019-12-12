@@ -1212,3 +1212,147 @@ public final class Environment {
 
 ```
 
+
+
+## databaseIdProviderElement
+- 修改`mybatis-config.xml`
+```java
+  <databaseIdProvider type="DB_VENDOR">
+    <property name="Oracle" value="oracle"/>
+    <property name="MySQL" value="mysql"/>
+    <property name="DB2" value="d2"/>
+  </databaseIdProvider>
+```
+
+![1576113864895](assets/1576113864895.png)
+
+回到`org.apache.ibatis.session.Configuration`类
+
+搜索`DB_VENDOR`
+
+```java
+        typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
+
+```
+
+```java
+   // 向 VendorDatabaseIdProvider 放入解析标签后的结果
+            Properties properties = context.getChildrenAsProperties();
+            databaseIdProvider = (DatabaseIdProvider) resolveClass(type).getDeclaredConstructor().newInstance();
+            databaseIdProvider.setProperties(properties);
+        }
+        Environment environment = configuration.getEnvironment();
+        if (environment != null && databaseIdProvider != null) {
+            // 从 configuration 获取 environment 标签的内容 在通过
+            String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource());
+            configuration.setDatabaseId(databaseId);
+        }
+```
+
+- 解析下面这段代码
+
+```java
+String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource());
+```
+
+
+
+```java
+    /**
+     * 获取数据库名称 MySQL
+     * 核心内容是JDBC 相关的 java.sql
+     *
+     * @param dataSource
+     * @return
+     * @throws SQLException
+     */
+    private String getDatabaseProductName(DataSource dataSource) throws SQLException {
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            DatabaseMetaData metaData = con.getMetaData();
+            return metaData.getDatabaseProductName();
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    // ignored
+                }
+            }
+        }
+    }
+
+```
+
+![1576114794663](assets/1576114794663.png)
+
+![1576114876295](assets/1576114876295.png)
+
+有了上面两张图片的内容再看下面这个方法就明了了
+
+```java
+    /**
+     * 通过数据源获取数据库类型名称
+     *
+     * @param dataSource
+     * @return
+     * @throws SQLException
+     */
+    private String getDatabaseName(DataSource dataSource) throws SQLException {
+        String productName = getDatabaseProductName(dataSource);
+        if (this.properties != null) {
+            // 通过获取到的数据库类型 获取 属性值的小写
+            // properties 就是
+            //  <databaseIdProvider type="DB_VENDOR">
+            //    <property name="Oracle" value="oracle"/>
+            //    <property name="MySQL" value="mysql"/>
+            //    <property name="DB2" value="d2"/>
+            //  </databaseIdProvider>
+
+            for (Map.Entry<Object, Object> property : properties.entrySet()) {
+                if (productName.contains((String) property.getKey())) {
+                    return (String) property.getValue();
+                }
+            }
+            // no match, return null
+            return null;
+        }
+        return productName;
+    }
+
+```
+
+在走一步
+
+```java
+    /**
+     * 返回数据源名称
+     * 返回的是 mysql
+     * <databaseIdProvider type="DB_VENDOR">
+     * <property name="Oracle" value="oracle"/>
+     * <property name="MySQL" value="mysql"/>
+     * <property name="DB2" value="d2"/>
+     * </databaseIdProvider>
+     *
+     * @param dataSource
+     * @return
+     */
+    @Override
+    public String getDatabaseId(DataSource dataSource) {
+        if (dataSource == null) {
+            throw new NullPointerException("dataSource cannot be null");
+        }
+        try {
+            return getDatabaseName(dataSource);
+        } catch (Exception e) {
+            LogHolder.log.error("Could not get a databaseId from dataSource", e);
+        }
+        return null;
+    }
+
+```
+
+![1576114996613](assets/1576114996613.png)
+
+最终我们获取到了`mysql `这个字符加载也就结束了
