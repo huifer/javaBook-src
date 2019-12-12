@@ -40,6 +40,7 @@ import org.apache.ibatis.type.JdbcType;
 import javax.sql.DataSource;
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 /**
@@ -358,21 +359,34 @@ public class XMLConfigBuilder extends BaseBuilder {
         configuration.setConfigurationFactory(resolveClass(props.getProperty("configurationFactory")));
     }
 
+    /**
+     * 解析 environments 标签
+     *
+     * @param context
+     * @throws Exception
+     */
     private void environmentsElement(XNode context) throws Exception {
         if (context != null) {
             if (environment == null) {
+                // environment 初始化的是就是空
                 environment = context.getStringAttribute("default");
             }
             for (XNode child : context.getChildren()) {
+                // 获取 environment 的 id
                 String id = child.getStringAttribute("id");
                 if (isSpecifiedEnvironment(id)) {
+                    // 解析 transactionManager
                     TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+                    // 解析 dataSource
                     DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
+                    // 获取数据库
                     DataSource dataSource = dsFactory.getDataSource();
-                    Environment.Builder environmentBuilder = new Environment.Builder(id)
-                            .transactionFactory(txFactory)
-                            .dataSource(dataSource);
-                    configuration.setEnvironment(environmentBuilder.build());
+                        // 构建
+                        Environment.Builder environmentBuilder = new Environment.Builder(id)
+                                .transactionFactory(txFactory)
+                                .dataSource(dataSource);
+                        // 在 configuration 设置
+                        configuration.setEnvironment(environmentBuilder.build());
                 }
             }
         }
@@ -397,8 +411,17 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 解析 transactionManager 标签
+     * <transactionManager type="JDBC"/>
+     *
+     * @param context
+     * @return
+     * @throws Exception
+     */
     private TransactionFactory transactionManagerElement(XNode context) throws Exception {
         if (context != null) {
+            // 获取 type 属性
             String type = context.getStringAttribute("type");
             Properties props = context.getChildrenAsProperties();
             TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
@@ -408,11 +431,27 @@ public class XMLConfigBuilder extends BaseBuilder {
         throw new BuilderException("Environment declaration requires a TransactionFactory.");
     }
 
+    /**
+     * 解析 dataSourceElement 标签
+     * <dataSource type="POOLED">
+     * <property name="driver" value="com.mysql.jdbc.Driver"/>
+     * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+     * <property name="username" value="root"/>
+     * <property name="password" value="root"/>
+     * </dataSource>
+     *
+     * @param context
+     * @return
+     * @throws Exception
+     */
     private DataSourceFactory dataSourceElement(XNode context) throws Exception {
         if (context != null) {
             String type = context.getStringAttribute("type");
             Properties props = context.getChildrenAsProperties();
+            //org.apache.ibatis.session.Configuration.Configuration()
             DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+
+            // PooledDataSourceFactory -> UnpooledDataSourceFactory
             factory.setProperties(props);
             return factory;
         }
@@ -477,6 +516,12 @@ public class XMLConfigBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * 判断 environment 标签的id 和  &lt environments default="development" &gt default 值是否相同
+     *
+     * @param id environment 的id属性
+     * @return
+     */
     private boolean isSpecifiedEnvironment(String id) {
         if (environment == null) {
             throw new BuilderException("No environment specified.");

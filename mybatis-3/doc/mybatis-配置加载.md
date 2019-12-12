@@ -832,3 +832,383 @@ public interface Interceptor {
 
 ```
 ## environmentsElement
+- 先修改配置`mybatis-config.xml`
+```xml
+  <environments default="development">
+    <environment id="development">
+      <transactionManager type="JDBC"/>
+      <dataSource type="POOLED">
+        <property name="driver" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+      </dataSource>
+    </environment>
+  </environments>
+```
+- 这个`environments`标签下我们会有多个数据源的填写操作,所以代码中应该会有循环来解析`environment`标签, 代码如下 。
+```java
+    /**
+     * 解析 environments 标签
+     *
+     * @param context
+     * @throws Exception
+     */
+    private void environmentsElement(XNode context) throws Exception {
+        if (context != null) {
+            if (environment == null) {
+                // environment 初始化的是就是空
+                environment = context.getStringAttribute("default");
+            }
+            for (XNode child : context.getChildren()) {
+                // 获取 environment 的 id
+                String id = child.getStringAttribute("id");
+                if (isSpecifiedEnvironment(id)) {
+                    // 解析 transactionManager
+                    TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+                    // 解析 dataSource
+                    DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
+                    // 获取数据库
+                    DataSource dataSource = dsFactory.getDataSource();
+                    // 构建
+                    Environment.Builder environmentBuilder = new Environment.Builder(id)
+                            .transactionFactory(txFactory)
+                            .dataSource(dataSource);
+                    // 在 configuration 设置
+                    configuration.setEnvironment(environmentBuilder.build());
+                }
+            }
+        }
+    }
+
+```
+
+### transactionManagerElement
+```java
+    /**
+     * 解析 transactionManager 标签
+     * <transactionManager type="JDBC"/>
+     *
+     * @param context
+     * @return
+     * @throws Exception
+     */
+    private TransactionFactory transactionManagerElement(XNode context) throws Exception {
+        if (context != null) {
+            // 获取 type 属性
+            String type = context.getStringAttribute("type");
+            Properties props = context.getChildrenAsProperties();
+            TransactionFactory factory = (TransactionFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            factory.setProperties(props);
+            return factory;
+        }
+        throw new BuilderException("Environment declaration requires a TransactionFactory.");
+    }
+```
+### dataSourceElement
+```java
+    /**
+     * 解析 dataSourceElement 标签
+     * <dataSource type="POOLED">
+     * <property name="driver" value="com.mysql.jdbc.Driver"/>
+     * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+     * <property name="username" value="root"/>
+     * <property name="password" value="root"/>
+     * </dataSource>
+     *
+     * @param context
+     * @return
+     * @throws Exception
+     */
+    private DataSourceFactory dataSourceElement(XNode context) throws Exception {
+        if (context != null) {
+            String type = context.getStringAttribute("type");
+            Properties props = context.getChildrenAsProperties();
+            //org.apache.ibatis.datasource.unpooled.UnpooledDataSourceFactory.setProperties
+            DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+            factory.setProperties(props);
+            return factory;
+        }
+        throw new BuilderException("Environment declaration requires a DataSourceFactory.");
+    }
+```
+- 这部分有话说! 此时通过`type`我们可以知道当前值为:`POOLED` 那么他的别名背后的类是那一个,从哪里寻找. 这一点之前源码中没有描述,补充一下在`org.apache.ibatis.session.Configuration.Configuration()`构造中
+```java
+public Configuration() {
+        typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+        typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
+
+        typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
+        typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
+        typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
+
+        typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
+        typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
+        typeAliasRegistry.registerAlias("LRU", LruCache.class);
+        typeAliasRegistry.registerAlias("SOFT", SoftCache.class);
+        typeAliasRegistry.registerAlias("WEAK", WeakCache.class);
+
+        typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
+
+        typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
+        typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
+
+        typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
+        typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
+        typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
+        typeAliasRegistry.registerAlias("LOG4J2", Log4j2Impl.class);
+        typeAliasRegistry.registerAlias("JDK_LOGGING", Jdk14LoggingImpl.class);
+        typeAliasRegistry.registerAlias("STDOUT_LOGGING", StdOutImpl.class);
+        typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
+
+        typeAliasRegistry.registerAlias("CGLIB", CglibProxyFactory.class);
+        typeAliasRegistry.registerAlias("JAVASSIST", JavassistProxyFactory.class);
+
+        languageRegistry.setDefaultDriverClass(XMLLanguageDriver.class);
+        languageRegistry.register(RawLanguageDriver.class);
+    }
+```
+
+![1576112853347](assets/1576112853347.png)
+
+```java
+public class PooledDataSourceFactory extends UnpooledDataSourceFactory {
+
+    public PooledDataSourceFactory() {
+        this.dataSource = new PooledDataSource();
+    }
+
+}
+```
+
+```java
+public class UnpooledDataSourceFactory implements DataSourceFactory {
+
+    private static final String DRIVER_PROPERTY_PREFIX = "driver.";
+    private static final int DRIVER_PROPERTY_PREFIX_LENGTH = DRIVER_PROPERTY_PREFIX.length();
+
+    protected DataSource dataSource;
+
+    public UnpooledDataSourceFactory() {
+        this.dataSource = new UnpooledDataSource();
+    }
+
+    @Override
+    public void setProperties(Properties properties) {
+        Properties driverProperties = new Properties();
+        MetaObject metaDataSource = SystemMetaObject.forObject(dataSource);
+        for (Object key : properties.keySet()) {
+            String propertyName = (String) key;
+            if (propertyName.startsWith(DRIVER_PROPERTY_PREFIX)) {
+                String value = properties.getProperty(propertyName);
+                driverProperties.setProperty(propertyName.substring(DRIVER_PROPERTY_PREFIX_LENGTH), value);
+            } else if (metaDataSource.hasSetter(propertyName)) {
+                String value = (String) properties.get(propertyName);
+                Object convertedValue = convertValue(metaDataSource, propertyName, value);
+                metaDataSource.setValue(propertyName, convertedValue);
+            } else {
+                throw new DataSourceException("Unknown DataSource property: " + propertyName);
+            }
+        }
+        if (driverProperties.size() > 0) {
+            metaDataSource.setValue("driverProperties", driverProperties);
+        }
+    }
+
+    @Override
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    private Object convertValue(MetaObject metaDataSource, String propertyName, String value) {
+        Object convertedValue = value;
+        Class<?> targetType = metaDataSource.getSetterType(propertyName);
+        if (targetType == Integer.class || targetType == int.class) {
+            convertedValue = Integer.valueOf(value);
+        } else if (targetType == Long.class || targetType == long.class) {
+            convertedValue = Long.valueOf(value);
+        } else if (targetType == Boolean.class || targetType == boolean.class) {
+            convertedValue = Boolean.valueOf(value);
+        }
+        return convertedValue;
+    }
+
+}
+
+```
+
+类图
+
+![1576112946984](assets/1576112946984.png)
+
+```java
+    private DataSourceFactory dataSourceElement(XNode context) throws Exception {
+        if (context != null) {
+            String type = context.getStringAttribute("type");
+            Properties props = context.getChildrenAsProperties();
+            //org.apache.ibatis.session.Configuration.Configuration()
+            DataSourceFactory factory = (DataSourceFactory) resolveClass(type).getDeclaredConstructor().newInstance();
+
+            // PooledDataSourceFactory -> UnpooledDataSourceFactory
+            factory.setProperties(props);
+            return factory;
+        }
+        throw new BuilderException("Environment declaration requires a DataSourceFactory.");
+    }
+```
+
+` factory.setProperties(props);`设置jdbc链接相关的属性值
+
+```java
+    @Override
+    public void setProperties(Properties properties) {
+        Properties driverProperties = new Properties();
+        //metaDataSource 现在是一个dataSource
+        MetaObject metaDataSource = SystemMetaObject.forObject(dataSource);
+        for (Object key : properties.keySet()) {
+            String propertyName = (String) key;
+            if (propertyName.startsWith(DRIVER_PROPERTY_PREFIX)) {
+                // 如果是 driver. 前缀开头
+                String value = properties.getProperty(propertyName);
+                driverProperties.setProperty(propertyName.substring(DRIVER_PROPERTY_PREFIX_LENGTH), value);
+            } else if (metaDataSource.hasSetter(propertyName)) {
+                String value = (String) properties.get(propertyName);
+                Object convertedValue = convertValue(metaDataSource, propertyName, value);
+                // 通过 metaDataSource 来对 dataSource 进行设置属性
+                metaDataSource.setValue(propertyName, convertedValue);
+            } else {
+                throw new DataSourceException("Unknown DataSource property: " + propertyName);
+            }
+        }
+        if (driverProperties.size() > 0) {
+            metaDataSource.setValue("driverProperties", driverProperties);
+        }
+    }
+
+
+```
+
+debug 第一次进来
+
+![1576113272209](assets/1576113272209.png)
+
+![1576113287640](assets/1576113287640.png)
+
+此时拿到的`key`=`password` 程序会设置`password`
+
+![1576113345527](assets/1576113345527.png)
+
+此时的密码是`root`
+
+执行`metaDataSource.setValue(propertyName, convertedValue);`
+
+![1576113398394](assets/1576113398394.png)
+
+方法走过去此时`dataSource`的`password`属性被设置了
+
+`environmentsElement`方法还有两个
+
+```java
+                    // 构建
+                    Environment.Builder environmentBuilder = new Environment.Builder(id)
+                            .transactionFactory(txFactory)
+                            .dataSource(dataSource);
+                    // 在 configuration 设置
+                    configuration.setEnvironment(environmentBuilder.build());
+```
+
+### Environment 
+
+```java
+/**
+ * <environment id="development">
+ * <transactionManager type="JDBC"/>
+ * <dataSource type="POOLED">
+ * <property name="driver" value="com.mysql.jdbc.Driver"/>
+ * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+ * <property name="username" value="root"/>
+ * <property name="password" value="root"/>
+ * </dataSource>
+ * </environment>
+ */
+public final class Environment {
+    /**
+     * <environment id="development">
+     */
+    private final String id;
+    /**
+     * <transactionManager type="JDBC"/>
+     * {@link Configuration#Configuration()}
+     * {@link JdbcTransactionFactory}
+     */
+    private final TransactionFactory transactionFactory;
+    /**
+     * * <dataSource type="POOLED">
+     * * <property name="driver" value="com.mysql.jdbc.Driver"/>
+     * * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+     * * <property name="username" value="root"/>
+     * * <property name="password" value="root"/>
+     * * </dataSource>
+     */
+    private final DataSource dataSource;
+
+    public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
+        if (id == null) {
+            throw new IllegalArgumentException("Parameter 'id' must not be null");
+        }
+        if (transactionFactory == null) {
+            throw new IllegalArgumentException("Parameter 'transactionFactory' must not be null");
+        }
+        this.id = id;
+        if (dataSource == null) {
+            throw new IllegalArgumentException("Parameter 'dataSource' must not be null");
+        }
+        this.transactionFactory = transactionFactory;
+        this.dataSource = dataSource;
+    }
+
+    public String getId() {
+        return this.id;
+    }
+
+    public TransactionFactory getTransactionFactory() {
+        return this.transactionFactory;
+    }
+
+    public DataSource getDataSource() {
+        return this.dataSource;
+    }
+
+    public static class Builder {
+        private final String id;
+        private TransactionFactory transactionFactory;
+        private DataSource dataSource;
+
+        public Builder(String id) {
+            this.id = id;
+        }
+
+        public Builder transactionFactory(TransactionFactory transactionFactory) {
+            this.transactionFactory = transactionFactory;
+            return this;
+        }
+
+        public Builder dataSource(DataSource dataSource) {
+            this.dataSource = dataSource;
+            return this;
+        }
+
+        public String id() {
+            return this.id;
+        }
+
+        public Environment build() {
+            return new Environment(this.id, this.transactionFactory, this.dataSource);
+        }
+
+    }
+
+}
+
+```
+

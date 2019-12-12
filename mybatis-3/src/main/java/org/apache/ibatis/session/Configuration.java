@@ -78,6 +78,7 @@ import java.util.function.BiFunction;
 
 /**
  * mybatis-config.xml 文件的java实体
+ *
  * @author Clinton Begin
  */
 public class Configuration {
@@ -123,7 +124,7 @@ public class Configuration {
     protected boolean useColumnLabel = true;
     /**
      * 缓存 默认开启
-     *     <setting name="cacheEnabled" value="true"/>
+     * <setting name="cacheEnabled" value="true"/>
      */
     protected boolean cacheEnabled = true;
     protected boolean callSettersOnNulls;
@@ -137,7 +138,7 @@ public class Configuration {
     protected Set<String> lazyLoadTriggerMethods = new HashSet<>(Arrays.asList("equals", "clone", "hashCode", "toString"));
     /**
      * 查询超时
-     *     <setting name="defaultStatementTimeout" value="100"/>
+     * <setting name="defaultStatementTimeout" value="100"/>
      */
     protected Integer defaultStatementTimeout;
     protected Integer defaultFetchSize;
@@ -165,6 +166,9 @@ public class Configuration {
         this.environment = environment;
     }
 
+    /**
+     * 构造器,注册了别名 -> 具体类
+     */
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
         typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
@@ -473,6 +477,7 @@ public class Configuration {
     /**
      * Set a default {@link TypeHandler} class for {@link Enum}.
      * A default {@link TypeHandler} is {@link org.apache.ibatis.type.EnumTypeHandler}.
+     *
      * @param typeHandler a type handler class for {@link Enum}
      * @since 3.4.5
      */
@@ -917,6 +922,7 @@ public class Configuration {
          * Assign a function for producing a conflict error message when contains value with the same key.
          * <p>
          * function arguments are 1st is saved value and 2nd is target value.
+         *
          * @param conflictMessageProducer A function for producing a conflict error message
          * @return a conflict error message
          * @since 3.5.0

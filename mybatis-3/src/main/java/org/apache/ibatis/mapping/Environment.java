@@ -15,16 +15,46 @@
  */
 package org.apache.ibatis.mapping;
 
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.transaction.TransactionFactory;
+import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
 
 import javax.sql.DataSource;
 
 /**
  * @author Clinton Begin
  */
+
+/**
+ * <environment id="development">
+ * <transactionManager type="JDBC"/>
+ * <dataSource type="POOLED">
+ * <property name="driver" value="com.mysql.jdbc.Driver"/>
+ * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+ * <property name="username" value="root"/>
+ * <property name="password" value="root"/>
+ * </dataSource>
+ * </environment>
+ */
 public final class Environment {
+    /**
+     * <environment id="development">
+     */
     private final String id;
+    /**
+     * <transactionManager type="JDBC"/>
+     * {@link Configuration#Configuration()}
+     * {@link JdbcTransactionFactory}
+     */
     private final TransactionFactory transactionFactory;
+    /**
+     * * <dataSource type="POOLED">
+     * * <property name="driver" value="com.mysql.jdbc.Driver"/>
+     * * <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+     * * <property name="username" value="root"/>
+     * * <property name="password" value="root"/>
+     * * </dataSource>
+     */
     private final DataSource dataSource;
 
     public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
