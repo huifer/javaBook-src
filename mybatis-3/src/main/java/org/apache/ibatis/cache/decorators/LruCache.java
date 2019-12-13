@@ -22,6 +22,7 @@ import java.util.Map;
 
 /**
  * Lru (least recently used) cache decorator.
+ * LRU  緩存策略 最近最少使用的：移除最长时间不被使用的对象。
  *
  * @author Clinton Begin
  */

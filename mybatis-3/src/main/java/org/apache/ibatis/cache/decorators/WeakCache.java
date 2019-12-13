@@ -25,6 +25,7 @@ import java.util.LinkedList;
 /**
  * Weak Reference cache decorator.
  * Thanks to Dr. Heinz Kabutz for his guidance here.
+ * WEAK  缓存策略 弱引用：更积极地移除基于垃圾收集器状态和弱引用规则的对象。
  *
  * @author Clinton Begin
  */

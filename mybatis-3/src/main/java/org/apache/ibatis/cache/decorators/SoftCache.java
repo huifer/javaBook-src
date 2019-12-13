@@ -25,7 +25,7 @@ import java.util.LinkedList;
 /**
  * Soft Reference cache decorator
  * Thanks to Dr. Heinz Kabutz for his guidance here.
- *
+ * SOFT  緩存策略 软引用：移除基于垃圾回收器状态和软引用规则的对象。
  * @author Clinton Begin
  */
 public class SoftCache implements Cache {

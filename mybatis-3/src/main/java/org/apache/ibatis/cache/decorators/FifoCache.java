@@ -22,7 +22,8 @@ import java.util.LinkedList;
 
 /**
  * FIFO (first in, first out) cache decorator.
- *
+ * FIFO  缓存策略
+ * 先进先出：按对象进入缓存的顺序来移除它们。
  * @author Clinton Begin
  */
 public class FifoCache implements Cache {
