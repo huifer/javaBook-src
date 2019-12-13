@@ -325,18 +325,33 @@ public class XMLMapperBuilder extends BaseBuilder {
         return resultMapElement(resultMapNode, Collections.emptyList(), null);
     }
 
+    /**
+     * reslutMapper 下级标签解析
+     * <resultMap type="com.huifer.mybatis.entity.Person" id="base">
+     * <id jdbcType="VARCHAR" column="ID" property="id"/>
+     * <result jdbcType="INTEGER" column="age" property="age"/>
+     * </resultMap>
+     *
+     * @param resultMapNode            resultMap 节点
+     * @param additionalResultMappings
+     * @param enclosingType
+     * @return
+     * @throws Exception
+     */
     private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings, Class<?> enclosingType) throws Exception {
         ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
         String type = resultMapNode.getStringAttribute("type",
                 resultMapNode.getStringAttribute("ofType",
                         resultMapNode.getStringAttribute("resultType",
                                 resultMapNode.getStringAttribute("javaType"))));
+        // 别名注册
         Class<?> typeClass = resolveClass(type);
         if (typeClass == null) {
             typeClass = inheritEnclosingType(resultMapNode, enclosingType);
         }
         Discriminator discriminator = null;
         List<ResultMapping> resultMappings = new ArrayList<>();
+        // 粗暴
         resultMappings.addAll(additionalResultMappings);
         List<XNode> resultChildren = resultMapNode.getChildren();
         for (XNode resultChild : resultChildren) {
