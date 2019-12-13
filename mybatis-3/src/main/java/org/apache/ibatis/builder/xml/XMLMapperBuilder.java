@@ -131,6 +131,7 @@ public class XMLMapperBuilder extends BaseBuilder {
             builderAssistant.setCurrentNamespace(namespace);
             //   <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
             cacheRefElement(context.evalNode("cache-ref"));
+//              <cache blocking="" eviction="" flushInterval="" readOnly="" size="" type=""/>
             cacheElement(context.evalNode("cache"));
             //   <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
             parameterMapElement(context.evalNodes("/mapper/parameterMap"));
@@ -140,12 +141,18 @@ public class XMLMapperBuilder extends BaseBuilder {
             //name,age,phone,email,address
             //</sql>
             sqlElement(context.evalNodes("/mapper/sql"));
+            // 解析 select|insert|update|delete 标签
             buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
         } catch (Exception e) {
             throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
         }
     }
 
+    /**
+     * select|insert|update|delete 标签
+     *
+     * @param list select|insert|update|delete 标签
+     */
     private void buildStatementFromContext(List<XNode> list) {
         if (configuration.getDatabaseId() != null) {
             buildStatementFromContext(list, configuration.getDatabaseId());
@@ -217,26 +224,45 @@ public class XMLMapperBuilder extends BaseBuilder {
     private void cacheRefElement(XNode context) {
         if (context != null) {
             configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
+            // 构造
             CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant, context.getStringAttribute("namespace"));
             try {
                 cacheRefResolver.resolveCacheRef();
             } catch (IncompleteElementException e) {
+                // 初始化是没有内容走这一步
                 configuration.addIncompleteCacheRef(cacheRefResolver);
             }
         }
     }
 
+    /**
+     * 解析
+     * <cache blocking="" eviction="" flushInterval="" readOnly="" size="" type=""/>
+     * 具体缓存策略查看{@link org.apache.ibatis.cache.decorators} 下的类
+     * 获取每个属性构造成 {@link  Cache}
+     *
+     * @param context
+     */
     private void cacheElement(XNode context) {
         if (context != null) {
+            // org.apache.ibatis.cache.impl.PerpetualCache 默认缓存实现
             String type = context.getStringAttribute("type", "PERPETUAL");
+            // 添加到别名,或者从别名中获取
             Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
+            // 緩存策略 LRU 最近最少使用的：移除最长时间不被使用的对象。
             String eviction = context.getStringAttribute("eviction", "LRU");
             Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
+            // 刷新时间 单位 毫秒
             Long flushInterval = context.getLongAttribute("flushInterval");
+            // 引用数量
             Integer size = context.getIntAttribute("size");
+            // 只读
             boolean readWrite = !context.getBooleanAttribute("readOnly", false);
+            //
             boolean blocking = context.getBooleanAttribute("blocking", false);
+            // <properties> 下级属性
             Properties props = context.getChildrenAsProperties();
+            // 构造 cache
             builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
         }
     }
@@ -377,6 +403,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /**
      * 解析 sql 标签
+     *
      * @param list
      */
     private void sqlElement(List<XNode> list) {

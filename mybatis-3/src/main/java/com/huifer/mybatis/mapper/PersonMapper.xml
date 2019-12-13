@@ -8,7 +8,7 @@
     <id column="ID" jdbcType="VARCHAR" property="id"/>
     <result column="age" jdbcType="INTEGER" property="age"/>
   </resultMap>
-
+<!--  <cache blocking="" eviction="" flushInterval="" readOnly="" size="" type=""/>-->
   <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
     <parameter property="name" resultMap="base"/>
   </parameterMap>

@@ -109,9 +109,12 @@ public class Configuration {
     protected final Collection<ResultMapResolver> incompleteResultMaps = new LinkedList<>();
     protected final Collection<MethodResolver> incompleteMethods = new LinkedList<>();
     /*
+
      * A map holds cache-ref relationship. The key is the namespace that
      * references a cache bound to another namespace and the value is the
      * namespace which the actual cache is bound to.
+
+         mapper.xml 的 cache-ref
      */
     protected final Map<String, String> cacheRefMap = new HashMap<>();
     protected Environment environment;
@@ -170,24 +173,29 @@ public class Configuration {
      * 构造器,注册了别名 -> 具体类
      */
     public Configuration() {
+        // 链接方式
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
         typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
+        // mybatis-config.xml 中的标签dataSource 的属性值
         typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
         typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
         typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);
 
         typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
+        // 4种缓存策略
         typeAliasRegistry.registerAlias("FIFO", FifoCache.class);
         typeAliasRegistry.registerAlias("LRU", LruCache.class);
         typeAliasRegistry.registerAlias("SOFT", SoftCache.class);
         typeAliasRegistry.registerAlias("WEAK", WeakCache.class);
 
+        // mybatis-config.xml 中的一个标签属性
         typeAliasRegistry.registerAlias("DB_VENDOR", VendorDatabaseIdProvider.class);
 
         typeAliasRegistry.registerAlias("XML", XMLLanguageDriver.class);
         typeAliasRegistry.registerAlias("RAW", RawLanguageDriver.class);
 
+        // 日志实现类
         typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
         typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
         typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
@@ -722,6 +730,11 @@ public class Configuration {
         return incompleteCacheRefs;
     }
 
+    /**
+     * 将 标签  <cache-ref namespace=""/> 制作成Java 类后插入 incompleteCacheRefs
+     *
+     * @param incompleteCacheRef
+     */
     public void addIncompleteCacheRef(CacheRefResolver incompleteCacheRef) {
         incompleteCacheRefs.add(incompleteCacheRef);
     }

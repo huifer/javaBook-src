@@ -29,6 +29,11 @@ public class CacheRefResolver {
         this.cacheRefNamespace = cacheRefNamespace;
     }
 
+    /**
+     * 使用缓存标签的内容
+     *
+     * @return
+     */
     public Cache resolveCacheRef() {
         return assistant.useCacheRef(cacheRefNamespace);
     }

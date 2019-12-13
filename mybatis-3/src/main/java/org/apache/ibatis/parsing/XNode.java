@@ -25,6 +25,7 @@ import java.util.Properties;
 
 /**
  * w3c node
+ *
  * @author Clinton Begin
  */
 public class XNode {
@@ -54,6 +55,7 @@ public class XNode {
 
     /**
      * 节点获取,核心是w3c xml 解析node后对解析结果包装成 {@link XNode}
+     *
      * @return
      */
     public XNode getParent() {
@@ -67,6 +69,7 @@ public class XNode {
 
     /**
      * 获取全路径
+     *
      * @return
      */
     public String getPath() {
@@ -84,6 +87,7 @@ public class XNode {
 
     /**
      * 外部调用,服务于 resultMap 标签
+     *
      * @return
      */
     public String getValueBasedIdentifier() {
@@ -225,6 +229,7 @@ public class XNode {
 
     /**
      * 通过标签的name属性获取值
+     *
      * @param name
      * @return
      */
@@ -245,6 +250,13 @@ public class XNode {
         return getBooleanAttribute(name, null);
     }
 
+    /**
+     * 根据属性名称获取属性值, 没有返回默认值 def
+     *
+     * @param name 属性名称
+     * @param def  默认值
+     * @return 属性名称-> 属性值
+     */
     public Boolean getBooleanAttribute(String name, Boolean def) {
         String value = attributes.getProperty(name);
         if (value == null) {
@@ -322,6 +334,7 @@ public class XNode {
 
     /**
      * 解析配置文件xml的标签将返回 {name:value}
+     *
      * @return
      */
     public Properties getChildrenAsProperties() {
@@ -385,6 +398,7 @@ public class XNode {
 
     /**
      * 构造方法中的函数,解析系欸但中的数据返回一个 Properties 对象
+     *
      * @param n
      * @return
      */
