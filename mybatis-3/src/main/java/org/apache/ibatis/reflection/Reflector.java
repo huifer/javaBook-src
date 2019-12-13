@@ -203,6 +203,7 @@ public class Reflector {
 
     /**
      * 一个名称多个方法
+     *
      * @param conflictingMethods
      * @param name
      * @param method
@@ -287,6 +288,11 @@ public class Reflector {
         return result;
     }
 
+    /**
+     * 添加类的字段 异界get set 方法
+     *
+     * @param clazz 类
+     */
     private void addFields(Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
@@ -316,6 +322,11 @@ public class Reflector {
         }
     }
 
+    /**
+     * 添加 get 字段
+     *
+     * @param field
+     */
     private void addGetField(Field field) {
         if (isValidPropertyName(field.getName())) {
             getMethods.put(field.getName(), new GetFieldInvoker(field));
@@ -464,6 +475,7 @@ public class Reflector {
      * @return The Class of the property getter
      */
     public Class<?> getGetterType(String propertyName) {
+        // 在可见参数中获取数据类型
         Class<?> clazz = getTypes.get(propertyName);
         if (clazz == null) {
             throw new ReflectionException("There is no getter for property named '" + propertyName + "' in '" + type + "'");

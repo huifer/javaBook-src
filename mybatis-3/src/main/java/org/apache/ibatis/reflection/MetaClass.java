@@ -27,6 +27,8 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 
 /**
+ * 源类
+ *
  * @author Clinton Begin
  */
 public class MetaClass {
@@ -78,6 +80,10 @@ public class MetaClass {
         }
     }
 
+    /**
+     * @param name
+     * @return
+     */
     public Class<?> getGetterType(String name) {
         PropertyTokenizer prop = new PropertyTokenizer(name);
         if (prop.hasNext()) {
@@ -88,12 +94,25 @@ public class MetaClass {
         return getGetterType(prop);
     }
 
+    /**
+     * 根据属性获取 操作javaType
+     *
+     * @param prop
+     * @return
+     */
     private MetaClass metaClassForProperty(PropertyTokenizer prop) {
         Class<?> propType = getGetterType(prop);
         return MetaClass.forClass(propType, reflectorFactory);
     }
 
+    /**
+     * 获取数据类型
+     *
+     * @param prop
+     * @return
+     */
     private Class<?> getGetterType(PropertyTokenizer prop) {
+        // 在 Reflector 类中获取
         Class<?> type = reflector.getGetterType(prop.getName());
         if (prop.getIndex() != null && Collection.class.isAssignableFrom(type)) {
             Type returnType = getGenericGetterType(prop.getName());

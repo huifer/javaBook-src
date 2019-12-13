@@ -35,6 +35,9 @@ import java.util.*;
 public class MapperBuilderAssistant extends BaseBuilder {
 
     private final String resource;
+    /**
+     * 当前 mapper.xml 中的 <mapper namespace="com.huifer.mybatis.mapper.PersonMapper"> namespace 属性值
+     */
     private String currentNamespace;
     private Cache currentCache;
     private boolean unresolvedCacheRef; // issue #676
@@ -62,6 +65,11 @@ public class MapperBuilderAssistant extends BaseBuilder {
         this.currentNamespace = currentNamespace;
     }
 
+    /**
+     * @param base
+     * @param isReference
+     * @return 组装成 : namespace . base
+     */
     public String applyCurrentNamespace(String base, boolean isReference) {
         if (base == null) {
             return null;
@@ -142,6 +150,14 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return cache;
     }
 
+    /**
+     * 添加 parameter 标签的内容
+     *
+     * @param id
+     * @param parameterClass
+     * @param parameterMappings
+     * @return
+     */
     public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
         id = applyCurrentNamespace(id, false);
         ParameterMap parameterMap = new ParameterMap.Builder(configuration, id, parameterClass, parameterMappings).build();
@@ -149,6 +165,22 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return parameterMap;
     }
 
+    /**
+     * 构造查询参数映射器？
+     * * <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+     * * < property="name" resultMap="base"/>
+     * * </parameterMap>
+     *
+     * @param parameterType parameterMap 标签的type 属性
+     * @param property      property 标签 name 属性
+     * @param javaType      javaType
+     * @param jdbcType      jdbcType
+     * @param resultMap     < property="name" resultMap="base"/> 的 resultMap 属性值
+     * @param parameterMode mode 属性值
+     * @param typeHandler   typeHandler 属性值
+     * @param numericScale  numericScale 属性值
+     * @return
+     */
     public ParameterMapping buildParameterMapping(
             Class<?> parameterType,
             String property,
@@ -162,6 +194,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
 
         // Class parameterType = parameterMapBuilder.type();
         Class<?> javaTypeClass = resolveParameterJavaType(parameterType, property, javaType, jdbcType);
+        // 加载 typeHandler
         TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, typeHandler);
 
         return new ParameterMapping.Builder(configuration, property, javaTypeClass)
@@ -437,14 +470,25 @@ public class MapperBuilderAssistant extends BaseBuilder {
         return javaType;
     }
 
+    /**
+     * @param resultType 返回类型
+     * @param property   属性
+     * @param javaType   java 类型
+     * @param jdbcType   jdbc 类型
+     * @return
+     */
     private Class<?> resolveParameterJavaType(Class<?> resultType, String property, Class<?> javaType, JdbcType jdbcType) {
         if (javaType == null) {
             if (JdbcType.CURSOR.equals(jdbcType)) {
+                // java.sql.ResultSet 作为javaType 对象
                 javaType = java.sql.ResultSet.class;
             } else if (Map.class.isAssignableFrom(resultType)) {
+                // 如果是 map 接口那么Java 类型为Object
                 javaType = Object.class;
             } else {
+                // 初始化
                 MetaClass metaResultType = MetaClass.forClass(resultType, configuration.getReflectorFactory());
+                // 解析后是个 JAVA 基础类型对象 或者自定义对象
                 javaType = metaResultType.getGetterType(property);
             }
         }

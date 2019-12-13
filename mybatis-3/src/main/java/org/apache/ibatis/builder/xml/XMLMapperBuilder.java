@@ -269,17 +269,24 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /**
      * 解析  parameterMap 标签的内容
+     * <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+     * <parameter property="name" resultMap="base"/>
+     * </parameterMap>
      *
      * @param list
      */
     private void parameterMapElement(List<XNode> list) {
         for (XNode parameterMapNode : list) {
+            // 获取标签属性值
             String id = parameterMapNode.getStringAttribute("id");
             String type = parameterMapNode.getStringAttribute("type");
+            // 到别名map中注册
             Class<?> parameterClass = resolveClass(type);
+            // 获取下级标签 parameter 的属性值
             List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
             List<ParameterMapping> parameterMappings = new ArrayList<>();
             for (XNode parameterNode : parameterNodes) {
+                // 遍历下级节点获取属性
                 String property = parameterNode.getStringAttribute("property");
                 String javaType = parameterNode.getStringAttribute("javaType");
                 String jdbcType = parameterNode.getStringAttribute("jdbcType");

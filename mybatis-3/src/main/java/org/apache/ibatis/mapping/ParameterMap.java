@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * parameterMap 标签
+ *
  * @author Clinton Begin
  */
 public class ParameterMap {

@@ -23,6 +23,11 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 import java.sql.ResultSet;
 
 /**
+ * parameterMap -> parameter 标签对应的实体类
+ * <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+ * <parameter property="name" resultMap="base"  jdbcType="VARCHAR"/>
+ * </parameterMap>
+ *
  * @author Clinton Begin
  */
 public class ParameterMapping {
@@ -48,6 +53,7 @@ public class ParameterMapping {
 
     /**
      * Used for handling output of callable statements.
+     *
      * @return
      */
     public ParameterMode getMode() {
@@ -56,6 +62,7 @@ public class ParameterMapping {
 
     /**
      * Used for handling output of callable statements.
+     *
      * @return
      */
     public Class<?> getJavaType() {
@@ -64,6 +71,7 @@ public class ParameterMapping {
 
     /**
      * Used in the UnknownTypeHandler in case there is no handler for the property type.
+     *
      * @return
      */
     public JdbcType getJdbcType() {
@@ -72,6 +80,7 @@ public class ParameterMapping {
 
     /**
      * Used for handling output of callable statements.
+     *
      * @return
      */
     public Integer getNumericScale() {
@@ -80,6 +89,7 @@ public class ParameterMapping {
 
     /**
      * Used when setting parameters to the PreparedStatement.
+     *
      * @return
      */
     public TypeHandler<?> getTypeHandler() {
@@ -88,6 +98,7 @@ public class ParameterMapping {
 
     /**
      * Used for handling output of callable statements.
+     *
      * @return
      */
     public String getResultMapId() {
@@ -96,6 +107,7 @@ public class ParameterMapping {
 
     /**
      * Used for handling output of callable statements.
+     *
      * @return
      */
     public String getJdbcTypeName() {
@@ -104,6 +116,7 @@ public class ParameterMapping {
 
     /**
      * Not used
+     *
      * @return
      */
     public String getExpression() {

@@ -26,7 +26,14 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
     private String name;
     private String index;
 
+
+    /**
+     * 数据初始化
+     *
+     * @param fullname
+     */
     public PropertyTokenizer(String fullname) {
+        // 分割 .
         int delim = fullname.indexOf('.');
         if (delim > -1) {
             name = fullname.substring(0, delim);
@@ -36,6 +43,7 @@ public class PropertyTokenizer implements Iterator<PropertyTokenizer> {
             children = null;
         }
         indexedName = name;
+        // 分割[
         delim = name.indexOf('[');
         if (delim > -1) {
             index = name.substring(delim + 1, name.length() - 1);
