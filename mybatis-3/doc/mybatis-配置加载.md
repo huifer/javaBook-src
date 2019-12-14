@@ -1452,3 +1452,525 @@ String databaseId = databaseIdProvider.getDatabaseId(environment.getDataSource()
 
 ## mapperElement
 
+- `org.apache.ibatis.builder.xml.XMLConfigBuilder#mapperElement`
+
+  ```java
+      /**
+       * 解析 mappers
+       *
+       * @param parent
+       * @throws Exception
+       */
+      private void mapperElement(XNode parent) throws Exception {
+          if (parent != null) {
+              for (XNode child : parent.getChildren()) {
+                  if ("package".equals(child.getName())) {
+                      String mapperPackage = child.getStringAttribute("name");
+                      configuration.addMappers(mapperPackage);
+                  } else {
+                      // 读取 resource 属性
+                      String resource = child.getStringAttribute("resource");
+                      // 读取 url 属性
+                      String url = child.getStringAttribute("url");
+                      // 读取 class 属性
+                      String mapperClass = child.getStringAttribute("class");
+                      if (resource != null && url == null && mapperClass == null) {
+                          // 加载 resource 内容
+                          ErrorContext.instance().resource(resource);
+                          InputStream inputStream = Resources.getResourceAsStream(resource);
+                          // 解析 mapper.xml 文件
+                          XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
+                          mapperParser.parse();
+                      } else if (resource == null && url != null && mapperClass == null) {
+                          ErrorContext.instance().resource(url);
+                          InputStream inputStream = Resources.getUrlAsStream(url);
+                          XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
+                          mapperParser.parse();
+                      } else if (resource == null && url == null && mapperClass != null) {
+                          Class<?> mapperInterface = Resources.classForName(mapperClass);
+                          configuration.addMapper(mapperInterface);
+                      } else {
+                          throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");
+                      }
+                  }
+              }
+          }
+      }
+  
+  ```
+
+  
+
+- 编辑`mybatis-config.xml`
+
+  ```xml
+  <mappers>  <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/></mappers>
+  ```
+
+![1576311527726](assets/1576311527726.png)
+
+
+
+### XMLMapperBuilder
+
+- 解析 `Mapper.xml`
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8" ?>
+  <!DOCTYPE mapper
+      PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+      "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.huifer.mybatis.mapper.PersonMapper">
+  
+    <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+    <resultMap id="base" type="com.huifer.mybatis.entity.Person"   >
+      <id column="ID" jdbcType="VARCHAR" property="id" />
+      <result column="age" jdbcType="INTEGER" property="age"/>
+      <collection property="name" jdbcType="VARCHAR"/>
+  
+    </resultMap>
+    <!--  <cache blocking="" eviction="" flushInterval="" readOnly="" size="" type=""/>-->
+    <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+      <parameter property="name" resultMap="base" jdbcType="VARCHAR"/>
+    </parameterMap>
+    <sql id="Base_List">
+  name,age,phone,email,address
+  </sql>
+    <insert id="insert" parameterType="Person" keyProperty="id"
+            useGeneratedKeys="true">
+          INSERT INTO person (name, age, phone, email, address)
+          VALUES(#{name},#{age},#{phone},#{email},#{address})
+      </insert>
+  
+  </mapper>
+  ```
+
+  
+
+
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#XMLMapperBuilder(java.io.InputStream, org.apache.ibatis.session.Configuration, java.lang.String, java.util.Map<java.lang.String,org.apache.ibatis.parsing.XNode>)`
+
+- ```java
+      /**
+       * @param inputStream   mapper.xml 文件流
+       * @param configuration 全局的配置文件
+       * @param resource      mapper.xml 文件路径/com/../..
+       * @param sqlFragments  配置里面的内容
+       */
+      public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
+          this(new XPathParser(inputStream, true, configuration.getVariables(), new XMLMapperEntityResolver()),
+                  configuration, resource, sqlFragments);
+      }
+  ```
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#parse`
+
+```java
+public void parse() {
+        if (!configuration.isResourceLoaded(resource)) {
+            // 解析 mapper 标签下的内容
+            configurationElement(parser.evalNode("/mapper"));
+            configuration.addLoadedResource(resource);
+            bindMapperForNamespace();
+        }
+
+        parsePendingResultMaps();
+        parsePendingCacheRefs();
+        parsePendingStatements();
+    }
+```
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#configurationElement`
+
+```java
+    /**
+     * 解析 mapper 标签
+     * <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>
+     * <mapper namespace="com.huifer.mybatis.mapper.PersonMapper">
+     * <p>
+     * <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+     * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     * <id column="ID" jdbcType="VARCHAR" property="id"/>
+     * <result column="age" jdbcType="INTEGER" property="age"/>
+     * </resultMap>
+     *
+     * <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+     * <parameter property="name" resultMap="base"/>
+     * </parameterMap>
+     * <sql id="Base_List">
+     * name,age,phone,email,address
+     * </sql>
+     * <insert id="insert" parameterType="Person" keyProperty="id"
+     * useGeneratedKeys="true">
+     * INSERT INTO person (name, age, phone, email, address)
+     * VALUES(#{name},#{age},#{phone},#{email},#{address})
+     * </insert>
+     * </mapper>
+     *
+     * @param context
+     */
+    private void configurationElement(XNode context) {
+        try {
+            // 获取 namespace 属性
+            String namespace = context.getStringAttribute("namespace");
+            if (namespace == null || namespace.equals("")) {
+                throw new BuilderException("Mapper's namespace cannot be empty");
+            }
+            // 直接设置 namespace 属性不做其他操作普通的 setter 方法
+            builderAssistant.setCurrentNamespace(namespace);
+            //   <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+            cacheRefElement(context.evalNode("cache-ref"));
+//              <cache blocking="" eviction="" flushInterval="" readOnly="" size="" type=""/>
+            cacheElement(context.evalNode("cache"));
+            //   <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+            parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+            //   <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+            resultMapElements(context.evalNodes("/mapper/resultMap"));
+            //   <sql id="Base_List">
+            //name,age,phone,email,address
+            //</sql>
+            sqlElement(context.evalNodes("/mapper/sql"));
+            // 解析 select|insert|update|delete 标签
+            buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
+        } catch (Exception e) {
+            throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
+        }
+    }
+
+```
+
+这个方法解析了`mapper.xml`的内容
+
+
+
+### cacheRefElement
+
+
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#cacheRefElement`
+
+  ```java
+      /**
+       * 解析 <cache-ref namespace=""/> 标签的属性
+       *
+       * @param context
+       */
+      private void cacheRefElement(XNode context) {
+          if (context != null) {
+              configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
+              // 构造
+              CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant, context.getStringAttribute("namespace"));
+              try {
+                  cacheRefResolver.resolveCacheRef();
+              } catch (IncompleteElementException e) {
+                  // 初始化是没有内容走这一步
+                  configuration.addIncompleteCacheRef(cacheRefResolver);
+              }
+          }
+      }
+  ```
+
+  ```java
+    /**
+       * 向 cacheRefMap 插入值
+       * <mapper namespace="com.huifer.mybatis.mapper.PersonMapper">
+       * <p>
+       * <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+       *
+       * @param namespace           mapper 的 namespace
+       * @param referencedNamespace cache-ref 的 namespace
+       */
+      public void addCacheRef(String namespace, String referencedNamespace) {
+          cacheRefMap.put(namespace, referencedNamespace);
+      }
+  ```
+
+  
+
+  ![1576311999030](assets/1576311999030.png)
+
+
+
+### cacheElement
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#cacheElement`
+
+  ```java
+      /**
+       * 解析
+       * <cache blocking="" eviction="" flushInterval="" readOnly="" size="" type=""/>
+       * 具体缓存策略查看{@link org.apache.ibatis.cache.decorators} 下的类
+       * 获取每个属性构造成 {@link  Cache}
+       *
+       * @param context
+       */
+      private void cacheElement(XNode context) {
+          if (context != null) {
+              // org.apache.ibatis.cache.impl.PerpetualCache 默认缓存实现
+              String type = context.getStringAttribute("type", "PERPETUAL");
+              // 添加到别名,或者从别名中获取
+              Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
+              // 緩存策略 LRU 最近最少使用的：移除最长时间不被使用的对象。
+              String eviction = context.getStringAttribute("eviction", "LRU");
+              Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
+              // 刷新时间 单位 毫秒
+              Long flushInterval = context.getLongAttribute("flushInterval");
+              // 引用数量
+              Integer size = context.getIntAttribute("size");
+              // 只读
+              boolean readWrite = !context.getBooleanAttribute("readOnly", false);
+              //
+              boolean blocking = context.getBooleanAttribute("blocking", false);
+              // <properties> 下级属性
+              Properties props = context.getChildrenAsProperties();
+              // 构造 cache
+              builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
+          }
+      }
+  
+  ```
+
+  默认实现方式
+
+  ```java
+          typeAliasRegistry.registerAlias("PERPETUAL", PerpetualCache.class);
+          typeAliasRegistry.registerAlias("LRU", LruCache.class);
+  
+  ```
+
+  ![1576312524112](assets/1576312524112.png)
+
+  不难发现这两个属性和默认值的属性相同
+
+
+
+
+
+
+
+### parameterMapElement
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#parameterMapElement`
+
+  ```java
+      /**
+       * 解析  parameterMap 标签的内容
+       * <parameterMap id="hc" type="com.huifer.mybatis.entity.PersonQuery">
+       * <parameter property="name" resultMap="base"/>
+       * </parameterMap>
+       *
+       * @param list
+       */
+      private void parameterMapElement(List<XNode> list) {
+          for (XNode parameterMapNode : list) {
+              // 获取标签属性值
+              String id = parameterMapNode.getStringAttribute("id");
+              String type = parameterMapNode.getStringAttribute("type");
+              // 到别名map中注册
+              Class<?> parameterClass = resolveClass(type);
+              // 获取下级标签 parameter 的属性值
+              List<XNode> parameterNodes = parameterMapNode.evalNodes("parameter");
+              List<ParameterMapping> parameterMappings = new ArrayList<>();
+              for (XNode parameterNode : parameterNodes) {
+                  // 遍历下级节点获取属性
+                  String property = parameterNode.getStringAttribute("property");
+                  String javaType = parameterNode.getStringAttribute("javaType");
+                  String jdbcType = parameterNode.getStringAttribute("jdbcType");
+                  String resultMap = parameterNode.getStringAttribute("resultMap");
+                  String mode = parameterNode.getStringAttribute("mode");
+                  String typeHandler = parameterNode.getStringAttribute("typeHandler");
+                  Integer numericScale = parameterNode.getIntAttribute("numericScale");
+                  ParameterMode modeEnum = resolveParameterMode(mode);
+                  Class<?> javaTypeClass = resolveClass(javaType);
+                  JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
+                  Class<? extends TypeHandler<?>> typeHandlerClass = resolveClass(typeHandler);
+                  ParameterMapping parameterMapping = builderAssistant.buildParameterMapping(parameterClass, property, javaTypeClass, jdbcTypeEnum, resultMap, modeEnum, typeHandlerClass, numericScale);
+                  parameterMappings.add(parameterMapping);
+              }
+              builderAssistant.addParameterMap(id, parameterClass, parameterMappings);
+          }
+      }
+  
+  ```
+
+  ```java
+      /**
+       * 向 {@link  Configuration} configuration 添加 parameter 标签的内容 
+       *
+       * @param id
+       * @param parameterClass
+       * @param parameterMappings
+       * @return
+       */
+      public ParameterMap addParameterMap(String id, Class<?> parameterClass, List<ParameterMapping> parameterMappings) {
+          id = applyCurrentNamespace(id, false);
+          ParameterMap parameterMap = new ParameterMap.Builder(configuration, id, parameterClass, parameterMappings).build();
+          configuration.addParameterMap(parameterMap);
+          return parameterMap;
+      }
+  ```
+
+  
+
+![1576312612783](assets/1576312612783.png)
+
+![1576312777050](assets/1576312777050.png)
+
+
+
+
+
+### resultMapElements
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#resultMapElements`
+
+  ```java
+      /**
+       * 解析 resultMap 标签
+       *
+       * @param list
+       * @throws Exception
+       */
+      private void resultMapElements(List<XNode> list) throws Exception {
+          for (XNode resultMapNode : list) {
+              try {
+                  resultMapElement(resultMapNode);
+              } catch (IncompleteElementException e) {
+                  // ignore, it will be retried
+              }
+          }
+      }
+  	
+  ```
+
+```java
+    /**
+     * reslutMapper 下级标签解析
+     * <resultMap type="com.huifer.mybatis.entity.Person" id="base">
+     * <id jdbcType="VARCHAR" column="ID" property="id"/>
+     * <result jdbcType="INTEGER" column="age" property="age"/>
+     * </resultMap>
+     *
+     * @param resultMapNode            resultMap 节点
+     * @param additionalResultMappings
+     * @param enclosingType
+     * @return
+     * @throws Exception
+     */
+    private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings, Class<?> enclosingType) throws Exception {
+        ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
+        String type = resultMapNode.getStringAttribute("type",
+                resultMapNode.getStringAttribute("ofType",
+                        resultMapNode.getStringAttribute("resultType",
+                                resultMapNode.getStringAttribute("javaType"))));
+        // 别名注册
+        Class<?> typeClass = resolveClass(type);
+        if (typeClass == null) {
+            typeClass = inheritEnclosingType(resultMapNode, enclosingType);
+        }
+        Discriminator discriminator = null;
+        List<ResultMapping> resultMappings = new ArrayList<>();
+        // 粗暴
+        resultMappings.addAll(additionalResultMappings);
+        List<XNode> resultChildren = resultMapNode.getChildren();
+        for (XNode resultChild : resultChildren) {
+            if ("constructor".equals(resultChild.getName())) {
+                processConstructorElement(resultChild, typeClass, resultMappings);
+            } else if ("discriminator".equals(resultChild.getName())) {
+                discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
+            } else {
+                List<ResultFlag> flags = new ArrayList<>();
+                if ("id".equals(resultChild.getName())) {
+                    // 获取 id 属性
+                    flags.add(ResultFlag.ID);
+                }
+                resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
+            }
+        }
+        // 解析xml 中的resultMap标签
+        // mapper_resultMap[base]_collection[name]
+        String id = resultMapNode.getStringAttribute("id",
+                resultMapNode.getValueBasedIdentifier());
+        String extend = resultMapNode.getStringAttribute("extends");
+        Boolean autoMapping = resultMapNode.getBooleanAttribute("autoMapping");
+        ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator, resultMappings, autoMapping);
+        try {
+            return resultMapResolver.resolve();
+        } catch (IncompleteElementException e) {
+            configuration.addIncompleteResultMap(resultMapResolver);
+            throw e;
+        }
+    }
+	
+```
+
+```java
+    public ResultMap resolve() {
+        return assistant.addResultMap(this.id, this.type, this.extend, this.discriminator, this.resultMappings, this.autoMapping);
+    }
+```
+
+```java
+    /**
+     * 添加 resultMap
+     *
+     * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     * <id column="ID" jdbcType="VARCHAR" property="id"/>
+     * <result column="age" jdbcType="INTEGER" property="age"/>
+     * <collection property="name" jdbcType="VARCHAR"/>
+     * </resultMap>
+     * @param id             resultMap 标签的 id 属性
+     * @param type           resultMap 标签的 type 属性的字节码
+     * @param extend         resultMap 标签的 extend 属性
+     * @param discriminator  下级标签
+     * @param resultMappings 夏季标签
+     * @param autoMapping    resultMap 标签的 autoMapping 属性
+     * @return
+     */
+    public ResultMap addResultMap(
+            String id,
+            Class<?> type,
+            String extend,
+            Discriminator discriminator,
+            List<ResultMapping> resultMappings,
+            Boolean autoMapping) {
+        id = applyCurrentNamespace(id, false);
+        extend = applyCurrentNamespace(extend, true);
+
+        if (extend != null) {
+            if (!configuration.hasResultMap(extend)) {
+                throw new IncompleteElementException("Could not find a parent resultmap with id '" + extend + "'");
+            }
+            ResultMap resultMap = configuration.getResultMap(extend);
+            List<ResultMapping> extendedResultMappings = new ArrayList<>(resultMap.getResultMappings());
+            extendedResultMappings.removeAll(resultMappings);
+            // Remove parent constructor if this resultMap declares a constructor.
+            boolean declaresConstructor = false;
+            for (ResultMapping resultMapping : resultMappings) {
+                if (resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR)) {
+                    declaresConstructor = true;
+                    break;
+                }
+            }
+            if (declaresConstructor) {
+                extendedResultMappings.removeIf(resultMapping -> resultMapping.getFlags().contains(ResultFlag.CONSTRUCTOR));
+            }
+            resultMappings.addAll(extendedResultMappings);
+        }
+        // 构建 ResultMap
+        ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
+                .discriminator(discriminator)
+                .build();
+        configuration.addResultMap(resultMap);
+        return resultMap;
+    }
+
+```
+
+他又来了`configuration`![1576313598939](assets/1576313598939.png)
+
+### sqlElement
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#sqlElement(java.util.List<org.apache.ibatis.parsing.XNode>)`
+- 
