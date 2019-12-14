@@ -151,7 +151,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
 
     /**
-     * 添加 parameter 标签的内容
+     * 向 {@link  Configuration} configuration 添加 parameter 标签的内容
      *
      * @param id
      * @param parameterClass
@@ -209,12 +209,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
     /**
      * 添加 resultMap
      *
-     * @param id
-     * @param type
-     * @param extend
-     * @param discriminator
-     * @param resultMappings
-     * @param autoMapping
+     * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     * <id column="ID" jdbcType="VARCHAR" property="id"/>
+     * <result column="age" jdbcType="INTEGER" property="age"/>
+     * <collection property="name" jdbcType="VARCHAR"/>
+     * </resultMap>
+     * @param id             resultMap 标签的 id 属性
+     * @param type           resultMap 标签的 type 属性的字节码
+     * @param extend         resultMap 标签的 extend 属性
+     * @param discriminator  下级标签
+     * @param resultMappings 夏季标签
+     * @param autoMapping    resultMap 标签的 autoMapping 属性
      * @return
      */
     public ResultMap addResultMap(
@@ -247,6 +252,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
             }
             resultMappings.addAll(extendedResultMappings);
         }
+        // 构建 ResultMap
         ResultMap resultMap = new ResultMap.Builder(configuration, id, type, resultMappings, autoMapping)
                 .discriminator(discriminator)
                 .build();

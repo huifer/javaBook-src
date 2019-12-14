@@ -574,6 +574,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                         ErrorContext.instance().resource(resource);
                         InputStream inputStream = Resources.getResourceAsStream(resource);
                         // 解析 mapper.xml 文件
+                        // 构造在解析
                         XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
                         mapperParser.parse();
                     } else if (resource == null && url != null && mapperClass == null) {

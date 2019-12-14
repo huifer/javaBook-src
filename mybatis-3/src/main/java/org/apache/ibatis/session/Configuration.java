@@ -805,6 +805,15 @@ public class Configuration {
         return mappedStatements.containsKey(statementName);
     }
 
+    /**
+     * 向 cacheRefMap 插入值
+     * <mapper namespace="com.huifer.mybatis.mapper.PersonMapper">
+     * <p>
+     * <cache-ref namespace="com.huifer.mybatis.mapper.PersonMapper"/>
+     *
+     * @param namespace           mapper 的 namespace
+     * @param referencedNamespace cache-ref 的 namespace
+     */
     public void addCacheRef(String namespace, String referencedNamespace) {
         cacheRefMap.put(namespace, referencedNamespace);
     }

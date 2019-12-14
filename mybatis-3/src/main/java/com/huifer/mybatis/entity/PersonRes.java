@@ -1,6 +1,6 @@
 package com.huifer.mybatis.entity;
 
-public class Person extends Object{
+public class PersonRes extends Object{
     private int id;
     private String name;
     private int age;

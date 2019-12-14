@@ -80,6 +80,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     public void parse() {
         if (!configuration.isResourceLoaded(resource)) {
+            // 解析 mapper 标签下的内容
             configurationElement(parser.evalNode("/mapper"));
             configuration.addLoadedResource(resource);
             bindMapperForNamespace();
@@ -223,11 +224,13 @@ public class XMLMapperBuilder extends BaseBuilder {
      */
     private void cacheRefElement(XNode context) {
         if (context != null) {
+            // 向全局配置设置 CacheRef
             configuration.addCacheRef(builderAssistant.getCurrentNamespace(), context.getStringAttribute("namespace"));
             // 构造
             CacheRefResolver cacheRefResolver = new CacheRefResolver(builderAssistant, context.getStringAttribute("namespace"));
             try {
-                cacheRefResolver.resolveCacheRef();
+//                解析
+                Cache cache = cacheRefResolver.resolveCacheRef();
             } catch (IncompleteElementException e) {
                 // 初始化是没有内容走这一步
                 configuration.addIncompleteCacheRef(cacheRefResolver);
@@ -353,6 +356,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         List<ResultMapping> resultMappings = new ArrayList<>();
         // 粗暴
         resultMappings.addAll(additionalResultMappings);
+        // 下级标签
         List<XNode> resultChildren = resultMapNode.getChildren();
         for (XNode resultChild : resultChildren) {
             if ("constructor".equals(resultChild.getName())) {
@@ -383,6 +387,12 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     *
+     * @param resultMapNode
+     * @param enclosingType
+     * @return
+     */
     protected Class<?> inheritEnclosingType(XNode resultMapNode, Class<?> enclosingType) {
         if ("association".equals(resultMapNode.getName()) && resultMapNode.getStringAttribute("resultMap") == null) {
             String property = resultMapNode.getStringAttribute("property");
@@ -516,6 +526,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         Class<?> javaTypeClass = resolveClass(javaType);
         Class<? extends TypeHandler<?>> typeHandlerClass = resolveClass(typeHandler);
         JdbcType jdbcTypeEnum = resolveJdbcType(jdbcType);
+        // 构造一个 resultMap
         return builderAssistant.buildResultMapping(resultType, property, column, javaTypeClass, jdbcTypeEnum, nestedSelect, nestedResultMap, notNullColumn, columnPrefix, typeHandlerClass, flags, resultSet, foreignColumn, lazy);
     }
 
