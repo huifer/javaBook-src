@@ -33,6 +33,21 @@ public class ResultMapResolver {
     private final List<ResultMapping> resultMappings;
     private final Boolean autoMapping;
 
+    /**
+     * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     * <id column="ID" jdbcType="VARCHAR" property="id"/>
+     * <result column="age" jdbcType="INTEGER" property="age"/>
+     * <collection property="name" jdbcType="VARCHAR"/>
+     * </resultMap>
+     *
+     * @param assistant      MapperBuilderAssistant 针对当前 mapper
+     * @param id             resultMap 标签的 id 属性
+     * @param type           resultMap 标签的 type 属性的字节码
+     * @param extend         resultMap 标签的 extend 属性
+     * @param discriminator  下级标签
+     * @param resultMappings 夏季标签
+     * @param autoMapping    resultMap 标签的 autoMapping 属性
+     */
     public ResultMapResolver(MapperBuilderAssistant assistant, String id, Class<?> type, String extend, Discriminator discriminator, List<ResultMapping> resultMappings, Boolean autoMapping) {
         this.assistant = assistant;
         this.id = id;

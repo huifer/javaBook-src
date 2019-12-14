@@ -206,6 +206,17 @@ public class MapperBuilderAssistant extends BaseBuilder {
                 .build();
     }
 
+    /**
+     * 添加 resultMap
+     *
+     * @param id
+     * @param type
+     * @param extend
+     * @param discriminator
+     * @param resultMappings
+     * @param autoMapping
+     * @return
+     */
     public ResultMap addResultMap(
             String id,
             Class<?> type,

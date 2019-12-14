@@ -362,12 +362,14 @@ public class XMLMapperBuilder extends BaseBuilder {
             } else {
                 List<ResultFlag> flags = new ArrayList<>();
                 if ("id".equals(resultChild.getName())) {
+                    // 获取 id 属性
                     flags.add(ResultFlag.ID);
                 }
                 resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
             }
         }
         // 解析xml 中的resultMap标签
+        // mapper_resultMap[base]_collection[name]
         String id = resultMapNode.getStringAttribute("id",
                 resultMapNode.getValueBasedIdentifier());
         String extend = resultMapNode.getStringAttribute("extends");
@@ -394,6 +396,13 @@ public class XMLMapperBuilder extends BaseBuilder {
         return null;
     }
 
+    /**
+     * 解析 constructor 标签
+     * @param resultChild
+     * @param resultType
+     * @param resultMappings
+     * @throws Exception
+     */
     private void processConstructorElement(XNode resultChild, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
         List<XNode> argChildren = resultChild.getChildren();
         for (XNode argChild : argChildren) {
@@ -406,6 +415,16 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     *     <discriminator javaType="">
+     *       <case value=""></case>
+     *     </discriminator>
+     * @param context
+     * @param resultType
+     * @param resultMappings
+     * @return
+     * @throws Exception
+     */
     private Discriminator processDiscriminatorElement(XNode context, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
         String column = context.getStringAttribute("column");
         String javaType = context.getStringAttribute("javaType");
@@ -461,6 +480,19 @@ public class XMLMapperBuilder extends BaseBuilder {
         return context.getStringAttribute("databaseId") == null;
     }
 
+    /**
+     * 创建一个 {@link  ResultMapping}
+     *  <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     *     <id column="ID" jdbcType="VARCHAR" property="id"/>
+     *     <result column="age" jdbcType="INTEGER" property="age"/>
+     *     <collection property="name" jdbcType="VARCHAR"/>
+     *   </resultMap>
+     * @param context
+     * @param resultType
+     * @param flags
+     * @return
+     * @throws Exception
+     */
     private ResultMapping buildResultMappingFromContext(XNode context, Class<?> resultType, List<ResultFlag> flags) throws Exception {
         String property;
         if (flags.contains(ResultFlag.CONSTRUCTOR)) {
@@ -468,6 +500,7 @@ public class XMLMapperBuilder extends BaseBuilder {
         } else {
             property = context.getStringAttribute("property");
         }
+        // 获取标签属性
         String column = context.getStringAttribute("column");
         String javaType = context.getStringAttribute("javaType");
         String jdbcType = context.getStringAttribute("jdbcType");
