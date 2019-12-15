@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * 查询结果对象
  * resultMap -> result 标签
  * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
  * <id column="ID" jdbcType="VARCHAR" property="id"/>

@@ -94,6 +94,7 @@ public class SqlSessionFactoryBuilder {
 
     public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
         try {
+            // 讲xml读取进行文件配置化,转换成java
             XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
             return build(parser.parse());
         } catch (Exception e) {
@@ -108,6 +109,11 @@ public class SqlSessionFactoryBuilder {
         }
     }
 
+    /**
+     * 默认的sqlSessionFactory初始化方法
+     * @param config
+     * @return
+     */
     public SqlSessionFactory build(Configuration config) {
         return new DefaultSqlSessionFactory(config);
     }

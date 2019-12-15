@@ -42,6 +42,12 @@ public abstract class BaseWrapper implements ObjectWrapper {
         }
     }
 
+    /**
+     * 对象转换
+     * @param prop
+     * @param collection
+     * @return
+     */
     protected Object getCollectionValue(PropertyTokenizer prop, Object collection) {
         if (collection instanceof Map) {
             return ((Map) collection).get(prop.getIndex());

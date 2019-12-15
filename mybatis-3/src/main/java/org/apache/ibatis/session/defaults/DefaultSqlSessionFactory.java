@@ -34,6 +34,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
     private final Configuration configuration;
 
+    /**
+     *
+     * @param configuration 配置文件
+     */
     public DefaultSqlSessionFactory(Configuration configuration) {
         this.configuration = configuration;
     }
