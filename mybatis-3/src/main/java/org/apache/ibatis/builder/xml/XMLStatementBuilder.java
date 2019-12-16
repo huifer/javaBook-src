@@ -42,6 +42,12 @@ public class XMLStatementBuilder extends BaseBuilder {
         this(configuration, builderAssistant, context, null);
     }
 
+    /**
+     * @param configuration    解析到的 configuration
+     * @param builderAssistant
+     * @param context          当前的 select|insert|update|delete
+     * @param databaseId
+     */
     public XMLStatementBuilder(Configuration configuration, MapperBuilderAssistant builderAssistant, XNode context, String databaseId) {
         super(configuration);
         this.builderAssistant = builderAssistant;
@@ -49,7 +55,9 @@ public class XMLStatementBuilder extends BaseBuilder {
         this.requiredDatabaseId = databaseId;
     }
 
+
     public void parseStatementNode() {
+        // 获取id属性
         String id = context.getStringAttribute("id");
         String databaseId = context.getStringAttribute("databaseId");
 

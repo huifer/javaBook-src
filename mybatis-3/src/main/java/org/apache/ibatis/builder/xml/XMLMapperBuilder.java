@@ -39,6 +39,9 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     private final XPathParser parser;
     private final MapperBuilderAssistant builderAssistant;
+    /**
+     * sql 标签数据
+     */
     private final Map<String, XNode> sqlFragments;
     private final String resource;
 
@@ -161,10 +164,28 @@ public class XMLMapperBuilder extends BaseBuilder {
         buildStatementFromContext(list, null);
     }
 
+    /**
+     * <insert keyProperty="id" parameterType="Person" useGeneratedKeys="true" id="insert">
+     * INSERT INTO person (name, age, phone, email, address)
+     * VALUES(#{name},#{age},#{phone},#{email},#{address})
+     * </insert>
+     *
+     * <select resultMap="base" id="list">
+     * <include refid="Base_List"/>
+     * <if test="iid != null">
+     * and id = #{iid,jdbcType=INTEGER}
+     * </if>
+     * </select>
+     *
+     * @param list
+     * @param requiredDatabaseId
+     */
     private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
         for (XNode context : list) {
+            // 动态 sql 解析
             final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
             try {
+                // 解析
                 statementParser.parseStatementNode();
             } catch (IncompleteElementException e) {
                 configuration.addIncompleteStatement(statementParser);
@@ -388,7 +409,6 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     *
      * @param resultMapNode
      * @param enclosingType
      * @return
@@ -408,6 +428,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /**
      * 解析 constructor 标签
+     *
      * @param resultChild
      * @param resultType
      * @param resultMappings
@@ -426,9 +447,10 @@ public class XMLMapperBuilder extends BaseBuilder {
     }
 
     /**
-     *     <discriminator javaType="">
-     *       <case value=""></case>
-     *     </discriminator>
+     * <discriminator javaType="">
+     * <case value=""></case>
+     * </discriminator>
+     *
      * @param context
      * @param resultType
      * @param resultMappings
@@ -436,6 +458,7 @@ public class XMLMapperBuilder extends BaseBuilder {
      * @throws Exception
      */
     private Discriminator processDiscriminatorElement(XNode context, Class<?> resultType, List<ResultMapping> resultMappings) throws Exception {
+        // 简单的数据获取 赋值
         String column = context.getStringAttribute("column");
         String javaType = context.getStringAttribute("javaType");
         String jdbcType = context.getStringAttribute("jdbcType");
@@ -454,6 +477,9 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /**
      * 解析 sql 标签
+     * <sql id="Base_List">
+     * name,age,phone,email,address
+     * </sql>
      *
      * @param list
      */
@@ -464,9 +490,18 @@ public class XMLMapperBuilder extends BaseBuilder {
         sqlElement(list, null);
     }
 
+    /**
+     * 解析 sql 标签
+     * <sql id="Base_List">
+     * name,age,phone,email,address
+     * </sql>
+     *
+     * @param list
+     */
     private void sqlElement(List<XNode> list, String requiredDatabaseId) {
         for (XNode context : list) {
             String databaseId = context.getStringAttribute("databaseId");
+            // 获取 id
             String id = context.getStringAttribute("id");
             id = builderAssistant.applyCurrentNamespace(id, false);
             if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
@@ -492,11 +527,12 @@ public class XMLMapperBuilder extends BaseBuilder {
 
     /**
      * 创建一个 {@link  ResultMapping}
-     *  <resultMap id="base" type="com.huifer.mybatis.entity.Person">
-     *     <id column="ID" jdbcType="VARCHAR" property="id"/>
-     *     <result column="age" jdbcType="INTEGER" property="age"/>
-     *     <collection property="name" jdbcType="VARCHAR"/>
-     *   </resultMap>
+     * <resultMap id="base" type="com.huifer.mybatis.entity.Person">
+     * <id column="ID" jdbcType="VARCHAR" property="id"/>
+     * <result column="age" jdbcType="INTEGER" property="age"/>
+     * <collection property="name" jdbcType="VARCHAR"/>
+     * </resultMap>
+     *
      * @param context
      * @param resultType
      * @param flags

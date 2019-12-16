@@ -200,6 +200,12 @@ public class XPathParser {
         return evalNodes(document, expression);
     }
 
+    /**
+     * 获取 一定规则的节点
+     * @param root
+     * @param expression
+     * @return
+     */
     public List<XNode> evalNodes(Object root, String expression) {
         List<XNode> xnodes = new ArrayList<>();
         NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
