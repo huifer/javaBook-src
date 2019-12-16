@@ -28,6 +28,7 @@ import java.lang.annotation.*;
  *   User selectById(&#064;Param("name") String value);
  * }
  * </pre>
+ * 参数注解
  * @author Clinton Begin
  */
 @Documented
