@@ -18,6 +18,8 @@ class HfConfigurationTest {
         Reader reader = Resources.getResourceAsReader("mybatis-config.xml");
         SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(reader);
         Configuration configuration = factory.getConfiguration();
+        SqlSession sqlSession = factory.openSession();
+
         System.out.println();
     }
 

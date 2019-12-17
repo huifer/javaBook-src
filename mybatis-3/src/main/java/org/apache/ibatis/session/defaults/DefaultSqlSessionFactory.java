@@ -35,7 +35,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
     private final Configuration configuration;
 
     /**
-     *
      * @param configuration 配置文件
      */
     public DefaultSqlSessionFactory(Configuration configuration) {
@@ -87,10 +86,20 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         return configuration;
     }
 
+    /**
+     * <setting name="defaultExecutorType" value="SIMPLE"/>
+     *
+     * @param execType   setting 标签的 defaultExecutorType 属性
+     * @param level      事物级别
+     * @param autoCommit
+     * @return
+     */
     private SqlSession openSessionFromDataSource(ExecutorType execType, TransactionIsolationLevel level, boolean autoCommit) {
         Transaction tx = null;
         try {
             final Environment environment = configuration.getEnvironment();
+            //       <transactionManager type="JDBC"/>
+            // org.apache.ibatis.transaction.jdbc.JdbcTransaction
             final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment(environment);
             tx = transactionFactory.newTransaction(environment.getDataSource(), level, autoCommit);
             final Executor executor = configuration.newExecutor(tx, execType);

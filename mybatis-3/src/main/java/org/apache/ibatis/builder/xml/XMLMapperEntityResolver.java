@@ -48,6 +48,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
      * @return The InputSource for the DTD
      *
      * @throws org.xml.sax.SAXException If anything goes wrong
+     * 加载 jar 中的文件判断是否出现异常 (是否符合xml解析规则)
      */
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException {

@@ -49,6 +49,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
+ * mapper xml 标签的对应解析器
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -57,6 +58,9 @@ public class MapperAnnotationBuilder {
     private static final Set<Class<? extends Annotation>> SQL_ANNOTATION_TYPES = new HashSet<>();
     private static final Set<Class<? extends Annotation>> SQL_PROVIDER_ANNOTATION_TYPES = new HashSet<>();
 
+    /**
+     * 注解设置
+     */
     static {
         SQL_ANNOTATION_TYPES.add(Select.class);
         SQL_ANNOTATION_TYPES.add(Insert.class);
@@ -80,6 +84,9 @@ public class MapperAnnotationBuilder {
         this.type = type;
     }
 
+    /**
+     * 注解解析
+     */
     public void parse() {
         String resource = type.toString();
         if (!configuration.isResourceLoaded(resource)) {
