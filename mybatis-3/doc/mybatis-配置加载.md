@@ -1998,3 +1998,279 @@ public void parse() {
   ```
 
   ![image-20191217103309934](assets/image-20191217103309934.png)
+
+
+
+
+
+### buildStatementFromContext
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#buildStatementFromContext(java.util.List<org.apache.ibatis.parsing.XNode>)`
+
+  ```JAVA
+      /**
+       * select|insert|update|delete 标签
+       *
+       * @param list select|insert|update|delete 标签
+       */
+      private void buildStatementFromContext(List<XNode> list) {
+          if (configuration.getDatabaseId() != null) {
+              buildStatementFromContext(list, configuration.getDatabaseId());
+          }
+          buildStatementFromContext(list, null);
+      }
+  
+  ```
+
+  ```JAVA
+      /**
+       * <insert keyProperty="id" parameterType="Person" useGeneratedKeys="true" id="insert">
+       * INSERT INTO person (name, age, phone, email, address)
+       * VALUES(#{name},#{age},#{phone},#{email},#{address})
+       * </insert>
+       *
+       * <select resultMap="base" id="list">
+       * <include refid="Base_List"/>
+       * <if test="iid != null">
+       * and id = #{iid,jdbcType=INTEGER}
+       * </if>
+       * </select>
+       *
+       * @param list
+       * @param requiredDatabaseId
+       */
+      private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+          for (XNode context : list) {
+              // 动态 sql 解析
+              final XMLStatementBuilder statementParser = new XMLStatementBuilder(configuration, builderAssistant, context, requiredDatabaseId);
+              try {
+                  // 解析
+                  statementParser.parseStatementNode();
+              } catch (IncompleteElementException e) {
+                  configuration.addIncompleteStatement(statementParser);
+              }
+          }
+      }
+  
+  ```
+
+  ```JAVA
+      /**
+       * context => <insert keyProperty="id" parameterType="Person" useGeneratedKeys="true" id="insert">
+       * INSERT INTO person (name, age, phone, email, address)
+       * VALUES(#{name},#{age},#{phone},#{email},#{address})
+       * </insert>
+       */
+      public void parseStatementNode() {
+          // 获取id属性
+          String id = context.getStringAttribute("id");
+          String databaseId = context.getStringAttribute("databaseId");
+  
+          if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) {
+              return;
+          }
+  
+          // 获取当前 <select insert delete update > 名称
+          String nodeName = context.getNode().getNodeName();
+          SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
+          boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+          boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
+          boolean useCache = context.getBooleanAttribute("useCache", isSelect);
+          boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
+  
+          // Include Fragments before parsing
+          // <include > 解析
+          // TODO: 2019/12/17 include 标签
+          XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
+          includeParser.applyIncludes(context.getNode());
+  
+          //<select resultMap="base" id="list">
+          //    <if test="iid != null">
+          //            and id = #{iid,jdbcType=INTEGER}
+          //        </if>
+          //</select>
+          // 请求类型
+          String parameterType = context.getStringAttribute("parameterType");
+          // 别名中心注册获取
+          Class<?> parameterTypeClass = resolveClass(parameterType);
+  
+          String lang = context.getStringAttribute("lang");
+          LanguageDriver langDriver = getLanguageDriver(lang);
+  
+          // Parse selectKey after includes and remove them.
+          processSelectKeyNodes(id, parameterTypeClass, langDriver);
+  
+          // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
+          KeyGenerator keyGenerator;
+          String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
+          keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
+          if (configuration.hasKeyGenerator(keyStatementId)) {
+              keyGenerator = configuration.getKeyGenerator(keyStatementId);
+          } else {
+              keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
+                      configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
+                      ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+          }
+  
+          // 语言驱动： org.apache.ibatis.scripting.xmltags.XMLLanguageDriver
+          // 创建sql源
+          SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
+          StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+          // 标签获取
+          Integer fetchSize = context.getIntAttribute("fetchSize");
+          Integer timeout = context.getIntAttribute("timeout");
+          String parameterMap = context.getStringAttribute("parameterMap");
+          String resultType = context.getStringAttribute("resultType");
+          Class<?> resultTypeClass = resolveClass(resultType);
+          String resultMap = context.getStringAttribute("resultMap");
+          String resultSetType = context.getStringAttribute("resultSetType");
+          ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
+          if (resultSetTypeEnum == null) {
+              resultSetTypeEnum = configuration.getDefaultResultSetType();
+          }
+          String keyProperty = context.getStringAttribute("keyProperty");
+          String keyColumn = context.getStringAttribute("keyColumn");
+          String resultSets = context.getStringAttribute("resultSets");
+  
+          builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType,
+                  fetchSize, timeout, parameterMap, parameterTypeClass, resultMap, resultTypeClass,
+                  resultSetTypeEnum, flushCache, useCache, resultOrdered,
+                  keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets);
+      }
+  
+  ```
+
+  相关类
+
+  - `org.apache.ibatis.builder.xml.XMLIncludeTransformer`
+  - `org.apache.ibatis.builder.xml.XMLStatementBuilder`
+  - `org.apache.ibatis.mapping.SqlCommandType`
+  - `org.apache.ibatis.executor.keygen.KeyGenerator`
+  - `org.apache.ibatis.scripting.LanguageDriver`
+  - `org.apache.ibatis.mapping.SqlSource`
+  - `org.apache.ibatis.scripting.xmltags.XMLScriptBuilder`
+  - ...
+
+
+
+debug
+
+```xml
+  <select id="sss" resultMap="BaseResultMap">
+    select * from hs_sell
+  </select>
+
+```
+
+![image-20191217104008186](assets/image-20191217104008186.png)
+
+可以看到获取`id`属性为`sss`
+
+```java
+/**
+ * 数据库的操作方式 CRUD
+ * @author Clinton Begin
+ */
+public enum SqlCommandType {
+    UNKNOWN, INSERT, UPDATE, DELETE, SELECT, FLUSH
+}
+
+```
+
+
+
+include 标签解析不明白,
+
+```java
+        XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
+        includeParser.applyIncludes(context.getNode());
+```
+
+源码看的不明白 ， 核心内容就是将 **`<include>`转换成具体的文本**
+
+看sqlSource 构建
+
+```java
+SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
+        StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+
+```
+
+```java
+    @Override
+    public SqlSource createSqlSource(Configuration configuration, XNode script, Class<?> parameterType) {
+        XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
+        return builder.parseScriptNode();
+    }
+
+```
+
+```java
+    public SqlSource parseScriptNode() {
+        //<select resultMap="BaseResultMap" parameterType="java.lang.Integer" id="selectByPrimaryKey">
+        //
+        //    select
+        //    </select>
+        //     select * from hs_sell
+        MixedSqlNode rootSqlNode = parseDynamicTags(context);
+        SqlSource sqlSource;
+        if (isDynamic) {
+            sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
+        } else {
+            sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType);
+        }
+        return sqlSource;
+    }
+
+
+```
+
+```java
+    /**
+     * <b>动态sql 的核心方法!!!</b>
+     *
+     * @param node
+     * @return
+     */
+    protected MixedSqlNode parseDynamicTags(XNode node) {
+        List<SqlNode> contents = new ArrayList<>();
+        NodeList children = node.getNode().getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            XNode child = node.newXNode(children.item(i));
+            if (child.getNode().getNodeType() == Node.CDATA_SECTION_NODE || child.getNode().getNodeType() == Node.TEXT_NODE) {
+//                如果不包含其他标签或者是纯文本节点
+                // data 是替换后sql文本
+                String data = child.getStringBody("");
+                TextSqlNode textSqlNode = new TextSqlNode(data);
+                if (textSqlNode.isDynamic()) {
+                    contents.add(textSqlNode);
+                    isDynamic = true;
+                } else {
+                    // 直接添加
+                    contents.add(new StaticTextSqlNode(data));
+                }
+            } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
+                // 动态标签处理逻辑
+                String nodeName = child.getNode().getNodeName();
+//                if 等标签
+                NodeHandler handler = nodeHandlerMap.get(nodeName);
+                if (handler == null) {
+                    throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
+                }
+                /**
+                 * 动态标签处理 {@link TrimHandler}
+                 */
+                handler.handleNode(child, contents);
+                isDynamic = true;
+            }
+        }
+        return new MixedSqlNode(contents);
+    }
+
+```
+
+- 当前sql是纯文本`select * from hs_sell`
+
+  ![image-20191217104450495](assets/image-20191217104450495.png)
+
+  可以看到当前`child`变量就是

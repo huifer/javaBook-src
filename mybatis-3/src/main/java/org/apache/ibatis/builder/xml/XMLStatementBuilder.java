@@ -74,6 +74,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
         // 获取当前 <select insert delete update > 名称
         String nodeName = context.getNode().getNodeName();
+        // 判断sql语句的类型
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
         boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
@@ -82,6 +83,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
         // Include Fragments before parsing
         // <include > 解析
+        // TODO: 2019/12/17 include 标签
         XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
         includeParser.applyIncludes(context.getNode());
 
@@ -117,6 +119,7 @@ public class XMLStatementBuilder extends BaseBuilder {
         // 创建sql源
         SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
         StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+        // 标签获取
         Integer fetchSize = context.getIntAttribute("fetchSize");
         Integer timeout = context.getIntAttribute("timeout");
         String parameterMap = context.getStringAttribute("parameterMap");
