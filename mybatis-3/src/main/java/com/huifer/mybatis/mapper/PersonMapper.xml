@@ -19,7 +19,7 @@
     <sql id="Base_List">
 name,age,phone,email,address
 </sql>
-    <insert id="insert" parameterType="Person" keyProperty="id"
+    <insert id="ins" parameterType="Person" keyProperty="id"
             useGeneratedKeys="true">
         INSERT INTO person (name, age, phone, email, address)
         VALUES(#{name},#{age},#{phone},#{email},#{address})
@@ -32,6 +32,7 @@ name,age,phone,email,address
             and id = #{iid,jdbcType=INTEGER}
         </if>
     </select>
+
 
 
 </mapper>

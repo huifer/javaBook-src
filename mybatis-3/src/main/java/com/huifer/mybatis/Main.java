@@ -34,7 +34,7 @@ public class Main {
             p.setEmail("123@qq.com");
             p.setAddress(new Date().toString());
 
-            roleMapper.insert(p);
+            roleMapper.ins(p);
 
 
             sqlSession.commit();

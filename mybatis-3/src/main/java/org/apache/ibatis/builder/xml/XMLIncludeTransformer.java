@@ -45,6 +45,7 @@ public class XMLIncludeTransformer {
 
     public void applyIncludes(Node source) {
         Properties variablesContext = new Properties();
+        // 获取 mybatis-config.xml properties 标签数据
         Properties configurationVariables = configuration.getVariables();
         Optional.ofNullable(configurationVariables).ifPresent(variablesContext::putAll);
         applyIncludes(source, variablesContext, false);
@@ -52,11 +53,20 @@ public class XMLIncludeTransformer {
 
     /**
      * Recursively apply includes through all SQL fragments.
+     * // TODO: 2019/12/17 ？？？？？？？？？？？？？？？？？？
      * @param source Include node in DOM tree
      * @param variablesContext Current context for static variables with values
      */
     private void applyIncludes(Node source, final Properties variablesContext, boolean included) {
         if (source.getNodeName().equals("include")) {
+            //     <select id="list" resultMap="base">
+            //        select
+            //        <include refid="Base_List"/>
+            //        from person where 1=1
+            //        <if test="iid != null">
+            //            and id = #{iid,jdbcType=INTEGER}
+            //        </if>
+            //    </select>
             Node toInclude = findSqlFragment(getStringAttribute(source, "refid"), variablesContext);
             Properties toIncludeContext = getVariablesContext(source, variablesContext);
             applyIncludes(toInclude, toIncludeContext, true);

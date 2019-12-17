@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface PersonMapper {
-    int insert(Person person);
+    int ins(Person person);
 
     List<Person> list(@Param("iid") Integer id);
 

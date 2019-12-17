@@ -40,6 +40,12 @@ public class RawSqlSource implements SqlSource {
         this(configuration, getSql(configuration, rootSqlNode), parameterType);
     }
 
+    /**
+     * 初始化方法
+     * @param configuration 配置
+     * @param sql sql 文本
+     * @param parameterType
+     */
     public RawSqlSource(Configuration configuration, String sql, Class<?> parameterType) {
         SqlSourceBuilder sqlSourceParser = new SqlSourceBuilder(configuration);
         Class<?> clazz = parameterType == null ? Object.class : parameterType;

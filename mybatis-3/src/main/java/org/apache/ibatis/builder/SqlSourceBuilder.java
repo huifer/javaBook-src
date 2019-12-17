@@ -39,6 +39,31 @@ public class SqlSourceBuilder extends BaseBuilder {
         super(configuration);
     }
 
+    /**
+     * sql 参数类型 ， 返回值
+     *
+     *   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+     *     <!--@mbg.generated-->
+     *     select
+     *     <include refid="Base_Column_List" />
+     *     from hs_sell
+     *     where ID = #{id,jdbcType=INTEGER}
+     *   </select>
+     *   => 替换成问号
+     * select
+     *
+     *
+     *     ID, USER_ID, GOOD_ID, PRICE, `SIZE`, COMPANY_ID, GROUP_ID, VERSION, DELETED, CREATE_USER,
+     *     CREATE_TIME, UPDATE_USER, UPDATE_TIME, WORK_ORDER_ID
+     *
+     *     from hs_sell
+     *     where ID = ?
+     *
+     * @param originalSql sql文本
+     * @param parameterType 默认 object
+     * @param additionalParameters
+     * @return
+     */
     public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
         ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
         GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);

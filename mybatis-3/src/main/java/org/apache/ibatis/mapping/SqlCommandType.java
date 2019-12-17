@@ -16,6 +16,7 @@
 package org.apache.ibatis.mapping;
 
 /**
+ * 数据库的操作方式 CRUD
  * @author Clinton Begin
  */
 public enum SqlCommandType {

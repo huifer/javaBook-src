@@ -24,6 +24,7 @@ import org.apache.ibatis.executor.keygen.SelectKeyGenerator;
 import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.parsing.XNode;
 import org.apache.ibatis.scripting.LanguageDriver;
+import org.apache.ibatis.scripting.LanguageDriverRegistry;
 import org.apache.ibatis.session.Configuration;
 
 import java.util.List;
@@ -56,6 +57,12 @@ public class XMLStatementBuilder extends BaseBuilder {
     }
 
 
+    /**
+     * context => <insert keyProperty="id" parameterType="Person" useGeneratedKeys="true" id="insert">
+     * INSERT INTO person (name, age, phone, email, address)
+     * VALUES(#{name},#{age},#{phone},#{email},#{address})
+     * </insert>
+     */
     public void parseStatementNode() {
         // 获取id属性
         String id = context.getStringAttribute("id");
@@ -65,6 +72,7 @@ public class XMLStatementBuilder extends BaseBuilder {
             return;
         }
 
+        // 获取当前 <select insert delete update > 名称
         String nodeName = context.getNode().getNodeName();
         SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
         boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
@@ -73,10 +81,18 @@ public class XMLStatementBuilder extends BaseBuilder {
         boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
 
         // Include Fragments before parsing
+        // <include > 解析
         XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
         includeParser.applyIncludes(context.getNode());
 
+        //<select resultMap="base" id="list">
+        //    <if test="iid != null">
+        //            and id = #{iid,jdbcType=INTEGER}
+        //        </if>
+        //</select>
+        // 请求类型
         String parameterType = context.getStringAttribute("parameterType");
+        // 别名中心注册获取
         Class<?> parameterTypeClass = resolveClass(parameterType);
 
         String lang = context.getStringAttribute("lang");
@@ -97,6 +113,8 @@ public class XMLStatementBuilder extends BaseBuilder {
                     ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
         }
 
+        // 语言驱动： org.apache.ibatis.scripting.xmltags.XMLLanguageDriver
+        // 创建sql源
         SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
         StatementType statementType = StatementType.valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
         Integer fetchSize = context.getIntAttribute("fetchSize");
@@ -120,6 +138,11 @@ public class XMLStatementBuilder extends BaseBuilder {
                 keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets);
     }
 
+    /**
+     * @param id                 crud 标签id
+     * @param parameterTypeClass 请求参数类型
+     * @param langDriver         语言驱动
+     */
     private void processSelectKeyNodes(String id, Class<?> parameterTypeClass, LanguageDriver langDriver) {
         List<XNode> selectKeyNodes = context.evalNodes("selectKey");
         if (configuration.getDatabaseId() != null) {
@@ -129,6 +152,13 @@ public class XMLStatementBuilder extends BaseBuilder {
         removeSelectKeyNodes(selectKeyNodes);
     }
 
+    /**
+     * @param parentId             crud 标签ID
+     * @param list                 子集
+     * @param parameterTypeClass   参数类型
+     * @param langDriver
+     * @param skRequiredDatabaseId
+     */
     private void parseSelectKeyNodes(String parentId, List<XNode> list, Class<?> parameterTypeClass, LanguageDriver langDriver, String skRequiredDatabaseId) {
         for (XNode nodeToHandle : list) {
             String id = parentId + SelectKeyGenerator.SELECT_KEY_SUFFIX;
@@ -194,6 +224,12 @@ public class XMLStatementBuilder extends BaseBuilder {
         return previous.getDatabaseId() == null;
     }
 
+    /**
+     * 默认的 {@link LanguageDriver} {@link LanguageDriverRegistry#setDefaultDriverClass(java.lang.Class)}
+     *
+     * @param lang
+     * @return
+     */
     private LanguageDriver getLanguageDriver(String lang) {
         Class<? extends LanguageDriver> langClass = null;
         if (lang != null) {
