@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * set 标签解析
  * @author Clinton Begin
  */
 public class SetSqlNode extends TrimSqlNode {

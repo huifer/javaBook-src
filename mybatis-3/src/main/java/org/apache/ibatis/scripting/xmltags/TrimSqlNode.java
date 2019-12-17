@@ -20,6 +20,7 @@ import org.apache.ibatis.session.Configuration;
 import java.util.*;
 
 /**
+ * trim 标签解析
  * @author Clinton Begin
  */
 public class TrimSqlNode implements SqlNode {

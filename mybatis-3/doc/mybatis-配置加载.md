@@ -2274,3 +2274,153 @@ SqlSource sqlSource = langDriver.createSqlSource(configuration, context, paramet
   ![image-20191217104450495](assets/image-20191217104450495.png)
 
   可以看到当前`child`变量就是
+
+- 动态解析
+
+  ![image-20191217143939247](assets/image-20191217143939247.png)
+
+  ```xml
+  <trim suffixOverrides="," prefix="(" suffix=")">
+      <if test="userId != null">
+          USER_ID,
+        </if>
+      <if test="goodId != null">
+          GOOD_ID,
+        </if>
+      <if test="price != null">
+          PRICE,
+        </if>
+      <if test="size != null">
+          `SIZE`,
+        </if>
+      <if test="companyId != null">
+          COMPANY_ID,
+        </if>
+      <if test="groupId != null">
+          GROUP_ID,
+        </if>
+      <if test="version != null">
+          VERSION,
+        </if>
+      <if test="deleted != null">
+          DELETED,
+        </if>
+      <if test="createUser != null">
+          CREATE_USER,
+        </if>
+      <if test="createTime != null">
+          CREATE_TIME,
+        </if>
+      <if test="updateUser != null">
+          UPDATE_USER,
+        </if>
+      <if test="updateTime != null">
+          UPDATE_TIME,
+        </if>
+      <if test="workOrderId != null">
+          WORK_ORDER_ID,
+        </if>
+  </trim>
+  
+  ```
+
+  
+
+  ```JAVA
+  private interface NodeHandler {
+          void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
+      }
+  ```
+
+  实现方法
+
+  ![image-20191217144453261](assets/image-20191217144453261.png)
+
+  处理后结果
+
+  ![image-20191217144739434](assets/image-20191217144739434.png)
+
+  ```java
+          Integer fetchSize = context.getIntAttribute("fetchSize");
+          Integer timeout = context.getIntAttribute("timeout");
+          String parameterMap = context.getStringAttribute("parameterMap");
+          String resultType = context.getStringAttribute("resultType");
+          Class<?> resultTypeClass = resolveClass(resultType);
+          String resultMap = context.getStringAttribute("resultMap");
+          String resultSetType = context.getStringAttribute("resultSetType");
+          ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
+          if (resultSetTypeEnum == null) {
+              resultSetTypeEnum = configuration.getDefaultResultSetType();
+          }
+          String keyProperty = context.getStringAttribute("keyProperty");
+          String keyColumn = context.getStringAttribute("keyColumn");
+          String resultSets = context.getStringAttribute("resultSets");
+  
+  ```
+
+  - 上述部分为属性值获取
+  - ![image-20191217145051629](assets/image-20191217145051629.png)
+
+
+
+
+
+- `org.apache.ibatis.builder.xml.XMLMapperBuilder#parse`
+
+  ```java
+  public void parse() {
+          if (!configuration.isResourceLoaded(resource)) {
+              // 解析 mapper 标签下的内容
+              configurationElement(parser.evalNode("/mapper"));
+              //  <mappers>
+              //<!--    <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>-->
+              //    <mapper resource="com/huifer/mybatis/mapper/HsSellMapper.xml"/>
+              //  </mappers>
+              // 将  resource 属性值添加
+              configuration.addLoadedResource(resource);
+              // mapper 和 namespace 绑定
+              bindMapperForNamespace();
+          }
+  
+          parsePendingResultMaps();
+          parsePendingCacheRefs();
+          parsePendingStatements();
+      }
+  ```
+
+  
+
+```java
+private void bindMapperForNamespace() {
+        String namespace = builderAssistant.getCurrentNamespace();
+        if (namespace != null) {
+            Class<?> boundType = null;
+            try {
+                // 获取 mapper.xml 的namespace 属性值对应的字节码
+                boundType = Resources.classForName(namespace);
+            } catch (ClassNotFoundException e) {
+                //ignore, bound type is not required
+            }
+            if (boundType != null) {
+                if (!configuration.hasMapper(boundType)) {
+                    // Spring may not know the real resource name so we set a flag
+                    // to prevent loading again this resource from the mapper interface
+                    // look at MapperAnnotationBuilder#loadXmlResource
+                    // 添加操作
+                    configuration.addLoadedResource("namespace:" + namespace);
+                    configuration.addMapper(boundType);
+                }
+            }
+        }
+    }
+```
+
+
+
+![image-20191217145607956](assets/image-20191217145607956.png)
+
+
+
+
+
+- 解析完成了 :happy:
