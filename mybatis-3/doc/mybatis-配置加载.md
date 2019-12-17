@@ -1973,4 +1973,28 @@ public void parse() {
 ### sqlElement
 
 - `org.apache.ibatis.builder.xml.XMLMapperBuilder#sqlElement(java.util.List<org.apache.ibatis.parsing.XNode>)`
-- 
+
+  ```java
+  private void sqlElement(List<XNode> list) {
+          if (configuration.getDatabaseId() != null) {
+              sqlElement(list, configuration.getDatabaseId());
+          }
+          sqlElement(list, null);
+      }
+  ```
+
+  ```java
+  private void sqlElement(List<XNode> list, String requiredDatabaseId) {
+          for (XNode context : list) {
+              String databaseId = context.getStringAttribute("databaseId");
+              // 获取 id
+              String id = context.getStringAttribute("id");
+              id = builderAssistant.applyCurrentNamespace(id, false);
+              if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
+                  sqlFragments.put(id, context);
+              }
+          }
+      }
+  ```
+
+  ![image-20191217103309934](assets/image-20191217103309934.png)
