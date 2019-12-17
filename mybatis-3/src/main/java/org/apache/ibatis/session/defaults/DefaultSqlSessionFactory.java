@@ -134,6 +134,11 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         }
     }
 
+    /**
+     * 获取 事物工厂
+     * @param environment
+     * @return
+     */
     private TransactionFactory getTransactionFactoryFromEnvironment(Environment environment) {
         if (environment == null || environment.getTransactionFactory() == null) {
             return new ManagedTransactionFactory();
@@ -141,6 +146,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         return environment.getTransactionFactory();
     }
 
+    /**
+     * 关闭失误
+     * @param tx
+     */
     private void closeTransaction(Transaction tx) {
         if (tx != null) {
             try {

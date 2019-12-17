@@ -50,6 +50,12 @@ public class DefaultSqlSession implements SqlSession {
     private boolean dirty;
     private List<Cursor<?>> cursorList;
 
+    /**
+     * 默认的 sql session
+     * @param configuration mybatis-config.xml
+     * @param executor {@link Executor}
+     * @param autoCommit 自动commit
+     */
     public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
         this.configuration = configuration;
         this.executor = executor;

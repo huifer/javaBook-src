@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
+ * 缓存执行器
  * @author Clinton Begin
  * @author Eduardo Macarron
  */

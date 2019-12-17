@@ -202,4 +202,7 @@
       WORK_ORDER_ID = #{workOrderId,jdbcType=INTEGER}
     where ID = #{id,jdbcType=INTEGER}
   </update>
+  <select id="list" resultMap="BaseResultMap">
+    select * from hs_sell
+  </select>
 </mapper>
