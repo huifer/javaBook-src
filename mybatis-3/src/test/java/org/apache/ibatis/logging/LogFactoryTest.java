@@ -30,6 +30,9 @@ import java.io.Reader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * 日志工厂的测试
+ */
 class LogFactoryTest {
 
     @Test

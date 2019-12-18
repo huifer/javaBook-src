@@ -27,6 +27,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/**
+ * 一些初始化的sql文件
+ */
 public abstract class BaseDataTest {
 
     public static final String BLOG_PROPERTIES = "org/apache/ibatis/databases/blog/blog-derby.properties";
