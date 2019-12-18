@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * {@link MapperProxy} 工厂
  * @author Lasse Voss
  */
 public class MapperProxyFactory<T> {

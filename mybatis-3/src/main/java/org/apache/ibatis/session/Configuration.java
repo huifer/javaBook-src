@@ -655,6 +655,10 @@ public class Configuration {
         return keyGenerators.containsKey(id);
     }
 
+    /**
+     * 添加 cache
+     * @param cache
+     */
     public void addCache(Cache cache) {
         caches.put(cache.getId(), cache);
     }

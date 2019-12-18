@@ -36,6 +36,14 @@ public class MapperRegistry {
         this.config = config;
     }
 
+    /**
+     * 获取 mapper
+     *
+     * @param type
+     * @param sqlSession
+     * @param <T>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
         final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
@@ -49,10 +57,23 @@ public class MapperRegistry {
         }
     }
 
+    /**
+     * 判断是否包含当前 mapper
+     *
+     * @param type mapper.class
+     * @param <T>
+     * @return
+     */
     public <T> boolean hasMapper(Class<T> type) {
         return knownMappers.containsKey(type);
     }
 
+    /**
+     * 注册mapper
+     *
+     * @param type
+     * @param <T>
+     */
     public <T> void addMapper(Class<T> type) {
         if (type.isInterface()) {
             if (hasMapper(type)) {

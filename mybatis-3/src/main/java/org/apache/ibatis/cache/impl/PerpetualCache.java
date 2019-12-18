@@ -61,6 +61,7 @@ public class PerpetualCache implements Cache {
 
     @Override
     public void clear() {
+        // map 清空
         cache.clear();
     }
 

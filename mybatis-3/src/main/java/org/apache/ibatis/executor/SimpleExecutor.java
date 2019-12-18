@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Mybatis 默认使用的执行器,每次使用开启 Statement 使用完毕关闭 Statement
+ * 可以从 每一个 方法中看到有一个 closeStatement(stmt);
  * @author Clinton Begin
  */
 public class SimpleExecutor extends BaseExecutor {
