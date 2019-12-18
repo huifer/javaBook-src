@@ -41,18 +41,40 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static org.apache.ibatis.executor.ExecutionPlaceholder.EXECUTION_PLACEHOLDER;
 
 /**
+ * 抽象类
  * @author Clinton Begin
  */
 public abstract class BaseExecutor implements Executor {
 
     private static final Log log = LogFactory.getLog(BaseExecutor.class);
 
+    /**
+     * 事物
+     */
     protected Transaction transaction;
+
+    /**
+     * 执行器
+     */
     protected Executor wrapper;
 
+    /**
+     * 线程安全的队列
+     */
     protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+
+    /**
+     * 本地缓存
+     */
     protected PerpetualCache localCache;
+
+    /**
+     * 缓存
+     */
     protected PerpetualCache localOutputParameterCache;
+    /**
+     * mybatis-config 配置信息
+     */
     protected Configuration configuration;
 
     protected int queryStack;
@@ -76,6 +98,11 @@ public abstract class BaseExecutor implements Executor {
         return transaction;
     }
 
+    /**
+     * 关闭
+     *
+     * @param forceRollback 是否回调
+     */
     @Override
     public void close(boolean forceRollback) {
         try {
@@ -109,7 +136,9 @@ public abstract class BaseExecutor implements Executor {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
+        // 清空本地缓存
         clearLocalCache();
+        // 子类来实现 doUpdate 方法
         return doUpdate(ms, parameter);
     }
 
@@ -127,8 +156,11 @@ public abstract class BaseExecutor implements Executor {
 
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+        // 获取绑定的sql
         BoundSql boundSql = ms.getBoundSql(parameter);
+        // 获取缓存 key
         CacheKey key = createCacheKey(ms, parameter, rowBounds, boundSql);
+        // 执行查询
         return query(ms, parameter, rowBounds, resultHandler, key, boundSql);
     }
 
@@ -137,30 +169,40 @@ public abstract class BaseExecutor implements Executor {
     public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
         ErrorContext.instance().resource(ms.getResource()).activity("executing a query").object(ms.getId());
         if (closed) {
+            // 判断当前是否关闭
             throw new ExecutorException("Executor was closed.");
         }
         if (queryStack == 0 && ms.isFlushCacheRequired()) {
+            // 查询堆栈==0 和 是否需要刷新缓存
+            // 清理本地缓存
             clearLocalCache();
         }
         List<E> list;
         try {
+//            堆栈+1,防止重新清理缓存
             queryStack++;
+            // 通过 缓存key 在本地缓存中获取
             list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
             if (list != null) {
+                // 通过缓存 key 查到后处理  localOutputParameterCache
                 handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
             } else {
+                // 没有查询到从数据库查询
                 list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
             }
         } finally {
+            // 堆栈-1
             queryStack--;
         }
         if (queryStack == 0) {
             for (DeferredLoad deferredLoad : deferredLoads) {
                 deferredLoad.load();
             }
+            // 清空线程安全队列(延迟队列)
             // issue #601
             deferredLoads.clear();
             if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
+                // STATEMENT 清空本地缓存
                 // issue #482
                 clearLocalCache();
             }
@@ -181,21 +223,38 @@ public abstract class BaseExecutor implements Executor {
         }
         DeferredLoad deferredLoad = new DeferredLoad(resultObject, property, key, localCache, configuration, targetType);
         if (deferredLoad.canLoad()) {
+            // 判断是否可以立即加载
+            // 可以直接加载
             deferredLoad.load();
         } else {
+            // 不可以 new 一个新的放进去
             deferredLoads.add(new DeferredLoad(resultObject, property, key, localCache, configuration, targetType));
         }
     }
 
+    /**
+     * 缓存key 创建,生成策略
+     * 标签id+offset+limit+sql+参数列表+Environment
+     *
+     * @param ms
+     * @param parameterObject
+     * @param rowBounds
+     * @param boundSql
+     * @return
+     */
     @Override
     public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
         if (closed) {
             throw new ExecutorException("Executor was closed.");
         }
         CacheKey cacheKey = new CacheKey();
+        // select|insert|update|delete 标签的id
         cacheKey.update(ms.getId());
+        // offset
         cacheKey.update(rowBounds.getOffset());
+        // limit
         cacheKey.update(rowBounds.getLimit());
+        // sql
         cacheKey.update(boundSql.getSql());
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
@@ -241,6 +300,12 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+    /**
+     * 回掉方法
+     *
+     * @param required
+     * @throws SQLException
+     */
     @Override
     public void rollback(boolean required) throws SQLException {
         if (!closed) {
@@ -258,13 +323,23 @@ public abstract class BaseExecutor implements Executor {
     @Override
     public void clearLocalCache() {
         if (!closed) {
+            // 清理缓存
             localCache.clear();
             localOutputParameterCache.clear();
         }
     }
 
+    /**
+     * 执行更新
+     *
+     * @param ms
+     * @param parameter
+     * @return
+     * @throws SQLException
+     */
     protected abstract int doUpdate(MappedStatement ms, Object parameter)
             throws SQLException;
+
 
     protected abstract List<BatchResult> doFlushStatements(boolean isRollback)
             throws SQLException;
@@ -287,15 +362,25 @@ public abstract class BaseExecutor implements Executor {
 
     /**
      * Apply a transaction timeout.
+     *
      * @param statement a current statement
      * @throws SQLException if a database access error occurs, this method is called on a closed <code>Statement</code>
-     * @since 3.4.0
      * @see StatementUtil#applyTransactionTimeout(Statement, Integer, Integer)
+     * @since 3.4.0
      */
     protected void applyTransactionTimeout(Statement statement) throws SQLException {
         StatementUtil.applyTransactionTimeout(statement, statement.getQueryTimeout(), transaction.getTimeout());
     }
 
+    /**
+     * 处理 localOutputParameterCache
+     * 存储过程
+     *
+     * @param ms
+     * @param key
+     * @param parameter
+     * @param boundSql
+     */
     private void handleLocallyCachedOutputParameters(MappedStatement ms, CacheKey key, Object parameter, BoundSql boundSql) {
         if (ms.getStatementType() == StatementType.CALLABLE) {
             final Object cachedParameter = localOutputParameterCache.getObject(key);
@@ -313,6 +398,19 @@ public abstract class BaseExecutor implements Executor {
         }
     }
 
+    /**
+     * 在数据库中查询
+     *
+     * @param ms
+     * @param parameter
+     * @param rowBounds
+     * @param resultHandler
+     * @param key
+     * @param boundSql
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
         List<E> list;
         localCache.putObject(key, EXECUTION_PLACEHOLDER);
@@ -342,6 +440,9 @@ public abstract class BaseExecutor implements Executor {
         this.wrapper = wrapper;
     }
 
+    /**
+     * 延迟队列中数据对象
+     */
     private static class DeferredLoad {
 
         private final MetaObject resultObject;
@@ -369,6 +470,8 @@ public abstract class BaseExecutor implements Executor {
         }
 
         public boolean canLoad() {
+            // 判断是否可以立即加载
+            // 从缓存中直接获取
             return localCache.getObject(key) != null && localCache.getObject(key) != EXECUTION_PLACEHOLDER;
         }
 
