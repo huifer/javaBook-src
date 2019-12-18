@@ -34,32 +34,86 @@ public interface Executor {
 
     ResultHandler NO_RESULT_HANDLER = null;
 
+    /**
+     * 更新方法   update , insert , delete 都执行这个方法
+     * @param ms sql文
+     * @param parameter 查询参数
+     * @return
+     * @throws SQLException
+     */
     int update(MappedStatement ms, Object parameter) throws SQLException;
 
+    /**
+     * 查询方法
+     * @param ms sql 文
+     * @param parameter 查询参数
+     * @param rowBounds
+     * @param resultHandler 结果处理器
+     * @param cacheKey 缓存key
+     * @param boundSql
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException;
 
+    /**
+     * 查询方法
+     * @param ms
+     * @param parameter
+     * @param rowBounds
+     * @param resultHandler
+     * @param <E>
+     * @return
+     * @throws SQLException
+     */
     <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException;
 
     <E> Cursor<E> queryCursor(MappedStatement ms, Object parameter, RowBounds rowBounds) throws SQLException;
 
     List<BatchResult> flushStatements() throws SQLException;
 
+    /**
+     * 提交
+     * @param required
+     * @throws SQLException
+     */
     void commit(boolean required) throws SQLException;
 
+    /**
+     * 回调
+     * @param required
+     * @throws SQLException
+     */
     void rollback(boolean required) throws SQLException;
 
     CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql);
 
     boolean isCached(MappedStatement ms, CacheKey key);
 
+    /**
+     * 清空本地缓存
+     */
     void clearLocalCache();
 
     void deferLoad(MappedStatement ms, MetaObject resultObject, String property, CacheKey key, Class<?> targetType);
 
+    /**
+     * 获取事物
+     * @return
+     */
     Transaction getTransaction();
 
+    /**
+     * 关闭
+     * @param forceRollback
+     */
     void close(boolean forceRollback);
 
+    /**
+     * 是否关闭
+     * @return
+     */
     boolean isClosed();
 
     void setExecutorWrapper(Executor executor);
