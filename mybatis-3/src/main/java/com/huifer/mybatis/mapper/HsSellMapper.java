@@ -1,6 +1,7 @@
 package com.huifer.mybatis.mapper;
 
 import com.huifer.mybatis.entity.HsSell;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,5 +18,6 @@ public interface HsSellMapper {
 
     int updateByPrimaryKey(HsSell record);
 
-    List<HsSell> list();
+    List<HsSell> list(@Param("ID") Integer id);
+
 }
