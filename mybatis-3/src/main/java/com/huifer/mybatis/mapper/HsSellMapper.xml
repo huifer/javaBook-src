@@ -204,11 +204,11 @@
         WORK_ORDER_ID = #{workOrderId,jdbcType=INTEGER}
         where ID = #{id,jdbcType=INTEGER}
     </update>
-    <select id="list" resultMap="BaseResultMap">
+    <select id="list" resultType="com.huifer.mybatis.entity.HsSell">
         select * from hs_sell
         <trim prefix="WHERE" prefixOverrides="AND |OR">
             <if test="ID != null">
-               and ID = #{ID,jdbcType=INTEGER}
+                and ID = #{ID,jdbcType=INTEGER}
             </if>
 
         </trim>

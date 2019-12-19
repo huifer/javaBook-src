@@ -95,6 +95,16 @@ public class DefaultSqlSession implements SqlSession {
         return this.selectMap(statement, parameter, mapKey, RowBounds.DEFAULT);
     }
 
+    /**
+     *
+     * @param statement Unique identifier matching the statement to use.
+     * @param parameter A parameter object to pass to the statement.
+     * @param mapKey The property to use as key for each value in the list.
+     * @param rowBounds  Bounds to limit object retrieval
+     * @param <K>
+     * @param <V>
+     * @return
+     */
     @Override
     public <K, V> Map<K, V> selectMap(String statement, Object parameter, String mapKey, RowBounds rowBounds) {
         final List<? extends V> list = selectList(statement, parameter, rowBounds);
