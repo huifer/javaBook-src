@@ -23,6 +23,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * CollectionWrapper 是{@link Collection} 的封装方法
+ *
  * @author Clinton Begin
  */
 public class CollectionWrapper implements ObjectWrapper {

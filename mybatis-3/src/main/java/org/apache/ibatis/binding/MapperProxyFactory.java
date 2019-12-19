@@ -44,6 +44,11 @@ public class MapperProxyFactory<T> {
         return methodCache;
     }
 
+    /**
+     * JDK 代理生产 mapperProxy
+     * @param mapperProxy
+     * @return
+     */
     @SuppressWarnings("unchecked")
     protected T newInstance(MapperProxy<T> mapperProxy) {
         return (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[]{mapperInterface}, mapperProxy);

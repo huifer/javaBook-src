@@ -21,6 +21,7 @@ import java.util.*;
 
 /**
  * trim 标签解析
+ *
  * @author Clinton Begin
  */
 public class TrimSqlNode implements SqlNode {
@@ -47,6 +48,7 @@ public class TrimSqlNode implements SqlNode {
 
     /**
      * 拆分字符串 转换为大写
+     *
      * @param overrides
      * @return
      */
@@ -66,6 +68,7 @@ public class TrimSqlNode implements SqlNode {
     @Override
     public boolean apply(DynamicContext context) {
         FilteredDynamicContext filteredDynamicContext = new FilteredDynamicContext(context);
+        // 解析下级标签的入口
         boolean result = contents.apply(filteredDynamicContext);
         filteredDynamicContext.applyAll();
         return result;
@@ -141,6 +144,7 @@ public class TrimSqlNode implements SqlNode {
 
         /**
          * 补充前缀
+         *
          * @param sql
          * @param trimmedUppercaseSql
          */

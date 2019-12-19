@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
+ * 数据源
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
@@ -43,6 +44,7 @@ public class UnpooledDataSource implements DataSource {
         }
     }
 
+    // 一些配置信息
     private ClassLoader driverClassLoader;
     private Properties driverProperties;
     private String driver;

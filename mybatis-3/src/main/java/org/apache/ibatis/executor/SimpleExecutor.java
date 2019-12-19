@@ -85,8 +85,12 @@ public class SimpleExecutor extends BaseExecutor {
 
     private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
         Statement stmt;
+        // 数据库连接
         Connection connection = getConnection(statementLog);
+        // stms 创建
+        // org.apache.ibatis.executor.statement.BaseStatementHandler.prepare
         stmt = handler.prepare(connection, transaction.getTimeout());
+        // 参数放入
         handler.parameterize(stmt);
         return stmt;
     }

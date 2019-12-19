@@ -139,6 +139,13 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     //
     // HANDLE RESULT SETS
     //
+
+    /**
+     * 处理查询结果
+     * @param stmt
+     * @return
+     * @throws SQLException
+     */
     @Override
     public List<Object> handleResultSets(Statement stmt) throws SQLException {
         ErrorContext.instance().activity("handling results").object(mappedStatement.getId());
@@ -174,6 +181,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             }
         }
 
+        // 查询结果
         return collapseSingleResultList(multipleResults);
     }
 
@@ -350,6 +358,14 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         }
     }
 
+    /**
+     * 处理成对应的实体对象
+     * @param rsw
+     * @param resultMap
+     * @param columnPrefix
+     * @return
+     * @throws SQLException
+     */
     private Object getRowValue(ResultSetWrapper rsw, ResultMap resultMap, String columnPrefix) throws SQLException {
         final ResultLoaderMap lazyLoader = new ResultLoaderMap();
         Object rowValue = createResultObject(rsw, resultMap, lazyLoader, columnPrefix);

@@ -553,6 +553,8 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 mappers
+     * 1. 通过  package 解析
+     * 2. 通过 resource,url,class 解析
      *
      * @param parent
      * @throws Exception

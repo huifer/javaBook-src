@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReadWriteLock;
  *  initialize();
  * }
  * </pre>
- *
+ * 二级缓存
  * @author Clinton Begin
  */
 

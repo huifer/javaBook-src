@@ -32,10 +32,22 @@ public class ResultSetWrapper {
 
     private final ResultSet resultSet;
     private final TypeHandlerRegistry typeHandlerRegistry;
+    /**
+     * 字段名称
+     */
     private final List<String> columnNames = new ArrayList<>();
+    /**
+     * 字段类型
+     */
     private final List<String> classNames = new ArrayList<>();
+    /**
+     * jdbc 数据类型
+     */
     private final List<JdbcType> jdbcTypes = new ArrayList<>();
     private final Map<String, Map<Class<?>, TypeHandler<?>>> typeHandlerMap = new HashMap<>();
+    /**
+     * sql 查询结果
+     */
     private final Map<String, List<String>> mappedColumnNamesMap = new HashMap<>();
     private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
 

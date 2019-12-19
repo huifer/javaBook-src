@@ -41,6 +41,11 @@ public class DynamicContext {
     private final StringJoiner sqlBuilder = new StringJoiner(" ");
     private int uniqueNumber = 0;
 
+    /**
+     * 构造函数
+     * @param configuration
+     * @param parameterObject
+     */
     public DynamicContext(Configuration configuration, Object parameterObject) {
         if (parameterObject != null && !(parameterObject instanceof Map)) {
             MetaObject metaObject = configuration.newMetaObject(parameterObject);
@@ -49,6 +54,9 @@ public class DynamicContext {
         } else {
             bindings = new ContextMap(null, false);
         }
+        /**
+         * 运行时需要的参数
+         */
         bindings.put(PARAMETER_OBJECT_KEY, parameterObject);
         bindings.put(DATABASE_ID_KEY, configuration.getDatabaseId());
     }
@@ -73,6 +81,9 @@ public class DynamicContext {
         return uniqueNumber++;
     }
 
+    /**
+     * hash map 上下文map
+     */
     static class ContextMap extends HashMap<String, Object> {
         private static final long serialVersionUID = 2977601501966151582L;
         private final MetaObject parameterMetaObject;
@@ -83,10 +94,12 @@ public class DynamicContext {
             this.fallbackParameterObject = fallbackParameterObject;
         }
 
+
         @Override
         public Object get(Object key) {
             String strKey = (String) key;
             if (super.containsKey(strKey)) {
+                    // 判断是否存在
                 return super.get(strKey);
             }
 
@@ -98,6 +111,7 @@ public class DynamicContext {
                 return parameterMetaObject.getOriginalObject();
             } else {
                 // issue #61 do not modify the context when reading
+                // 从运行时参数中查找结果
                 return parameterMetaObject.getValue(strKey);
             }
         }

@@ -30,15 +30,34 @@ import java.util.Map;
  * the value from).
  * <p>
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
+ * <p>
+ * <p>
+ * <p>
+ * {@link MappedStatement#getBoundSql(java.lang.Object)}
  *
  * @author Clinton Begin
  */
 public class BoundSql {
 
+    /**
+     * sql 语句 带有`?`特殊符号
+     */
     private final String sql;
+    /**
+     * 参数映射列表 #{a},#{b} ->a,b
+     */
     private final List<ParameterMapping> parameterMappings;
+    /**
+     * 执行时所需要的参数,用户传递
+     */
     private final Object parameterObject;
+    /**
+     * 附加参数
+     */
     private final Map<String, Object> additionalParameters;
+    /**
+     * 元信息
+     */
     private final MetaObject metaParameters;
 
     public BoundSql(Configuration configuration, String sql, List<ParameterMapping> parameterMappings, Object parameterObject) {

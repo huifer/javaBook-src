@@ -415,6 +415,7 @@ public abstract class BaseExecutor implements Executor {
         List<E> list;
         localCache.putObject(key, EXECUTION_PLACEHOLDER);
         try {
+            // 查询方法
             list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
         } finally {
             localCache.removeObject(key);

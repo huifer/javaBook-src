@@ -32,8 +32,17 @@ import java.util.regex.Pattern;
  * @author Clinton Begin
  */
 public abstract class BaseBuilder {
+    /**
+     * 全局 configuration
+     */
     protected final Configuration configuration;
+    /**
+     * 别名注册中心
+     */
     protected final TypeAliasRegistry typeAliasRegistry;
+    /**
+     * 类型处理器 注册中心
+     */
     protected final TypeHandlerRegistry typeHandlerRegistry;
 
     /**
