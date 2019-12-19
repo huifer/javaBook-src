@@ -143,6 +143,12 @@ public class ResultSetWrapper {
         return null;
     }
 
+    /**
+     *
+     * @param resultMap
+     * @param columnPrefix
+     * @throws SQLException
+     */
     private void loadMappedAndUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
         List<String> mappedColumnNames = new ArrayList<>();
         List<String> unmappedColumnNames = new ArrayList<>();
@@ -156,6 +162,7 @@ public class ResultSetWrapper {
                 unmappedColumnNames.add(columnName);
             }
         }
+        // 缓存列名
         mappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), mappedColumnNames);
         unMappedColumnNamesMap.put(getMapKey(resultMap, columnPrefix), unmappedColumnNames);
     }
@@ -169,9 +176,18 @@ public class ResultSetWrapper {
         return mappedColumnNames;
     }
 
+    /**
+     * 获取列名
+     *
+     * @param resultMap
+     * @param columnPrefix
+     * @return
+     * @throws SQLException
+     */
     public List<String> getUnmappedColumnNames(ResultMap resultMap, String columnPrefix) throws SQLException {
         List<String> unMappedColumnNames = unMappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
         if (unMappedColumnNames == null) {
+            // 获取所有列名
             loadMappedAndUnmappedColumnNames(resultMap, columnPrefix);
             unMappedColumnNames = unMappedColumnNamesMap.get(getMapKey(resultMap, columnPrefix));
         }
