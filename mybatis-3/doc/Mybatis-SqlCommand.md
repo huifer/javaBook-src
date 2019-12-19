@@ -2,7 +2,7 @@
 - `org.apache.ibatis.binding.MapperMethod.SqlCommand`
 ```java
     /**
-     * 核心思想: sql id , Sql 类型
+     * 核心内容: sql id , Sql 类型
      */
     public static class SqlCommand {
 
@@ -23,8 +23,10 @@
          * @param method
          */
         public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
+            // 方法名
             final String methodName = method.getName();
             final Class<?> declaringClass = method.getDeclaringClass();
+            // Statement 实质是sql
             MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
                     configuration);
             if (ms == null) {
@@ -42,7 +44,6 @@
                     throw new BindingException("Unknown execution method for: " + name);
                 }
             }
-            System.out.println();
         }
 
         public String getName() {
@@ -88,9 +89,13 @@
 ```
 
 
-
 ![image-20191218191512184](assets/image-20191218191512184.png)
 
 
 
 ![image-20191218191550550](assets/image-20191218191550550.png)
+
+
+
+
+

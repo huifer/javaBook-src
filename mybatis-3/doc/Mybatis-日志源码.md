@@ -233,3 +233,16 @@ public final class LogFactory {
 ```
 
 - `LogFactory`是一个单例对象,对外公开`getLog`方法在使用时直接`private static final Log log = LogFactory.getLog(CglibProxyFactory.class);`即可
+
+- 在 `org.apache.ibatis.session.Configuration` 中可以看到下面这些注册方法
+```java
+        // 日志实现类
+        typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
+        typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
+        typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
+        typeAliasRegistry.registerAlias("LOG4J2", Log4j2Impl.class);
+        typeAliasRegistry.registerAlias("JDK_LOGGING", Jdk14LoggingImpl.class);
+        typeAliasRegistry.registerAlias("STDOUT_LOGGING", StdOutImpl.class);
+        typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
+
+```
