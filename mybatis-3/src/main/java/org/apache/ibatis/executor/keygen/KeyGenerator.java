@@ -21,12 +21,30 @@ import org.apache.ibatis.mapping.MappedStatement;
 import java.sql.Statement;
 
 /**
+ * {@link  Jdbc3KeyGenerator} \ {@link SelectKeyGenerator} \ {@link NoKeyGenerator}
+ *
  * @author Clinton Begin
  */
 public interface KeyGenerator {
 
+    /**
+     * 前置处理
+     *
+     * @param executor
+     * @param ms
+     * @param stmt
+     * @param parameter
+     */
     void processBefore(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
 
+    /**
+     * 后置处理
+     *
+     * @param executor
+     * @param ms
+     * @param stmt
+     * @param parameter
+     */
     void processAfter(Executor executor, MappedStatement ms, Statement stmt, Object parameter);
 
 }
