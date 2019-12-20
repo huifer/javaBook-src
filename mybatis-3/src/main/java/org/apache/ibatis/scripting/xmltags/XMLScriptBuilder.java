@@ -73,6 +73,10 @@ public class XMLScriptBuilder extends BaseBuilder {
         nodeHandlerMap.put("bind", new BindHandler());
     }
 
+    /**
+     * 格式化 标签数据
+     * @return
+     */
     public SqlSource parseScriptNode() {
         //<select resultMap="BaseResultMap" parameterType="java.lang.Integer" id="selectByPrimaryKey">
         //

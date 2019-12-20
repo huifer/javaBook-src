@@ -58,7 +58,7 @@ public interface Executor {
     <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey cacheKey, BoundSql boundSql) throws SQLException;
 
     /**
-     * 查询方法
+     * 查询方法 有一个doQuery() {@link BaseExecutor#doQuery(org.apache.ibatis.mapping.MappedStatement, java.lang.Object, org.apache.ibatis.session.RowBounds, org.apache.ibatis.session.ResultHandler, org.apache.ibatis.mapping.BoundSql)}
      * @param ms
      * @param parameter
      * @param rowBounds

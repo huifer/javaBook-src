@@ -50,6 +50,7 @@ import java.util.*;
 
 /**
  * mapper xml 标签的对应解析器
+ *
  * @author Clinton Begin
  * @author Kazuki Shimizu
  */
@@ -429,6 +430,12 @@ public class MapperAnnotationBuilder {
         return returnType;
     }
 
+    /**
+     * @param method
+     * @param parameterType
+     * @param languageDriver
+     * @return
+     */
     private SqlSource getSqlSourceFromAnnotations(Method method, Class<?> parameterType, LanguageDriver languageDriver) {
         try {
             Class<? extends Annotation> sqlAnnotationType = getSqlAnnotationType(method);
@@ -450,6 +457,14 @@ public class MapperAnnotationBuilder {
         }
     }
 
+    /**
+     * 语言驱动创建sqlSource
+     *
+     * @param strings
+     * @param parameterTypeClass
+     * @param languageDriver
+     * @return
+     */
     private SqlSource buildSqlSourceFromStrings(String[] strings, Class<?> parameterTypeClass, LanguageDriver languageDriver) {
         final StringBuilder sql = new StringBuilder();
         for (String fragment : strings) {
@@ -459,6 +474,13 @@ public class MapperAnnotationBuilder {
         return languageDriver.createSqlSource(configuration, sql.toString().trim(), parameterTypeClass);
     }
 
+    /**
+     * 获取方法头上的注解 获取具体的注解类型
+     * {@link Select} {@link Insert} {@link Update} {@link Delete}
+     *
+     * @param method
+     * @return
+     */
     private SqlCommandType getSqlCommandType(Method method) {
         Class<? extends Annotation> type = getSqlAnnotationType(method);
 
@@ -480,6 +502,7 @@ public class MapperAnnotationBuilder {
             }
         }
 
+        // 计算数据类型
         return SqlCommandType.valueOf(type.getSimpleName().toUpperCase(Locale.ENGLISH));
     }
 

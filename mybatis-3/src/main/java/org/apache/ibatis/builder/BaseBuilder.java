@@ -140,6 +140,13 @@ public abstract class BaseBuilder {
         }
     }
 
+    /**
+     * 加载类型处理器
+     *
+     * @param javaType
+     * @param typeHandlerAlias
+     * @return
+     */
     protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, String typeHandlerAlias) {
         if (typeHandlerAlias == null) {
             return null;
@@ -153,6 +160,13 @@ public abstract class BaseBuilder {
         return resolveTypeHandler(javaType, typeHandlerType);
     }
 
+    /**
+     * 加载 类型处理器
+     *
+     * @param javaType
+     * @param typeHandlerType
+     * @return
+     */
     protected TypeHandler<?> resolveTypeHandler(Class<?> javaType, Class<? extends TypeHandler<?>> typeHandlerType) {
         if (typeHandlerType == null) {
             return null;
@@ -166,6 +180,13 @@ public abstract class BaseBuilder {
         return handler;
     }
 
+    /**
+     * 别名加载 class
+     *
+     * @param alias
+     * @param <T>
+     * @return
+     */
     protected <T> Class<? extends T> resolveAlias(String alias) {
         return typeAliasRegistry.resolveAlias(alias);
     }

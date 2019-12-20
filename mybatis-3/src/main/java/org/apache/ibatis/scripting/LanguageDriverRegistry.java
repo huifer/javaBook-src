@@ -19,10 +19,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 语言驱动注册中心
  * @author Frank D. Martinez [mnesarco]
  */
 public class LanguageDriverRegistry {
 
+    /**
+     * 语言驱动注册中心
+     */
     private final Map<Class<? extends LanguageDriver>, LanguageDriver> LANGUAGE_DRIVER_MAP = new HashMap<>();
 
     private Class<? extends LanguageDriver> defaultDriverClass;

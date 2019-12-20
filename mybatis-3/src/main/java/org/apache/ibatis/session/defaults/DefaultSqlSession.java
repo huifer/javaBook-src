@@ -72,6 +72,13 @@ public class DefaultSqlSession implements SqlSession {
         return this.selectOne(statement, null);
     }
 
+    /**
+     * 执行 selectList().get(0)
+     * @param statement Unique identifier matching the statement to use.
+     * @param parameter A parameter object to pass to the statement.
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> T selectOne(String statement, Object parameter) {
         // Popular vote was to return null on 0 results and throw exception on too many.
@@ -147,11 +154,26 @@ public class DefaultSqlSession implements SqlSession {
         return this.selectList(statement, null);
     }
 
+    /**
+     * 向下继续调用
+     * @param statement Unique identifier matching the statement to use.
+     * @param parameter A parameter object to pass to the statement.
+     * @param <E>
+     * @return
+     */
     @Override
     public <E> List<E> selectList(String statement, Object parameter) {
         return this.selectList(statement, parameter, RowBounds.DEFAULT);
     }
 
+    /**
+     * 执行query
+     * @param statement Unique identifier matching the statement to use.
+     * @param parameter A parameter object to pass to the statement.
+     * @param rowBounds  Bounds to limit object retrieval
+     * @param <E>
+     * @return
+     */
     @Override
     public <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds) {
         try {

@@ -16,6 +16,8 @@
 package org.apache.ibatis.scripting.xmltags;
 
 /**
+ * 不同类型的 sqlNode 类处理不同类型的标签
+ * 如 if 标签-> {@link IfSqlNode} ,
  * @author Clinton Begin
  */
 public interface SqlNode {

@@ -25,16 +25,22 @@ import java.lang.reflect.Method;
  */
 public final class ProviderContext {
 
+    /**
+     * mapper class
+     */
     private final Class<?> mapperType;
+    /**
+     * mapper 方法
+     */
     private final Method mapperMethod;
     private final String databaseId;
 
     /**
      * Constructor.
      *
-     * @param mapperType A mapper interface type that specified provider
+     * @param mapperType   A mapper interface type that specified provider
      * @param mapperMethod A mapper method that specified provider
-     * @param databaseId A database id
+     * @param databaseId   A database id
      */
     ProviderContext(Class<?> mapperType, Method mapperMethod, String databaseId) {
         this.mapperType = mapperType;

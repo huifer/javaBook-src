@@ -105,6 +105,7 @@ public class XMLStatementBuilder extends BaseBuilder {
 
         // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
         KeyGenerator keyGenerator;
+        // 生成一个id
         String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
         keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
         if (configuration.hasKeyGenerator(keyStatementId)) {
@@ -172,6 +173,14 @@ public class XMLStatementBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     *
+     * @param id
+     * @param nodeToHandle
+     * @param parameterTypeClass
+     * @param langDriver
+     * @param databaseId
+     */
     private void parseSelectKeyNode(String id, XNode nodeToHandle, Class<?> parameterTypeClass, LanguageDriver langDriver, String databaseId) {
         String resultType = nodeToHandle.getStringAttribute("resultType");
         Class<?> resultTypeClass = resolveClass(resultType);
