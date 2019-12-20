@@ -47,18 +47,21 @@ public interface Cache {
     String getId();
 
     /**
+     * 放入数据
      * @param key Can be any object but usually it is a {@link CacheKey}
      * @param value The result of a select.
      */
     void putObject(Object key, Object value);
 
     /**
+     * 获取数据
      * @param key The key
      * @return The object stored in the cache.
      */
     Object getObject(Object key);
 
     /**
+     * 移除数据
      * As of 3.3.0 this method is only called during a rollback
      * for any previous value that was missing in the cache.
      * This lets any blocking cache to release the lock that
@@ -75,11 +78,13 @@ public interface Cache {
     Object removeObject(Object key);
 
     /**
+     * 清空数据
      * Clears this cache instance.
      */
     void clear();
 
     /**
+     * 有多少缓存数据
      * Optional. This method is not called by the core.
      *
      * @return The number of elements stored in the cache (not its capacity).

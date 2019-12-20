@@ -24,6 +24,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * 阻塞的缓存
  * Simple blocking decorator
  *
  * Simple and inefficient version of EhCache's BlockingCache decorator.
@@ -36,6 +37,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BlockingCache implements Cache {
 
     private final Cache delegate;
+    /**
+     * 线程安全的map
+     */
     private final ConcurrentHashMap<Object, ReentrantLock> locks;
     private long timeout;
 
@@ -68,6 +72,7 @@ public class BlockingCache implements Cache {
         acquireLock(key);
         Object value = delegate.getObject(key);
         if (value != null) {
+            // 释放锁
             releaseLock(key);
         }
         return value;
@@ -89,10 +94,15 @@ public class BlockingCache implements Cache {
         return locks.computeIfAbsent(key, k -> new ReentrantLock());
     }
 
+    /**
+     * 请求锁
+     * @param key
+     */
     private void acquireLock(Object key) {
         Lock lock = getLockForKey(key);
         if (timeout > 0) {
             try {
+                // 上锁
                 boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
                 if (!acquired) {
                     throw new CacheException("Couldn't get a lock in " + timeout + " for the key " + key + " at the cache " + delegate.getId());
@@ -105,6 +115,10 @@ public class BlockingCache implements Cache {
         }
     }
 
+    /**
+     * 释放锁
+     * @param key
+     */
     private void releaseLock(Object key) {
         ReentrantLock lock = locks.get(key);
         if (lock.isHeldByCurrentThread()) {
