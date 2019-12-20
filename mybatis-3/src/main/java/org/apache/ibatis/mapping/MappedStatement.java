@@ -169,10 +169,18 @@ public final class MappedStatement {
         return resultSets;
     }
 
+    /**
+     * 获取sql文 , 获取{@link  BoundSql},在触发 sql 的时候才会使用这个方法
+     *
+     * @param parameterObject
+     * @return
+     */
     public BoundSql getBoundSql(Object parameterObject) {
         BoundSql boundSql = sqlSource.getBoundSql(parameterObject);
+        // 获取参数列表
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
         if (parameterMappings == null || parameterMappings.isEmpty()) {
+            // new 一个BoundSql
             boundSql = new BoundSql(configuration, boundSql.getSql(), parameterMap.getParameterMappings(), parameterObject);
         }
 

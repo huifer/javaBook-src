@@ -26,6 +26,7 @@ import java.io.Reader;
 import java.util.Properties;
 
 /**
+ * mybatis 入口
  * Builds {@link SqlSession} instances.
  *
  * @author Clinton Begin

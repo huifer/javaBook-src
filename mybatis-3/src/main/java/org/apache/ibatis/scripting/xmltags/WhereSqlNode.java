@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * where 标签内容
  * @author Clinton Begin
  */
 public class WhereSqlNode extends TrimSqlNode {

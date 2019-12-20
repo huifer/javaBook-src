@@ -85,10 +85,17 @@ public class XMLMapperBuilder extends BaseBuilder {
         if (!configuration.isResourceLoaded(resource)) {
             // 解析 mapper 标签下的内容
             configurationElement(parser.evalNode("/mapper"));
+            //  <mappers>
+            //<!--    <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>-->
+            //    <mapper resource="com/huifer/mybatis/mapper/HsSellMapper.xml"/>
+            //  </mappers>
+            // 将  resource 属性值添加
             configuration.addLoadedResource(resource);
+            // mapper 和 namespace 绑定
             bindMapperForNamespace();
         }
 
+        // // TODO: 2019/12/17  
         parsePendingResultMaps();
         parsePendingCacheRefs();
         parsePendingStatements();
@@ -591,11 +598,15 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     *  mapper 和 namespace 绑定
+     */
     private void bindMapperForNamespace() {
         String namespace = builderAssistant.getCurrentNamespace();
         if (namespace != null) {
             Class<?> boundType = null;
             try {
+                // 获取 mapper.xml 的namespace 属性值对应的字节码
                 boundType = Resources.classForName(namespace);
             } catch (ClassNotFoundException e) {
                 //ignore, bound type is not required
@@ -605,6 +616,7 @@ public class XMLMapperBuilder extends BaseBuilder {
                     // Spring may not know the real resource name so we set a flag
                     // to prevent loading again this resource from the mapper interface
                     // look at MapperAnnotationBuilder#loadXmlResource
+                    // 添加操作
                     configuration.addLoadedResource("namespace:" + namespace);
                     configuration.addMapper(boundType);
                 }

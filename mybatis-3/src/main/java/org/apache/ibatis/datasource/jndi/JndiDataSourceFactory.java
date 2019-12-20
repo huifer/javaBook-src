@@ -34,6 +34,9 @@ public class JndiDataSourceFactory implements DataSourceFactory {
     public static final String DATA_SOURCE = "data_source";
     public static final String ENV_PREFIX = "env.";
 
+    /**
+     * 直接 java 数据源
+     */
     private DataSource dataSource;
 
     private static Properties getEnvProperties(Properties allProps) {

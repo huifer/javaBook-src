@@ -18,6 +18,7 @@ package org.apache.ibatis.session;
 import java.sql.Connection;
 
 /**
+ * 事物级别, 封装 java.sql 的事物美剧
  * @author Clinton Begin
  */
 public enum TransactionIsolationLevel {

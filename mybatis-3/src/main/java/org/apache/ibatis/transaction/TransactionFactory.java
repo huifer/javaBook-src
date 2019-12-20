@@ -24,6 +24,7 @@ import java.util.Properties;
 /**
  * Creates {@link Transaction} instances.
  *
+ * 事物工厂
  * @author Clinton Begin
  */
 public interface TransactionFactory {

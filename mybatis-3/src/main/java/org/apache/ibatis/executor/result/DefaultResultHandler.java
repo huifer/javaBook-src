@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 默认的result 处理器
  * @author Clinton Begin
  */
 public class DefaultResultHandler implements ResultHandler<Object> {

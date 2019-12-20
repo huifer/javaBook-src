@@ -16,6 +16,9 @@
 package org.apache.ibatis.session;
 
 /**
+ * <p>SIMPLE: 简单执行器,直接将sql执行</p>
+ * <p>REUSE: 可重用执行器 重用对象 Statement </p>
+ * <p>BATCH: 批量执行器</p>
  * @author Clinton Begin
  */
 public enum ExecutorType {

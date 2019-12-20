@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * hash map 的实现
  * @author Clinton Begin
  */
 public class PerpetualCache implements Cache {
@@ -46,6 +47,7 @@ public class PerpetualCache implements Cache {
 
     @Override
     public void putObject(Object key, Object value) {
+        // 存储
         cache.put(key, value);
     }
 
@@ -61,6 +63,7 @@ public class PerpetualCache implements Cache {
 
     @Override
     public void clear() {
+        // map 清空
         cache.clear();
     }
 

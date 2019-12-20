@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * sql 脚本创建工具
+ *
  * @author Clinton Begin
  * @author Jeff Butler
  * @author Adam Gent
@@ -29,13 +31,24 @@ import java.util.List;
  */
 public abstract class AbstractSQL<T> {
 
+    /**
+     * and 替换文本
+     */
     private static final String AND = ") \nAND (";
+    /**
+     * or 替换文本
+     */
     private static final String OR = ") \nOR (";
 
     private final SQLStatement sql = new SQLStatement();
 
     public abstract T getSelf();
 
+    /**
+     * update
+     * @param table
+     * @return
+     */
     public T UPDATE(String table) {
         sql().statementType = SQLStatement.StatementType.UPDATE;
         sql().tables.add(table);
@@ -55,8 +68,16 @@ public abstract class AbstractSQL<T> {
         return getSelf();
     }
 
+    /**
+     *
+     * @param tableName 表名
+     * @return
+     */
     public T INSERT_INTO(String tableName) {
         sql().statementType = SQLStatement.StatementType.INSERT;
+
+        // DEBUG阶段 下面这句话执行后 sql文多了 INSERT INTO 来源是从哪里来的
+        // 变量监控的时候调用了toString方法
         sql().tables.add(tableName);
         return getSelf();
     }
@@ -68,6 +89,7 @@ public abstract class AbstractSQL<T> {
     }
 
     /**
+     * insert 字段列
      * @since 3.4.2
      */
     public T INTO_COLUMNS(String... columns) {
@@ -76,6 +98,7 @@ public abstract class AbstractSQL<T> {
     }
 
     /**
+     * insert 值
      * @since 3.4.2
      */
     public T INTO_VALUES(String... values) {
@@ -84,6 +107,11 @@ public abstract class AbstractSQL<T> {
         return getSelf();
     }
 
+    /**
+     * select 列
+     * @param columns
+     * @return
+     */
     public T SELECT(String columns) {
         sql().statementType = SQLStatement.StatementType.SELECT;
         sql().select.add(columns);
@@ -91,6 +119,7 @@ public abstract class AbstractSQL<T> {
     }
 
     /**
+     * select 列
      * @since 3.4.2
      */
     public T SELECT(String... columns) {
@@ -99,6 +128,11 @@ public abstract class AbstractSQL<T> {
         return getSelf();
     }
 
+    /**
+     * select  去重列
+     * @param columns
+     * @return
+     */
     public T SELECT_DISTINCT(String columns) {
         sql().distinct = true;
         SELECT(columns);
@@ -106,6 +140,7 @@ public abstract class AbstractSQL<T> {
     }
 
     /**
+     * select 多列去重
      * @since 3.4.2
      */
     public T SELECT_DISTINCT(String... columns) {
@@ -114,12 +149,22 @@ public abstract class AbstractSQL<T> {
         return getSelf();
     }
 
+    /**
+     *  删除表
+     * @param table
+     * @return
+     */
     public T DELETE_FROM(String table) {
         sql().statementType = SQLStatement.StatementType.DELETE;
         sql().tables.add(table);
         return getSelf();
     }
 
+    /**
+     * from
+     * @param table
+     * @return
+     */
     public T FROM(String table) {
         sql().tables.add(table);
         return getSelf();
@@ -421,11 +466,17 @@ public abstract class AbstractSQL<T> {
 
     }
 
+    /**
+     * 各类语句的组装 最后应该是一个sql文
+     */
     private static class SQLStatement {
 
         StatementType statementType;
         List<String> sets = new ArrayList<>();
         List<String> select = new ArrayList<>();
+        /**
+         * 表名
+         */
         List<String> tables = new ArrayList<>();
         List<String> join = new ArrayList<>();
         List<String> innerJoin = new ArrayList<>();
@@ -443,6 +494,7 @@ public abstract class AbstractSQL<T> {
         String offset;
         String limit;
         LimitingRowsStrategy limitingRowsStrategy = LimitingRowsStrategy.NOP;
+
         public SQLStatement() {
             // Prevent Synthetic Access
             valuesList.add(new ArrayList<>());
@@ -452,6 +504,7 @@ public abstract class AbstractSQL<T> {
                                String conjunction) {
             if (!parts.isEmpty()) {
                 if (!builder.isEmpty()) {
+                    // 换行
                     builder.append("\n");
                 }
                 builder.append(keyword);
@@ -470,6 +523,11 @@ public abstract class AbstractSQL<T> {
             }
         }
 
+        /**
+         * select 组装
+         * @param builder
+         * @return
+         */
         private String selectSQL(SafeAppendable builder) {
             if (distinct) {
                 sqlClause(builder, "SELECT DISTINCT", select, "", "", ", ");
@@ -487,6 +545,10 @@ public abstract class AbstractSQL<T> {
             return builder.toString();
         }
 
+        /**
+         * join 组装
+         * @param builder
+         */
         private void joins(SafeAppendable builder) {
             sqlClause(builder, "JOIN", join, "", "", "\nJOIN ");
             sqlClause(builder, "INNER JOIN", innerJoin, "", "", "\nINNER JOIN ");
@@ -495,6 +557,11 @@ public abstract class AbstractSQL<T> {
             sqlClause(builder, "RIGHT OUTER JOIN", rightOuterJoin, "", "", "\nRIGHT OUTER JOIN ");
         }
 
+        /**
+         * insert 组装
+         * @param builder
+         * @return
+         */
         private String insertSQL(SafeAppendable builder) {
             sqlClause(builder, "INSERT INTO", tables, "", "", "");
             sqlClause(builder, "", columns, "(", ")", ", ");
@@ -504,6 +571,11 @@ public abstract class AbstractSQL<T> {
             return builder.toString();
         }
 
+        /**
+         * delete 组装
+         * @param builder
+         * @return
+         */
         private String deleteSQL(SafeAppendable builder) {
             sqlClause(builder, "DELETE FROM", tables, "", "", "");
             sqlClause(builder, "WHERE", where, "(", ")", " AND ");

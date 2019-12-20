@@ -38,6 +38,9 @@ public class ResultMap {
     private Configuration configuration;
 
     private String id;
+    /***
+     * db 的实体对象
+     */
     private Class<?> type;
     private List<ResultMapping> resultMappings;
     private List<ResultMapping> idResultMappings;

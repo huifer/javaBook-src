@@ -57,6 +57,7 @@ public final class Environment {
      */
     private final DataSource dataSource;
 
+
     public Environment(String id, TransactionFactory transactionFactory, DataSource dataSource) {
         if (id == null) {
             throw new IllegalArgumentException("Parameter 'id' must not be null");

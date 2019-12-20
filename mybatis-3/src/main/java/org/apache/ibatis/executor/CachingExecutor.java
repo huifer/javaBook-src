@@ -29,11 +29,16 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
+ * 缓存执行器
+ *
  * @author Clinton Begin
  * @author Eduardo Macarron
  */
 public class CachingExecutor implements Executor {
 
+    /**
+     * 执行器
+     */
     private final Executor delegate;
     private final TransactionalCacheManager tcm = new TransactionalCacheManager();
 
@@ -88,20 +93,24 @@ public class CachingExecutor implements Executor {
     @Override
     public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
             throws SQLException {
+        // 标签<cache>
         Cache cache = ms.getCache();
         if (cache != null) {
             flushCacheIfRequired(ms);
             if (ms.isUseCache() && resultHandler == null) {
+                // 判断是否使用缓存 和 结果处理器
                 ensureNoOutParams(ms, boundSql);
                 @SuppressWarnings("unchecked")
                 List<E> list = (List<E>) tcm.getObject(cache, key);
                 if (list == null) {
+                    // 二级缓存是否有数据,查询流程:2级缓存\1级缓存\数据库
                     list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
                     tcm.putObject(cache, key, list); // issue #578 and #116
                 }
                 return list;
             }
         }
+        // 数据库查询
         return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
     }
 
@@ -112,13 +121,16 @@ public class CachingExecutor implements Executor {
 
     @Override
     public void commit(boolean required) throws SQLException {
+        // 执行提交方法
         delegate.commit(required);
+        // 缓存事物提交
         tcm.commit();
     }
 
     @Override
     public void rollback(boolean required) throws SQLException {
         try {
+            // 事物回滚
             delegate.rollback(required);
         } finally {
             if (required) {

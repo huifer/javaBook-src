@@ -409,6 +409,7 @@ public class XMLConfigBuilder extends BaseBuilder {
                 String id = child.getStringAttribute("id");
                 if (isSpecifiedEnvironment(id)) {
                     // 解析 transactionManager
+                    // JdbcTransaction
                     TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
                     // 解析 dataSource
                     DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
@@ -552,6 +553,8 @@ public class XMLConfigBuilder extends BaseBuilder {
 
     /**
      * 解析 mappers
+     * 1. 通过  package 解析
+     * 2. 通过 resource,url,class 解析
      *
      * @param parent
      * @throws Exception

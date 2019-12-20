@@ -1,4 +1,6 @@
 # GenericTokenParser
+- Author: [HuiFer](https://github.com/huifer)
+
 ```java
 /**
  * Copyright 2009-2019 the original author or authors.
@@ -116,3 +118,58 @@ public class GenericTokenParser {
 }
 
 ```
+
+
+- 一个具体的例子`org.apache.ibatis.builder.SqlSourceBuilder.ParameterMappingTokenHandler`
+    - 具体类`org.apache.ibatis.builder.SqlSourceBuilder`
+```java
+        /**
+         * ? 的来源
+         *
+         * @param content
+         * @return
+         */
+        @Override
+        public String handleToken(String content) {
+            parameterMappings.add(buildParameterMapping(content));
+            return "?";
+        }
+
+```
+```java
+    /**
+     * sql 参数类型 ， 返回值
+     *
+     * <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+     * <!--@mbg.generated-->
+     * select
+     * <include refid="Base_Column_List" />
+     * from hs_sell
+     * where ID = #{id,jdbcType=INTEGER}
+     * </select>
+     * => 替换成问号
+     * select
+     * <p>
+     * <p>
+     * ID, USER_ID, GOOD_ID, PRICE, `SIZE`, COMPANY_ID, GROUP_ID, VERSION, DELETED, CREATE_USER,
+     * CREATE_TIME, UPDATE_USER, UPDATE_TIME, WORK_ORDER_ID
+     * <p>
+     * from hs_sell
+     * where ID = ?
+     *
+     * @param originalSql          sql文本
+     * @param parameterType        默认 object
+     * @param additionalParameters
+     * @return
+     */
+    public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
+        ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
+//        org.apache.ibatis.builder.SqlSourceBuilder.ParameterMappingTokenHandler.handleToken
+        GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
+        String sql = parser.parse(originalSql);
+        return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
+    }
+
+```
+
+![image-20191219100446796](assets/image-20191219100446796.png)

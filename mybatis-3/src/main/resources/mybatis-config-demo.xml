@@ -26,5 +26,6 @@
   <!-- 定义映射器 -->
   <mappers>
     <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>
+    <mapper resource="com/huifer/mybatis/mapper/HsSellMapper.xml"/>
   </mappers>
 </configuration>

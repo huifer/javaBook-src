@@ -41,8 +41,14 @@ public class PooledDataSource implements DataSource {
 
     private final PoolState state = new PoolState(this);
 
+    /**
+     * 链接地址 用户名 密码 在这里面
+     */
     private final UnpooledDataSource dataSource;
 
+    /**
+     * 一些默认连接参数
+     */
     // OPTIONAL CONFIGURATION FIELDS
     protected int poolMaximumActiveConnections = 10;
     protected int poolMaximumIdleConnections = 5;
@@ -202,8 +208,7 @@ public class PooledDataSource implements DataSource {
     /**
      * Sets the default network timeout value to wait for the database operation to complete. See {@link Connection#setNetworkTimeout(java.util.concurrent.Executor, int)}
      *
-     * @param milliseconds
-     *          The time in milliseconds to wait for the database operation to complete.
+     * @param milliseconds The time in milliseconds to wait for the database operation to complete.
      * @since 3.5.2
      */
     public void setDefaultNetworkTimeout(Integer milliseconds) {
@@ -247,9 +252,7 @@ public class PooledDataSource implements DataSource {
      * The maximum number of tolerance for bad connection happens in one thread
      * which are applying for new {@link PooledConnection}.
      *
-     * @param poolMaximumLocalBadConnectionTolerance
-     * max tolerance for bad connection happens in one thread
-     *
+     * @param poolMaximumLocalBadConnectionTolerance max tolerance for bad connection happens in one thread
      * @since 3.4.5
      */
     public void setPoolMaximumLocalBadConnectionTolerance(

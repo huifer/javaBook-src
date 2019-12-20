@@ -29,8 +29,15 @@ import java.util.Map;
 public class LruCache implements Cache {
 
     private final Cache delegate;
+    /**
+     * {@link  LinkedHashMap}
+     */
     private Map<Object, Object> keyMap;
     private Object eldestKey;
+
+    public Map<Object, Object> getKeyMap() {
+        return keyMap;
+    }
 
     public LruCache(Cache delegate) {
         this.delegate = delegate;
@@ -47,15 +54,23 @@ public class LruCache implements Cache {
         return delegate.getSize();
     }
 
+    /**
+     * 设置大小
+     *
+     * @param size
+     */
     public void setSize(final int size) {
         keyMap = new LinkedHashMap<Object, Object>(size, .75F, true) {
             private static final long serialVersionUID = 4267176411845948333L;
 
             @Override
             protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
+                // 数量超出预设值 执行
                 boolean tooBig = size() > size;
                 if (tooBig) {
+//                    获取被移除的key
                     eldestKey = eldest.getKey();
+                    System.out.println("移除的key="+eldestKey);
                 }
                 return tooBig;
             }
@@ -85,6 +100,10 @@ public class LruCache implements Cache {
         keyMap.clear();
     }
 
+    /**
+     * 删除最早的一个key
+     * @param key
+     */
     private void cycleKeyList(Object key) {
         keyMap.put(key, key);
         if (eldestKey != null) {

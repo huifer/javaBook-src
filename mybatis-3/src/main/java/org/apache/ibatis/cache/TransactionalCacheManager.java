@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 缓存和事物管理器
  * @author Clinton Begin
  */
 public class TransactionalCacheManager {

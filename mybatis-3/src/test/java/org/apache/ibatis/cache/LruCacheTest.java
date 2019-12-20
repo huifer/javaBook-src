@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * LRU 缓存测试{@link LruCache}
+ */
 class LruCacheTest {
 
     @Test
@@ -30,8 +33,10 @@ class LruCacheTest {
         for (int i = 0; i < 5; i++) {
             cache.putObject(i, i);
         }
+        System.out.println(cache.getKeyMap());
         assertEquals(0, cache.getObject(0));
         cache.putObject(5, 5);
+        System.out.println(cache.getKeyMap());
         assertNull(cache.getObject(1));
         assertEquals(5, cache.getSize());
     }

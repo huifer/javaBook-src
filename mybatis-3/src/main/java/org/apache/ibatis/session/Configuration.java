@@ -146,6 +146,9 @@ public class Configuration {
     protected Integer defaultStatementTimeout;
     protected Integer defaultFetchSize;
     protected ResultSetType defaultResultSetType;
+    /**
+     * 默认执行器类型
+     */
     protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
     protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
     protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
@@ -597,6 +600,16 @@ public class Configuration {
         return resultSetHandler;
     }
 
+    /**
+     * 创建 {@link StatementHandler}
+     * @param executor  执行器
+     * @param mappedStatement
+     * @param parameterObject
+     * @param rowBounds
+     * @param resultHandler
+     * @param boundSql
+     * @return
+     */
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
         StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
         statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
@@ -607,10 +620,16 @@ public class Configuration {
         return newExecutor(transaction, defaultExecutorType);
     }
 
+    /**
+     * @param transaction  事物
+     * @param executorType 执行器, 默认: {@link ExecutorType#SIMPLE}
+     * @return
+     */
     public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
         executorType = executorType == null ? defaultExecutorType : executorType;
         executorType = executorType == null ? ExecutorType.SIMPLE : executorType;
         Executor executor;
+        // 通过枚举进行执行器选择
         if (ExecutorType.BATCH == executorType) {
             executor = new BatchExecutor(this, transaction);
         } else if (ExecutorType.REUSE == executorType) {
@@ -618,6 +637,7 @@ public class Configuration {
         } else {
             executor = new SimpleExecutor(this, transaction);
         }
+        // 缓存开启
         if (cacheEnabled) {
             executor = new CachingExecutor(executor);
         }
@@ -645,6 +665,10 @@ public class Configuration {
         return keyGenerators.containsKey(id);
     }
 
+    /**
+     * 添加 cache
+     * @param cache
+     */
     public void addCache(Cache cache) {
         caches.put(cache.getId(), cache);
     }

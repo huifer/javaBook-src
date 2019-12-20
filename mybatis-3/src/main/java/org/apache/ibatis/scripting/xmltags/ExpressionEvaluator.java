@@ -28,6 +28,12 @@ import java.util.Map;
  */
 public class ExpressionEvaluator {
 
+    /**
+     * 判断参数列表中是否存在 expression 的 被判断符号
+     * @param expression      判断语句,ID != null
+     * @param parameterObject 参数列表
+     * @return
+     */
     public boolean evaluateBoolean(String expression, Object parameterObject) {
         Object value = OgnlCache.getValue(expression, parameterObject);
         if (value instanceof Boolean) {

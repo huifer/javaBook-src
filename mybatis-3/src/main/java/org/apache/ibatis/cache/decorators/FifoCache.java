@@ -24,11 +24,15 @@ import java.util.LinkedList;
  * FIFO (first in, first out) cache decorator.
  * FIFO  缓存策略
  * 先进先出：按对象进入缓存的顺序来移除它们。
+ *
  * @author Clinton Begin
  */
 public class FifoCache implements Cache {
 
     private final Cache delegate;
+    /**
+     * 队列
+     */
     private final Deque<Object> keyList;
     private int size;
 
@@ -74,9 +78,15 @@ public class FifoCache implements Cache {
         keyList.clear();
     }
 
+    /**
+     * 添加 key 删除最开始的一个
+     *
+     * @param key
+     */
     private void cycleKeyList(Object key) {
         keyList.addLast(key);
         if (keyList.size() > size) {
+            // 数量超过 删除第一个数据
             Object oldestKey = keyList.removeFirst();
             delegate.removeObject(oldestKey);
         }

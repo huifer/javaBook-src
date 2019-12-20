@@ -20,6 +20,8 @@ import org.apache.ibatis.session.Configuration;
 import java.util.*;
 
 /**
+ * trim 标签解析
+ *
  * @author Clinton Begin
  */
 public class TrimSqlNode implements SqlNode {
@@ -44,8 +46,15 @@ public class TrimSqlNode implements SqlNode {
         this.configuration = configuration;
     }
 
+    /**
+     * 拆分字符串 转换为大写
+     *
+     * @param overrides
+     * @return
+     */
     private static List<String> parseOverrides(String overrides) {
         if (overrides != null) {
+            // 拆分 "|"
             final StringTokenizer parser = new StringTokenizer(overrides, "|", false);
             final List<String> list = new ArrayList<>(parser.countTokens());
             while (parser.hasMoreTokens()) {
@@ -59,6 +68,7 @@ public class TrimSqlNode implements SqlNode {
     @Override
     public boolean apply(DynamicContext context) {
         FilteredDynamicContext filteredDynamicContext = new FilteredDynamicContext(context);
+        // 解析下级标签的入口
         boolean result = contents.apply(filteredDynamicContext);
         filteredDynamicContext.applyAll();
         return result;
@@ -118,6 +128,7 @@ public class TrimSqlNode implements SqlNode {
                 prefixApplied = true;
                 if (prefixesToOverride != null) {
                     for (String toRemove : prefixesToOverride) {
+                        // 替换 字符 AND ID = #{ID,JDBCTYPE=INTEGER} ->  ID = #{ID,jdbcType=INTEGER}
                         if (trimmedUppercaseSql.startsWith(toRemove)) {
                             sql.delete(0, toRemove.trim().length());
                             break;
@@ -131,6 +142,12 @@ public class TrimSqlNode implements SqlNode {
             }
         }
 
+        /**
+         * 补充前缀
+         *
+         * @param sql
+         * @param trimmedUppercaseSql
+         */
         private void applySuffix(StringBuilder sql, String trimmedUppercaseSql) {
             if (!suffixApplied) {
                 suffixApplied = true;

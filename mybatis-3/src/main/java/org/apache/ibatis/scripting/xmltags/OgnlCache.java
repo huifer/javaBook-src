@@ -39,9 +39,16 @@ public final class OgnlCache {
         // Prevent Instantiation of Static Class
     }
 
+    /**
+     * 取值
+     * @param expression  判断语句,ID=NULL
+     * @param root 参数列表
+     * @return
+     */
     public static Object getValue(String expression, Object root) {
         try {
             Map context = Ognl.createDefaultContext(root, MEMBER_ACCESS, CLASS_RESOLVER, null);
+            // 判断是否存在 expression 的判断内容 (判断ID是否存在)
             return Ognl.getValue(parseExpression(expression), context, root);
         } catch (OgnlException e) {
             throw new BuilderException("Error evaluating expression '" + expression + "'. Cause: " + e, e);

@@ -32,6 +32,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Mybatis 默认使用的执行器,每次使用开启 Statement 使用完毕关闭 Statement
+ * 可以从 每一个 方法中看到有一个 closeStatement(stmt);
+ *
  * @author Clinton Begin
  */
 public class SimpleExecutor extends BaseExecutor {
@@ -40,13 +43,25 @@ public class SimpleExecutor extends BaseExecutor {
         super(configuration, transaction);
     }
 
+    /**
+     * 执行 update 方法
+     *
+     * @param ms
+     * @param parameter
+     * @return
+     * @throws SQLException
+     */
     @Override
     public int doUpdate(MappedStatement ms, Object parameter) throws SQLException {
         Statement stmt = null;
         try {
+            // 获取配置信息
             Configuration configuration = ms.getConfiguration();
+            // 创建 StatementHandler
             StatementHandler handler = configuration.newStatementHandler(this, ms, parameter, RowBounds.DEFAULT, null, null);
+            // 创建 Statement
             stmt = prepareStatement(handler, ms.getStatementLog());
+            // 执行
             return handler.update(stmt);
         } finally {
             closeStatement(stmt);
@@ -83,8 +98,12 @@ public class SimpleExecutor extends BaseExecutor {
 
     private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
         Statement stmt;
+        // 数据库连接
         Connection connection = getConnection(statementLog);
+        // stms 创建
+        // org.apache.ibatis.executor.statement.BaseStatementHandler.prepare
         stmt = handler.prepare(connection, transaction.getTimeout());
+        // 参数放入
         handler.parameterize(stmt);
         return stmt;
     }

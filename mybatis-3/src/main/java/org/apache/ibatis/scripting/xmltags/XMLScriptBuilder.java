@@ -82,8 +82,10 @@ public class XMLScriptBuilder extends BaseBuilder {
         MixedSqlNode rootSqlNode = parseDynamicTags(context);
         SqlSource sqlSource;
         if (isDynamic) {
+            // 动态sql
             sqlSource = new DynamicSqlSource(configuration, rootSqlNode);
         } else {
+            // 静态sql
             sqlSource = new RawSqlSource(configuration, rootSqlNode, parameterType);
         }
         return sqlSource;
@@ -91,7 +93,47 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     /**
      * <b>动态sql 的核心方法!!!</b>
-     *
+     *<trim suffixOverrides="," prefix="(" suffix=")">
+     *     <if test="userId != null">
+     *         USER_ID,
+     *       </if>
+     *     <if test="goodId != null">
+     *         GOOD_ID,
+     *       </if>
+     *     <if test="price != null">
+     *         PRICE,
+     *       </if>
+     *     <if test="size != null">
+     *         `SIZE`,
+     *       </if>
+     *     <if test="companyId != null">
+     *         COMPANY_ID,
+     *       </if>
+     *     <if test="groupId != null">
+     *         GROUP_ID,
+     *       </if>
+     *     <if test="version != null">
+     *         VERSION,
+     *       </if>
+     *     <if test="deleted != null">
+     *         DELETED,
+     *       </if>
+     *     <if test="createUser != null">
+     *         CREATE_USER,
+     *       </if>
+     *     <if test="createTime != null">
+     *         CREATE_TIME,
+     *       </if>
+     *     <if test="updateUser != null">
+     *         UPDATE_USER,
+     *       </if>
+     *     <if test="updateTime != null">
+     *         UPDATE_TIME,
+     *       </if>
+     *     <if test="workOrderId != null">
+     *         WORK_ORDER_ID,
+     *       </if>
+     * </trim>
      * @param node
      * @return
      */
@@ -148,6 +190,9 @@ public class XMLScriptBuilder extends BaseBuilder {
         }
     }
 
+    /**
+     * trim 标签解析
+     */
     private class TrimHandler implements NodeHandler {
         public TrimHandler() {
             // Prevent Synthetic Access
