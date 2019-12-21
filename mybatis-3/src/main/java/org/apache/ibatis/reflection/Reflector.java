@@ -455,6 +455,7 @@ public class Reflector {
     }
 
     /**
+     * 获取set 的数据类型
      * Gets the type for a property setter.
      *
      * @param propertyName - the name of the property
@@ -469,6 +470,7 @@ public class Reflector {
     }
 
     /**
+     * 获取 get的数据类型
      * Gets the type for a property getter.
      *
      * @param propertyName - the name of the property

@@ -23,6 +23,7 @@ import java.util.Arrays;
 public class ArrayUtil {
 
     /**
+     * 计算 hash code
      * Returns a hash code for {@code obj}.
      *
      * @param obj
@@ -61,6 +62,8 @@ public class ArrayUtil {
     }
 
     /**
+     * 比较是否相同
+     *
      * Compares two objects. Returns <code>true</code> if
      * <ul>
      * <li>{@code thisObj} and {@code thatObj} are both <code>null</code></li>
