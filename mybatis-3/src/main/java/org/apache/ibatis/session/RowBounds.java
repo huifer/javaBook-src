@@ -16,6 +16,7 @@
 package org.apache.ibatis.session;
 
 /**
+ * 返回值处理时使用, 应用场景,处理第几行数据 , 可以理解成分页
  * @author Clinton Begin
  */
 public class RowBounds {

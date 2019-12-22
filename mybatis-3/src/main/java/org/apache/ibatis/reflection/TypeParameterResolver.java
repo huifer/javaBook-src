@@ -116,6 +116,18 @@ public class TypeParameterResolver {
         Class<?> rawType = (Class<?>) parameterizedType.getRawType();
         // 实际参数获取
         Type[] typeArgs = parameterizedType.getActualTypeArguments();
+        Type[] args = typesToArgs(srcType, declaringClass, typeArgs);
+        return new ParameterizedTypeImpl(rawType, null, args);
+    }
+
+    /**
+     * 提取的方法 不是原始的方便注释代码 ^_^
+     * @param srcType
+     * @param declaringClass
+     * @param typeArgs
+     * @return
+     */
+    private static Type[] typesToArgs(Type srcType, Class<?> declaringClass, Type[] typeArgs) {
         Type[] args = new Type[typeArgs.length];
         // 实际参数处理ß
         for (int i = 0; i < typeArgs.length; i++) {
@@ -130,7 +142,7 @@ public class TypeParameterResolver {
                 args[i] = typeArgs[i];
             }
         }
-        return new ParameterizedTypeImpl(rawType, null, args);
+        return args;
     }
 
     private static Type resolveWildcardType(WildcardType wildcardType, Type srcType, Class<?> declaringClass) {
@@ -140,18 +152,7 @@ public class TypeParameterResolver {
     }
 
     private static Type[] resolveWildcardTypeBounds(Type[] bounds, Type srcType, Class<?> declaringClass) {
-        Type[] result = new Type[bounds.length];
-        for (int i = 0; i < bounds.length; i++) {
-            if (bounds[i] instanceof TypeVariable) {
-                result[i] = resolveTypeVar((TypeVariable<?>) bounds[i], srcType, declaringClass);
-            } else if (bounds[i] instanceof ParameterizedType) {
-                result[i] = resolveParameterizedType((ParameterizedType) bounds[i], srcType, declaringClass);
-            } else if (bounds[i] instanceof WildcardType) {
-                result[i] = resolveWildcardType((WildcardType) bounds[i], srcType, declaringClass);
-            } else {
-                result[i] = bounds[i];
-            }
-        }
+        Type[] result = typesToArgs(srcType, declaringClass, bounds);
         return result;
     }
 

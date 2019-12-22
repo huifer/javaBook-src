@@ -18,6 +18,7 @@ package org.apache.ibatis.jdbc;
 import org.apache.ibatis.type.*;
 
 /**
+ * 对于 null 不同类型的描述, {类型处理器,jdbc类型}
  * @author Clinton Begin
  * @author Adam Gent
  */
@@ -49,7 +50,13 @@ public enum Null {
     SQLDATE(new SqlDateTypeHandler(), JdbcType.DATE),
     SQLTIME(new SqlTimeTypeHandler(), JdbcType.TIME);
 
+    /**
+     * 类型处理器
+     */
     private TypeHandler<?> typeHandler;
+    /**
+     * jdbc 类型
+     */
     private JdbcType jdbcType;
 
     Null(TypeHandler<?> typeHandler, JdbcType jdbcType) {
