@@ -36,6 +36,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
+ * mybatis 默认的sqlSession
  * The default implementation for {@link SqlSession}.
  * Note that this class is not Thread-Safe.
  *

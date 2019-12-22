@@ -176,7 +176,7 @@ public class Configuration {
      * 构造器,注册了别名 -> 具体类
      */
     public Configuration() {
-        // 链接方式
+        // 事务类型
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
         typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 

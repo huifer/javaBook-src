@@ -87,6 +87,11 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
         }
     }
 
+    /**
+     * 根据type 的类型返回对应的数据类型
+     * @param type
+     * @return
+     */
     protected Class<?> resolveInterface(Class<?> type) {
         Class<?> classToCreate;
         if (type == List.class || type == Collection.class || type == Iterable.class) {
@@ -103,6 +108,12 @@ public class DefaultObjectFactory implements ObjectFactory, Serializable {
         return classToCreate;
     }
 
+    /**
+     * 判断是否是 List
+     * @param type Object type
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> boolean isCollection(Class<T> type) {
         return Collection.class.isAssignableFrom(type);

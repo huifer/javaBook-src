@@ -583,6 +583,11 @@ public abstract class AbstractSQL<T> {
             return builder.toString();
         }
 
+        /**
+         * update 组装
+         * @param builder
+         * @return
+         */
         private String updateSQL(SafeAppendable builder) {
             sqlClause(builder, "UPDATE", tables, "", "", "");
             joins(builder);
@@ -592,6 +597,11 @@ public abstract class AbstractSQL<T> {
             return builder.toString();
         }
 
+        /**
+         * sql 文本创建方式
+         * @param a
+         * @return
+         */
         public String sql(Appendable a) {
             SafeAppendable builder = new SafeAppendable(a);
             if (statementType == null) {
@@ -599,21 +609,25 @@ public abstract class AbstractSQL<T> {
             }
 
             String answer;
-
+            // 不同sql类型的sql创建方式
             switch (statementType) {
                 case DELETE:
+                    // 删除sql
                     answer = deleteSQL(builder);
                     break;
 
                 case INSERT:
+                    // 插入sql
                     answer = insertSQL(builder);
                     break;
 
                 case SELECT:
+                    // 查询sql
                     answer = selectSQL(builder);
                     break;
 
                 case UPDATE:
+                    // 更新sql
                     answer = updateSQL(builder);
                     break;
 
