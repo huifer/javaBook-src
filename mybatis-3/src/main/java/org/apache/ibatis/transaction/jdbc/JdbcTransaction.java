@@ -27,15 +27,14 @@ import java.sql.SQLException;
 
 /**
  * <transactionManager type="JDBC"/>
- *
- *
+ * <p>
+ * <p>
  * {@link Transaction} that makes use of the JDBC commit and rollback facilities directly.
  * It relies on the connection retrieved from the dataSource to manage the scope of the transaction.
  * Delays connection retrieval until getConnection() is called.
  * Ignores commit or rollback requests when autocommit is on.
  *
  * @author Clinton Begin
- *
  * @see JdbcTransactionFactory
  */
 public class JdbcTransaction implements Transaction {
