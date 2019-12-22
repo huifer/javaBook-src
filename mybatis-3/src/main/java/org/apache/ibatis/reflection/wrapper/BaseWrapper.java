@@ -79,6 +79,12 @@ public abstract class BaseWrapper implements ObjectWrapper {
         }
     }
 
+    /**
+     * 设置属性值 ,List , object[] , char[] boolean byte double float int long short
+     * @param prop
+     * @param collection
+     * @param value
+     */
     protected void setCollectionValue(PropertyTokenizer prop, Object collection, Object value) {
         if (collection instanceof Map) {
             ((Map) collection).put(prop.getIndex(), value);

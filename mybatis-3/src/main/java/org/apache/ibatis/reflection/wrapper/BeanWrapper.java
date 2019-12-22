@@ -23,6 +23,7 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 import java.util.List;
 
 /**
+ * java bean 的包装类
  * @author Clinton Begin
  */
 public class BeanWrapper extends BaseWrapper {

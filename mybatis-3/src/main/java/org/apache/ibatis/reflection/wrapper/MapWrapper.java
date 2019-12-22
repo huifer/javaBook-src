@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * java map 的包装对象, 本质操作为map的操作, get-> map.get() set->map.put()
  * @author Clinton Begin
  */
 public class MapWrapper extends BaseWrapper {
