@@ -85,16 +85,32 @@ public class CollectionWrapper implements ObjectWrapper {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * 是否是list
+     *
+     * @return true
+     */
     @Override
     public boolean isCollection() {
         return true;
     }
 
+    /**
+     * java {@link Collection#add(Object)}
+     *
+     * @param element
+     */
     @Override
     public void add(Object element) {
         object.add(element);
     }
 
+    /**
+     * java {@link Collection#addAll(Collection)}
+     *
+     * @param element
+     * @param <E>
+     */
     @Override
     public <E> void addAll(List<E> element) {
         object.addAll(element);

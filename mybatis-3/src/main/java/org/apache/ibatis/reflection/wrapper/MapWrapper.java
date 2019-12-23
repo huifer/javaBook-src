@@ -39,10 +39,13 @@ public class MapWrapper extends BaseWrapper {
 
     @Override
     public Object get(PropertyTokenizer prop) {
+        // 是否有索引
         if (prop.getIndex() != null) {
             Object collection = resolveCollection(prop, map);
+            // 嗲用 BaseWrapper
             return getCollectionValue(prop, collection);
         } else {
+            // 获取
             return map.get(prop.getName());
         }
     }

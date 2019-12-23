@@ -45,21 +45,26 @@ public class BeanWrapper extends BaseWrapper {
 
     @Override
     public Object get(PropertyTokenizer prop) {
+        // 索引不为空
         if (prop.getIndex() != null) {
             // 实例化集合对象
             Object collection = resolveCollection(prop, object);
             return getCollectionValue(prop, collection);
         } else {
+            // 没有索引
             return getBeanProperty(prop, object);
         }
     }
 
     @Override
     public void set(PropertyTokenizer prop, Object value) {
+        // 是否存在索引
         if (prop.getIndex() != null) {
             Object collection = resolveCollection(prop, object);
+            // 向上层调用 BaseWrapper
             setCollectionValue(prop, collection, value);
         } else {
+            // 本类方法
             setBeanProperty(prop, object, value);
         }
     }
@@ -83,7 +88,9 @@ public class BeanWrapper extends BaseWrapper {
     public Class<?> getSetterType(String name) {
         PropertyTokenizer prop = new PropertyTokenizer(name);
         if (prop.hasNext()) {
+
             MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
+            // 是否null
             if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
                 return metaClass.getSetterType(name);
             } else {
@@ -128,6 +135,11 @@ public class BeanWrapper extends BaseWrapper {
         }
     }
 
+    /**
+     * 是否包含 name 的get 方法
+     * @param name
+     * @return
+     */
     @Override
     public boolean hasGetter(String name) {
         PropertyTokenizer prop = new PropertyTokenizer(name);
@@ -147,12 +159,20 @@ public class BeanWrapper extends BaseWrapper {
         }
     }
 
+    /**
+     * 数据嵌套处理 a.b.c  需要处理成 a->b->c
+     * @param name
+     * @param prop
+     * @param objectFactory
+     * @return
+     */
     @Override
     public MetaObject instantiatePropertyValue(String name, PropertyTokenizer prop, ObjectFactory objectFactory) {
         MetaObject metaValue;
         Class<?> type = getSetterType(prop.getName());
         try {
             Object newObject = objectFactory.create(type);
+            // 出现嵌套处理 instantiatePropertyValue->set
             metaValue = MetaObject.forObject(newObject, metaObject.getObjectFactory(), metaObject.getObjectWrapperFactory(), metaObject.getReflectorFactory());
             set(prop, newObject);
         } catch (Exception e) {
@@ -161,10 +181,18 @@ public class BeanWrapper extends BaseWrapper {
         return metaValue;
     }
 
+    /**
+     * 获取 object 的  prop 属性值
+     * @param prop
+     * @param object
+     * @return
+     */
     private Object getBeanProperty(PropertyTokenizer prop, Object object) {
         try {
+            // 获取get 方法
             Invoker method = metaClass.getGetInvoker(prop.getName());
             try {
+                // 获取属性值
                 return method.invoke(object, NO_ARGUMENTS);
             } catch (Throwable t) {
                 throw ExceptionUtil.unwrapThrowable(t);
@@ -176,11 +204,19 @@ public class BeanWrapper extends BaseWrapper {
         }
     }
 
+    /**
+     * 设置 object 的属性 prop 值为 value
+     * @param prop
+     * @param object
+     * @param value
+     */
     private void setBeanProperty(PropertyTokenizer prop, Object object, Object value) {
         try {
+            // 获取set 方法
             Invoker method = metaClass.getSetInvoker(prop.getName());
             Object[] params = {value};
             try {
+                // 设置属性
                 method.invoke(object, params);
             } catch (Throwable t) {
                 throw ExceptionUtil.unwrapThrowable(t);
