@@ -22,7 +22,7 @@ class HfConfigurationTest {
      */
     @Test
     void testXmlConfigurationLoad() throws IOException {
-        Reader reader = Resources.getResourceAsReader("mybatis-config-demo.xml");
+        Reader reader = Resources.getResourceAsReader("mybatis-config.xml");
         SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(reader);
         Configuration configuration = factory.getConfiguration();
         SqlSession sqlSession = factory.openSession();

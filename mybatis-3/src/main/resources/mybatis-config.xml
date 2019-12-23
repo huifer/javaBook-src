@@ -3,10 +3,10 @@
     PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-  <properties resource="test.properties">
-    <property name="hello" value="world"/>
-    <property name="k" value="v"/>
-  </properties>
+<!--  <properties resource="test.properties">-->
+<!--    <property name="hello" value="world"/>-->
+<!--    <property name="k" value="v"/>-->
+<!--  </properties>-->
 
   <settings>
     <!--    缓存,默认开启-->
@@ -32,35 +32,35 @@
   </settings>
 
 
-  <typeAliases>
-    <!--    <package name="com.huifer.mybatis.entity"/>-->
-    <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>
-  </typeAliases>
+<!--  <typeAliases>-->
+<!--    &lt;!&ndash;    <package name="com.huifer.mybatis.entity"/>&ndash;&gt;-->
+<!--    <typeAlias type="com.huifer.mybatis.entity.Person" alias="Person"/>-->
+<!--  </typeAliases>-->
 
-  <typeHandlers>
-    <!--      <package name="com.huifer.mybatis.handler"/>-->
-    <typeHandler jdbcType="VARCHAR" javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>
-  </typeHandlers>
-  <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">
-    <property name="data" value="100"/>
-  </objectFactory>
+<!--  <typeHandlers>-->
+<!--    &lt;!&ndash;      <package name="com.huifer.mybatis.handler"/>&ndash;&gt;-->
+<!--    <typeHandler jdbcType="VARCHAR" javaType="String" handler="com.huifer.mybatis.handler.TestTypeHandler"/>-->
+<!--  </typeHandlers>-->
+<!--  <objectFactory type="com.huifer.mybatis.factory.TestObjectFactory">-->
+<!--    <property name="data" value="100"/>-->
+<!--  </objectFactory>-->
 
-  <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>
-  <reflectorFactory type="org.apache.ibatis.reflection.DefaultReflectorFactory"/>
-  <plugins>
-    <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin">
-      <property name="testPlugins" value="tPl"/>
-    </plugin>
-  </plugins>
+<!--  <objectWrapperFactory type="org.apache.ibatis.reflection.wrapper.DefaultObjectWrapperFactory"/>-->
+<!--  <reflectorFactory type="org.apache.ibatis.reflection.DefaultReflectorFactory"/>-->
+<!--  <plugins>-->
+<!--    <plugin interceptor="com.huifer.mybatis.plugins.TestPlugin">-->
+<!--      <property name="testPlugins" value="tPl"/>-->
+<!--    </plugin>-->
+<!--  </plugins>-->
   <!-- 定义数据库的信息，默认使用development数据库构建环境 -->
   <environments default="development">
     <environment id="development">
       <transactionManager type="JDBC"/>
       <dataSource type="POOLED">
         <property name="driver" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
-        <property name="username" value="root"/>
-        <property name="password" value="root"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=false"/>
+        <property name="username" value="mybatis"/>
+        <property name="password" value="mybatis"/>
       </dataSource>
     </environment>
   </environments>
@@ -71,6 +71,7 @@
   </databaseIdProvider>
   <!-- 定义映射器 -->
   <mappers>
-    <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>
+<!--    <mapper resource="com/huifer/mybatis/mapper/PersonMapper.xml"/>-->
+    <mapper resource="com/huifer/mybatis/mapper/HsSellMapper.xml"/>
   </mappers>
 </configuration>

@@ -198,6 +198,13 @@ public class UnpooledDataSource implements DataSource {
         this.defaultNetworkTimeout = defaultNetworkTimeout;
     }
 
+    /**
+     * 获取链接对象
+     * @param username
+     * @param password
+     * @return
+     * @throws SQLException
+     */
     private Connection doGetConnection(String username, String password) throws SQLException {
         Properties props = new Properties();
         if (driverProperties != null) {
@@ -219,6 +226,10 @@ public class UnpooledDataSource implements DataSource {
         return connection;
     }
 
+    /**
+     * 加载链接驱动 如 mysql 链接驱动
+     * @throws SQLException
+     */
     private synchronized void initializeDriver() throws SQLException {
         if (!registeredDrivers.containsKey(driver)) {
             Class<?> driverType;
@@ -239,6 +250,11 @@ public class UnpooledDataSource implements DataSource {
         }
     }
 
+    /**
+     * 设置连接对象 , 超时时间,是否自动提交事物
+     * @param conn
+     * @throws SQLException
+     */
     private void configureConnection(Connection conn) throws SQLException {
         if (defaultNetworkTimeout != null) {
             conn.setNetworkTimeout(Executors.newSingleThreadExecutor(), defaultNetworkTimeout);
