@@ -36,8 +36,17 @@ public class MetaObject {
      * 对象包装
      */
     private final ObjectWrapper objectWrapper;
+    /**
+     * object 工厂
+     */
     private final ObjectFactory objectFactory;
+    /**
+     * object
+     */
     private final ObjectWrapperFactory objectWrapperFactory;
+    /**
+     * 反射工程
+     */
     private final ReflectorFactory reflectorFactory;
 
     private MetaObject(Object object, ObjectFactory objectFactory, ObjectWrapperFactory objectWrapperFactory, ReflectorFactory reflectorFactory) {
@@ -142,7 +151,7 @@ public class MetaObject {
     public void setValue(String name, Object value) {
         PropertyTokenizer prop = new PropertyTokenizer(name);
         if (prop.hasNext()) {
-            // 获取属性实力
+            // 获取属性实例
             MetaObject metaValue = metaObjectForProperty(prop.getIndexedName());
             if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
                 if (value == null) {

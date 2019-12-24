@@ -29,6 +29,7 @@ import java.sql.SQLException;
  * <transactionManager type="JDBC"/>
  * <p>
  * <p>
+ * <p>这部分的内容是数据JDBC操作</p>
  * {@link Transaction} that makes use of the JDBC commit and rollback facilities directly.
  * It relies on the connection retrieved from the dataSource to manage the scope of the transaction.
  * Delays connection retrieval until getConnection() is called.
@@ -56,6 +57,11 @@ public class JdbcTransaction implements Transaction {
         this.connection = connection;
     }
 
+    /**
+     * 获取连接对象
+     * @return
+     * @throws SQLException
+     */
     @Override
     public Connection getConnection() throws SQLException {
         if (connection == null) {
@@ -64,6 +70,10 @@ public class JdbcTransaction implements Transaction {
         return connection;
     }
 
+    /**
+     * 提交
+     * @throws SQLException
+     */
     @Override
     public void commit() throws SQLException {
         if (connection != null && !connection.getAutoCommit()) {
@@ -74,6 +84,10 @@ public class JdbcTransaction implements Transaction {
         }
     }
 
+    /**
+     * 回滚
+     * @throws SQLException
+     */
     @Override
     public void rollback() throws SQLException {
         if (connection != null && !connection.getAutoCommit()) {

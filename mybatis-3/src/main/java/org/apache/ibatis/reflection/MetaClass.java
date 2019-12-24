@@ -33,7 +33,13 @@ import java.util.Collection;
  */
 public class MetaClass {
 
+    /**
+     * {@link DefaultReflectorFactory}
+     */
     private final ReflectorFactory reflectorFactory;
+    /**
+     * 反射器
+     */
     private final Reflector reflector;
 
     private MetaClass(Class<?> type, ReflectorFactory reflectorFactory) {
@@ -41,6 +47,13 @@ public class MetaClass {
         this.reflector = reflectorFactory.findForClass(type);
     }
 
+    /**
+     * 根据 type (java.class) 和 反射工厂{@link DefaultReflectorFactory} 创建 {@link MetaClass}
+     *
+     * @param type
+     * @param reflectorFactory
+     * @return
+     */
     public static MetaClass forClass(Class<?> type, ReflectorFactory reflectorFactory) {
         return new MetaClass(type, reflectorFactory);
     }
@@ -50,6 +63,12 @@ public class MetaClass {
         return MetaClass.forClass(propType, reflectorFactory);
     }
 
+    /**
+     * 根据 name 获取数据类型
+     *
+     * @param name
+     * @return
+     */
     public String findProperty(String name) {
         StringBuilder prop = buildProperty(name, new StringBuilder());
         return prop.length() > 0 ? prop.toString() : null;
@@ -186,25 +205,39 @@ public class MetaClass {
         return reflector.getSetInvoker(name);
     }
 
+    /**
+     * @param name
+     * @param builder
+     * @return
+     */
     private StringBuilder buildProperty(String name, StringBuilder builder) {
+        // 获取name的内容 属性解析
         PropertyTokenizer prop = new PropertyTokenizer(name);
         if (prop.hasNext()) {
             String propertyName = reflector.findPropertyName(prop.getName());
             if (propertyName != null) {
                 builder.append(propertyName);
                 builder.append(".");
+                // 创建下级对象
                 MetaClass metaProp = metaClassForProperty(propertyName);
+                // 设置属性
                 metaProp.buildProperty(prop.getChildren(), builder);
             }
         } else {
+            // 查找属性
             String propertyName = reflector.findPropertyName(name);
             if (propertyName != null) {
+                // 属性添加
                 builder.append(propertyName);
             }
         }
         return builder;
     }
 
+    /**
+     * 是否存在无参数构造方法
+     * @return
+     */
     public boolean hasDefaultConstructor() {
         return reflector.hasDefaultConstructor();
     }
