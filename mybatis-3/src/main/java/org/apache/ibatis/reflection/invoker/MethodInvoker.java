@@ -21,6 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * 方法的 method
+ *
  * @author Clinton Begin
  */
 public class MethodInvoker implements Invoker {
@@ -33,20 +35,24 @@ public class MethodInvoker implements Invoker {
 
         if (method.getParameterTypes().length == 1) {
             type = method.getParameterTypes()[0];
-        } else {
+        }
+        else {
             type = method.getReturnType();
         }
     }
+
 
     @Override
     public Object invoke(Object target, Object[] args) throws IllegalAccessException, InvocationTargetException {
         try {
             return method.invoke(target, args);
-        } catch (IllegalAccessException e) {
+        }
+        catch (IllegalAccessException e) {
             if (Reflector.canControlMemberAccessible()) {
                 method.setAccessible(true);
                 return method.invoke(target, args);
-            } else {
+            }
+            else {
                 throw e;
             }
         }

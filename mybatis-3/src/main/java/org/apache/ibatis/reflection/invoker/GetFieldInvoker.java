@@ -20,9 +20,14 @@ import org.apache.ibatis.reflection.Reflector;
 import java.lang.reflect.Field;
 
 /**
+ * getter 方法
+ *
  * @author Clinton Begin
  */
 public class GetFieldInvoker implements Invoker {
+    /**
+     * 字段
+     */
     private final Field field;
 
     public GetFieldInvoker(Field field) {
@@ -33,11 +38,13 @@ public class GetFieldInvoker implements Invoker {
     public Object invoke(Object target, Object[] args) throws IllegalAccessException {
         try {
             return field.get(target);
-        } catch (IllegalAccessException e) {
+        }
+        catch (IllegalAccessException e) {
             if (Reflector.canControlMemberAccessible()) {
                 field.setAccessible(true);
                 return field.get(target);
-            } else {
+            }
+            else {
                 throw e;
             }
         }
