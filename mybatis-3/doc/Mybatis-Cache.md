@@ -1,4 +1,4 @@
-# mybatis 缓存
+# mybatis Cache
 - `org.apache.ibatis.cache.Cache`
 ```java
 public interface Cache {
