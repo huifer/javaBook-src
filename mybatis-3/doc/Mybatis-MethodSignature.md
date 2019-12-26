@@ -1,4 +1,4 @@
-# MethodSignature
+# Mybatis MethodSignature
 - `org.apache.ibatis.binding.MapperMethod.MethodSignature`
 ```java
     /**
