@@ -116,12 +116,14 @@ public class TypeAliasRegistry {
             if (typeAliases.containsKey(key)) {
                 // 别名 map 中是否有
                 value = (Class<T>) typeAliases.get(key);
-            } else {
+            }
+            else {
                 // 没有构造一个
                 value = (Class<T>) Resources.classForName(string);
             }
             return value;
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             throw new TypeException("Could not resolve type alias '" + string + "'.  Cause: " + e, e);
         }
     }
@@ -152,8 +154,10 @@ public class TypeAliasRegistry {
         String alias = type.getSimpleName();
         Alias aliasAnnotation = type.getAnnotation(Alias.class);
         if (aliasAnnotation != null) {
+            // 获取 别名注解
             alias = aliasAnnotation.value();
         }
+        // 转换为 别名,clazz
         registerAlias(alias, type);
     }
 
@@ -179,7 +183,8 @@ public class TypeAliasRegistry {
     public void registerAlias(String alias, String value) {
         try {
             registerAlias(alias, Resources.classForName(value));
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             throw new TypeException("Error registering type alias " + alias + " for " + value + ". Cause: " + e, e);
         }
     }

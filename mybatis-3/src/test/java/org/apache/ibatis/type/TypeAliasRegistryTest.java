@@ -32,6 +32,16 @@ class TypeAliasRegistryTest {
         assertEquals("org.apache.ibatis.domain.misc.RichType", typeAliasRegistry.resolveAlias("rich").getName());
     }
 
+    /**
+     * 对注解 {@link Alias} 的测试用例
+     */
+    @Test
+    void testAnnotation() {
+        TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
+        typeAliasRegistry.registerAlias(Hc.class);
+        assertEquals("org.apache.ibatis.type.Hc", typeAliasRegistry.resolveAlias("hc").getName());
+    }
+
     @Test
     void shouldFetchArrayType() {
         TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
@@ -64,5 +74,6 @@ class TypeAliasRegistryTest {
         typeAliasRegistry.registerAlias("foo", (Class<?>) null);
         typeAliasRegistry.registerAlias("foo", String.class);
     }
+
 
 }
