@@ -1,7 +1,8 @@
 # Spring-BeanDefinitionParserDelegate
 - Author: [HuiFer](https://github.com/huifer)
 - 源码路径: `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate`
-- 该类的作用是将bean标签解析出来
+- 源码阅读仓库: [huifer-spring](https://github.com/huifer/spring-framework)
+- 该类的作用是将标签解析出来
 
 
 
@@ -788,3 +789,123 @@ public class QualifierSourceCode {
 ```
 
 ![image-20200101155539501](assets/image-20200101155539501.png)
+
+
+
+
+
+### Bean解析结果
+
+![image-20200102083512005](assets/image-20200102083512005.png)
+
+
+
+
+
+## importBeanDefinitionResource
+
+```JAVA
+    /**
+     * 解析{@code <import>} 标签
+     * Parse an "import" element and load the bean definitions
+     * from the given resource into the bean factory.
+     */
+    protected void importBeanDefinitionResource(Element ele) {
+        // 获取 resource 属性
+        String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
+        // 是否有 resource 属性
+        if (!StringUtils.hasText(location)) {
+            getReaderContext().error("Resource location must not be empty", ele);
+            return;
+        }
+
+        // Resolve system properties: e.g. "${user.dir}"
+        // 获取系统环境,解析路径
+        /**
+         * 1. getReaderContext() 获取{@link XmlReaderContext}
+         * 2. getEnvironment() 获取环境
+         * 3. resolveRequiredPlaceholders(location) 解析占位符${...}
+         */
+        location = getReaderContext().getEnvironment().resolveRequiredPlaceholders(location);
+
+        // 资源存放集合
+        Set<Resource> actualResources = new LinkedHashSet<>(4);
+
+        // Discover whether the location is an absolute or relative URI
+        // 相对路径 绝对路径的判断
+        boolean absoluteLocation = false;
+        try {
+            // 判断是相对路径还是绝对路径
+            absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();
+        }
+        catch (URISyntaxException ex) {
+            // cannot convert to an URI, considering the location relative
+            // unless it is the well-known Spring prefix "classpath*:"
+        }
+
+        // Absolute or relative?
+        if (absoluteLocation) {
+            try {
+                // 获取import中的数量
+                int importCount = getReaderContext().getReader().loadBeanDefinitions(location, actualResources);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Imported " + importCount + " bean definitions from URL location [" + location + "]");
+                }
+            }
+            catch (BeanDefinitionStoreException ex) {
+                getReaderContext().error(
+                        "Failed to import bean definitions from URL location [" + location + "]", ele, ex);
+            }
+        }
+        else {
+            // No URL -> considering resource location as relative to the current file.
+            try {
+                int importCount;
+                // 本地地址
+                Resource relativeResource = getReaderContext().getResource().createRelative(location);
+                if (relativeResource.exists()) {
+                    // 此处调用方式和加载一个xml文件相同
+                    importCount = getReaderContext().getReader().loadBeanDefinitions(relativeResource);
+
+                    actualResources.add(relativeResource);
+                }
+                else {
+                    String baseLocation = getReaderContext().getResource().getURL().toString();
+                    importCount = getReaderContext().getReader().loadBeanDefinitions(
+                            StringUtils.applyRelativePath(baseLocation, location), actualResources);
+                }
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Imported " + importCount + " bean definitions from relative location [" + location + "]");
+                }
+            }
+            catch (IOException ex) {
+                getReaderContext().error("Failed to resolve current resource location", ele, ex);
+            }
+            catch (BeanDefinitionStoreException ex) {
+                getReaderContext().error(
+                        "Failed to import bean definitions from relative location [" + location + "]", ele, ex);
+            }
+        }
+        // 转换数组
+        Resource[] actResArray = actualResources.toArray(new Resource[0]);
+        /***
+         * fireImportProcessed()触发import事件,
+         * 并且通过{@link org.springframework.beans.factory.parsing.ReaderEventListener#importProcessed(ImportDefinition)} 宣布处理结果
+         */
+        getReaderContext().fireImportProcessed(location, actResArray, extractSource(ele));
+    }
+
+```
+
+### 测试用例
+
+```xml
+    <import resource="ImportDemo.xml"/>
+```
+
+
+
+![image-20200102091421516](assets/image-20200102091421516.png)
+
+
+
