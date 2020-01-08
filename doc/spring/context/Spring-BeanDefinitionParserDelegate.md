@@ -535,6 +535,295 @@ xml 配置
 
 
 
+
+
+
+
+### constructor-arg 下级标签解析 parsePropertySubElement
+
+- `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parsePropertySubElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition)`
+  - `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate#parsePropertySubElement(org.w3c.dom.Element, org.springframework.beans.factory.config.BeanDefinition, java.lang.String)`
+
+
+
+
+
+```java
+@Nullable
+    public Object parsePropertySubElement(Element ele, @Nullable BeanDefinition bd, @Nullable String defaultValueType) {
+        // 判断是否是默认命名空间
+        if (!isDefaultNamespace(ele)) {
+            return parseNestedCustomElement(ele, bd);
+        }
+        else if (nodeNameEquals(ele, BEAN_ELEMENT)) {
+            // 解析 bean
+            BeanDefinitionHolder nestedBd = parseBeanDefinitionElement(ele, bd);
+            if (nestedBd != null) {
+                nestedBd = decorateBeanDefinitionIfRequired(ele, nestedBd, bd);
+            }
+            return nestedBd;
+        }
+        else if (nodeNameEquals(ele, REF_ELEMENT)) {
+            // A generic reference to any name of any bean.
+            // 获取ref 属性值
+            String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
+            boolean toParent = false;
+            if (!StringUtils.hasLength(refName)) {
+                // A reference to the id of another bean in a parent context.
+                refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+                toParent = true;
+                if (!StringUtils.hasLength(refName)) {
+                    error("'bean' or 'parent' is required for <ref> element", ele);
+                    return null;
+                }
+            }
+            if (!StringUtils.hasText(refName)) {
+                error("<ref> element contains empty target attribute", ele);
+                return null;
+            }
+            RuntimeBeanReference ref = new RuntimeBeanReference(refName, toParent);
+            ref.setSource(extractSource(ele));
+            return ref;
+        }
+        // 解析 idref标签
+        else if (nodeNameEquals(ele, IDREF_ELEMENT)) {
+            return parseIdRefElement(ele);
+        }
+        // 解析 value 标签
+        else if (nodeNameEquals(ele, VALUE_ELEMENT)) {
+            return parseValueElement(ele, defaultValueType);
+        }
+        // 解析 null
+        else if (nodeNameEquals(ele, NULL_ELEMENT)) {
+            // It's a distinguished null value. Let's wrap it in a TypedStringValue
+            // object in order to preserve the source location.
+            TypedStringValue nullHolder = new TypedStringValue(null);
+            nullHolder.setSource(extractSource(ele));
+            return nullHolder;
+        }
+        // 解析 array
+        else if (nodeNameEquals(ele, ARRAY_ELEMENT)) {
+            return parseArrayElement(ele, bd);
+        }
+        // 解析 list
+        else if (nodeNameEquals(ele, LIST_ELEMENT)) {
+            return parseListElement(ele, bd);
+        }
+        //  解析 set
+        else if (nodeNameEquals(ele, SET_ELEMENT)) {
+            return parseSetElement(ele, bd);
+        }
+        // 解析 map
+        else if (nodeNameEquals(ele, MAP_ELEMENT)) {
+            return parseMapElement(ele, bd);
+        }
+        // 解析 props
+        else if (nodeNameEquals(ele, PROPS_ELEMENT)) {
+            return parsePropsElement(ele);
+        }
+        else {
+            error("Unknown property sub-element: [" + ele.getNodeName() + "]", ele);
+            return null;
+        }
+    }
+```
+
+```XML
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean name="obj" class="com.huifer.source.spring.bean.JavaObjectTest">
+        <constructor-arg>
+            <list value-type="java.lang.String">
+                <value>jasl</value>
+                <value>acg</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean name="obj2" class="com.huifer.source.spring.bean.JavaObjectTest">
+        <constructor-arg>
+            <map>
+                <entry value-type="java.lang.String" key="h" value="k"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+</beans>
+```
+
+- 先看一个list解析
+
+
+
+### parseListElement
+
+- list , set , array 处理逻辑相似
+
+```java
+public List<Object> parseListElement(Element collectionEle, @Nullable BeanDefinition bd) {
+        // 获取 value-type 标签数据
+        String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+        NodeList nl = collectionEle.getChildNodes();
+        ManagedList<Object> target = new ManagedList<>(nl.getLength());
+        target.setSource(extractSource(collectionEle));
+        target.setElementTypeName(defaultElementType);
+        target.setMergeEnabled(parseMergeAttribute(collectionEle));
+        // 解析集合标签
+        parseCollectionElements(nl, target, bd, defaultElementType);
+        return target;
+    }
+```
+
+
+
+
+
+### parseMapElement
+
+```java
+public Map<Object, Object> parseMapElement(Element mapEle, @Nullable BeanDefinition bd) {
+        // 获取  key-type 属性
+        String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
+        //  获取 value-type 属性
+        String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+        // 获取 map 下级标签
+        List<Element> entryEles = DomUtils.getChildElementsByTagName(mapEle, ENTRY_ELEMENT);
+        ManagedMap<Object, Object> map = new ManagedMap<>(entryEles.size());
+        map.setSource(extractSource(mapEle));
+        map.setKeyTypeName(defaultKeyType);
+        map.setValueTypeName(defaultValueType);
+        map.setMergeEnabled(parseMergeAttribute(mapEle));
+
+        for (Element entryEle : entryEles) {
+            // Should only have one value child element: ref, value, list, etc.
+            // Optionally, there might be a key child element.
+            NodeList entrySubNodes = entryEle.getChildNodes();
+            Element keyEle = null;
+            Element valueEle = null;
+            for (int j = 0; j < entrySubNodes.getLength(); j++) {
+                Node node = entrySubNodes.item(j);
+                if (node instanceof Element) {
+                    Element candidateEle = (Element) node;
+                    if (nodeNameEquals(candidateEle, KEY_ELEMENT)) {
+                        if (keyEle != null) {
+                            error("<entry> element is only allowed to contain one <key> sub-element", entryEle);
+                        }
+                        else {
+                            keyEle = candidateEle;
+                        }
+                    }
+                    else {
+                        // Child element is what we're looking for.
+                        if (nodeNameEquals(candidateEle, DESCRIPTION_ELEMENT)) {
+                            // the element is a <description> -> ignore it
+                        }
+                        else if (valueEle != null) {
+                            error("<entry> element must not contain more than one value sub-element", entryEle);
+                        }
+                        else {
+                            valueEle = candidateEle;
+                        }
+                    }
+                }
+            }
+
+            // Extract key from attribute or sub-element.
+            Object key = null;
+            // 是否存在 key 属性
+            boolean hasKeyAttribute = entryEle.hasAttribute(KEY_ATTRIBUTE);
+            // 是否存在 key-ref 属性
+            boolean hasKeyRefAttribute = entryEle.hasAttribute(KEY_REF_ATTRIBUTE);
+            if ((hasKeyAttribute && hasKeyRefAttribute) ||
+                    (hasKeyAttribute || hasKeyRefAttribute) && keyEle != null) {
+                error("<entry> element is only allowed to contain either " +
+                        "a 'key' attribute OR a 'key-ref' attribute OR a <key> sub-element", entryEle);
+            }
+            if (hasKeyAttribute) {
+                // 获取 key 值
+                key = buildTypedStringValueForMap(entryEle.getAttribute(KEY_ATTRIBUTE), defaultKeyType, entryEle);
+            }
+            else if (hasKeyRefAttribute) {
+                // 获取 key-ref 属性值
+                String refName = entryEle.getAttribute(KEY_REF_ATTRIBUTE);
+                if (!StringUtils.hasText(refName)) {
+                    error("<entry> element contains empty 'key-ref' attribute", entryEle);
+                }
+                RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+                ref.setSource(extractSource(entryEle));
+                key = ref;
+            }
+            else if (keyEle != null) {
+                key = parseKeyElement(keyEle, bd, defaultKeyType);
+            }
+            else {
+                error("<entry> element must specify a key", entryEle);
+            }
+
+            // Extract value from attribute or sub-element.
+            Object value = null;
+            // 是否存在 value 标签
+            boolean hasValueAttribute = entryEle.hasAttribute(VALUE_ATTRIBUTE);
+            // 是否存在 value-ref 标签
+            boolean hasValueRefAttribute = entryEle.hasAttribute(VALUE_REF_ATTRIBUTE);
+            // 是否存在 value-type 标签
+            boolean hasValueTypeAttribute = entryEle.hasAttribute(VALUE_TYPE_ATTRIBUTE);
+            if ((hasValueAttribute && hasValueRefAttribute) ||
+                    (hasValueAttribute || hasValueRefAttribute) && valueEle != null) {
+                error("<entry> element is only allowed to contain either " +
+                        "'value' attribute OR 'value-ref' attribute OR <value> sub-element", entryEle);
+            }
+            if ((hasValueTypeAttribute && hasValueRefAttribute) ||
+                    (hasValueTypeAttribute && !hasValueAttribute) ||
+                    (hasValueTypeAttribute && valueEle != null)) {
+                error("<entry> element is only allowed to contain a 'value-type' " +
+                        "attribute when it has a 'value' attribute", entryEle);
+            }
+            if (hasValueAttribute) {
+                //   获取 value-type值
+                String valueType = entryEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
+                if (!StringUtils.hasText(valueType)) {
+                    valueType = defaultValueType;
+                }
+                // 构造value
+                value = buildTypedStringValueForMap(entryEle.getAttribute(VALUE_ATTRIBUTE), valueType, entryEle);
+            }
+            else if (hasValueRefAttribute) {
+                //  获取 value-ref 属性值
+                String refName = entryEle.getAttribute(VALUE_REF_ATTRIBUTE);
+                if (!StringUtils.hasText(refName)) {
+                    error("<entry> element contains empty 'value-ref' attribute", entryEle);
+                }
+                RuntimeBeanReference ref = new RuntimeBeanReference(refName);
+                ref.setSource(extractSource(entryEle));
+                value = ref;
+            }
+            else if (valueEle != null) {
+                // 继续解析下级标签
+                value = parsePropertySubElement(valueEle, bd, defaultValueType);
+            }
+            else {
+                error("<entry> element must specify a value", entryEle);
+            }
+
+            // Add final key and value to the Map.
+            //  设置 map 值
+            map.put(key, value);
+        }
+
+        return map;
+    }
+```
+
+
+
+
+
+
+
+
+
 ## parsePropertyElements
 
 ```java
