@@ -1,7 +1,7 @@
 # Spring-BeanDefinitionParserDelegate
 - Author: [HuiFer](https://github.com/huifer)
 - 源码路径: `org.springframework.beans.factory.xml.BeanDefinitionParserDelegate`
-- 源码阅读仓库: [huifer-spring](https://github.com/huifer/spring-framework)
+- 源码阅读仓库: [huifer-spring](https://github.com/huifer/spring-framework-read)
 - 该类的作用是将标签解析出来
 
 

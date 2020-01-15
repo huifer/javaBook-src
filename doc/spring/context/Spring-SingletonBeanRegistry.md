@@ -1,6 +1,6 @@
 # Spring SingletonBeanRegistry
 - Author: [HuiFer](https://github.com/huifer)
-- 源码阅读仓库: [huifer-spring](https://github.com/huifer/spring-framework)
+- 源码阅读仓库: [huifer-spring](https://github.com/huifer/spring-framework-read)
 
 ## SingletonBeanRegistry
 - `org.springframework.beans.factory.config.SingletonBeanRegistry`
