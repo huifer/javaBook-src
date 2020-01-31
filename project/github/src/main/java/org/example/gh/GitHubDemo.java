@@ -18,21 +18,36 @@ import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 
+/**
+ * token 限制
+ */
 public class GitHubDemo {
     public static void main(String[] args) throws IOException {
         String user = "huifer";
         List<Repository> repositories = getUserRepoList(user);
         System.out.println("仓库获取完成");
         List<CountRepoResult> countRepoResults = new ArrayList<CountRepoResult>();
-        for (Repository repository : repositories) {
-            String repoName = repository.getName();
+        // 不可控原因只能写死几个库了.
+        List<String> rs = new ArrayList<String>();
+
+        rs.add("record_oneself");
+        rs.add("javaBook-src");
+        rs.add("spring-framework-read");
+        rs.add("dubbo-read");
+        rs.add("source-code-hunter");
+
+
+//        for (Repository repository : repositories) {
+        for (String repoName : rs) {
+//            String repoName = repository.getName();
             RepoCommitsInfo repoCommitsInfo = getOneRepoCommits(user, repoName);
             System.out.println("当前仓库提交信息获取完成");
             int countOneRepo = countOneRepo(repoCommitsInfo);
             System.out.println("开始组装结果集合");
             CountRepoResult countRepoResult = new CountRepoResult();
             countRepoResult.setDate(getYearMonth());
-            countRepoResult.setUrl(repository.getCloneUrl());
+//            countRepoResult.setUrl(repository.getCloneUrl());
+            countRepoResult.setUrl("");
             countRepoResult.setRepoName(repoName);
             countRepoResult.setCount(countOneRepo);
             System.out.println(countRepoResult);
@@ -54,8 +69,7 @@ public class GitHubDemo {
             fileWritter.write(content);
             fileWritter.close();
             System.out.println("finish");
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -70,6 +84,7 @@ public class GitHubDemo {
 
     /**
      * 统计,每个月提交数量
+     *
      * @param repoCommitsInfo 仓库提交信息
      */
     private static int countOneRepo(RepoCommitsInfo repoCommitsInfo) {
@@ -82,7 +97,7 @@ public class GitHubDemo {
             Date createTime = commitsInfo.getCreateTime();
             long createTimeTime = createTime.getTime();
             // 创建时间小于等于当月结束时间,创建时间大于等于当月开始时间
-            if (monthStartTime <= createTimeTime || createTimeTime <= monthEndTime) {
+            if (monthEndTime <= createTimeTime || monthStartTime <= createTimeTime) {
                 count++;
             }
         }
@@ -133,6 +148,7 @@ public class GitHubDemo {
 
     /**
      * 单个仓库个人提交数量记录
+     *
      * @param userName 用户名
      * @param repoName 仓库名
      * @return
@@ -159,12 +175,15 @@ public class GitHubDemo {
         }
         repoCommitsInfo.setCommitsInfoList(commitsInfos);
         // 写文件
-        write(getYearMonth() + repoName + "记录", JSON.toJSONString(commitsInfos));
+        if (!commitsInfos.isEmpty()) {
+            write(getYearMonth() + repoName + "记录", JSON.toJSONString(commitsInfos));
+        }
         return repoCommitsInfo;
     }
 
     /**
      * 获取仓库信息
+     *
      * @param userName 用户名
      * @return
      * @throws IOException
