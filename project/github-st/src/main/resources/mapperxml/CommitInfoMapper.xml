@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.githubst.mapper.CommitInfoMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.githubst.entity.CommitInfo">
+    <!--@mbg.generated-->
+    <!--@Table commit_info-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="sha" jdbcType="VARCHAR" property="sha" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="message" jdbcType="VARCHAR" property="message" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="date" jdbcType="TIMESTAMP" property="date" />
+    <result column="additions" jdbcType="INTEGER" property="additions" />
+    <result column="deletions" jdbcType="INTEGER" property="deletions" />
+    <result column="total" jdbcType="INTEGER" property="total" />
+      <result column="repo_name" jdbcType="VARCHAR" property="repoName"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, sha, url, message, `name`, email, `date`, additions, deletions, total,repo_name
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from commit_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from commit_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.huifer.githubst.entity.CommitInfo" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into commit_info (sha, url, message, 
+      `name`, email, `date`, 
+      additions, deletions, total,repo_name
+      )
+    values (#{sha,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{date,jdbcType=TIMESTAMP}, 
+      #{additions,jdbcType=INTEGER}, #{deletions,jdbcType=INTEGER}, #{total,jdbcType=INTEGER},#{repoName,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.huifer.githubst.entity.CommitInfo" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into commit_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="sha != null">
+        sha,
+      </if>
+      <if test="url != null">
+        url,
+      </if>
+      <if test="message != null">
+        message,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="date != null">
+        `date`,
+      </if>
+      <if test="additions != null">
+        additions,
+      </if>
+      <if test="deletions != null">
+        deletions,
+      </if>
+      <if test="total != null">
+        total,
+      </if>
+        <if test="repoName != null and repoName != ''"
+            >
+            repo_name,
+        </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="sha != null">
+        #{sha,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="message != null">
+        #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="date != null">
+        #{date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="additions != null">
+        #{additions,jdbcType=INTEGER},
+      </if>
+      <if test="deletions != null">
+        #{deletions,jdbcType=INTEGER},
+      </if>
+      <if test="total != null">
+        #{total,jdbcType=INTEGER},
+      </if>
+        <if test="repoName != null and repoName != ''">
+            #{repoName,jdbcType=VARCHAR},
+        </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huifer.githubst.entity.CommitInfo">
+    <!--@mbg.generated-->
+    update commit_info
+    <set>
+      <if test="sha != null">
+        sha = #{sha,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="message != null">
+        message = #{message,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="date != null">
+        `date` = #{date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="additions != null">
+        additions = #{additions,jdbcType=INTEGER},
+      </if>
+      <if test="deletions != null">
+        deletions = #{deletions,jdbcType=INTEGER},
+      </if>
+      <if test="total != null">
+        total = #{total,jdbcType=INTEGER},
+      </if>
+        <if test="repoName != null and repoName != ''">
+            repo_name=#{repoName,jdbcType=VARCHAR},
+        </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huifer.githubst.entity.CommitInfo">
+    <!--@mbg.generated-->
+    update commit_info
+    set sha = #{sha,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR},
+      message = #{message,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      `date` = #{date,jdbcType=TIMESTAMP},
+      additions = #{additions,jdbcType=INTEGER},
+      deletions = #{deletions,jdbcType=INTEGER},
+      total = #{total,jdbcType=INTEGER},
+      repo_name=#{repoName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
