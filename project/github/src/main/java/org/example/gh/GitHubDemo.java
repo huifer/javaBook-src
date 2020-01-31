@@ -158,6 +158,8 @@ public class GitHubDemo {
             }
         }
         repoCommitsInfo.setCommitsInfoList(commitsInfos);
+        // 写文件
+        write(getYearMonth() + repoName + "记录", JSON.toJSONString(commitsInfos));
         return repoCommitsInfo;
     }
 
