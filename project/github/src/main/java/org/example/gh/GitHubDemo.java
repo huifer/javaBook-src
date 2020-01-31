@@ -14,50 +14,82 @@ import com.alibaba.fastjson.JSON;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.RepositoryId;
+import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.RepositoryService;
-
 
 /**
  * token 限制
  */
+
+
 public class GitHubDemo {
-    public static void main(String[] args) throws IOException {
-        String user = "huifer";
-        List<Repository> repositories = getUserRepoList(user);
-        System.out.println("仓库获取完成");
-        List<CountRepoResult> countRepoResults = new ArrayList<CountRepoResult>();
-        // 不可控原因只能写死几个库了.
-        List<String> rs = new ArrayList<String>();
+    public static void main(String[] args) throws Exception {
+        GitHubClient client = new GitHubClient();
+        client.setCredentials("xxxx", "xxx");
+        RepositoryService repositoryService = new RepositoryService();
 
-        rs.add("record_oneself");
-        rs.add("javaBook-src");
-        rs.add("spring-framework-read");
-        rs.add("dubbo-read");
-        rs.add("source-code-hunter");
-
-
-//        for (Repository repository : repositories) {
-        for (String repoName : rs) {
-//            String repoName = repository.getName();
-            RepoCommitsInfo repoCommitsInfo = getOneRepoCommits(user, repoName);
-            System.out.println("当前仓库提交信息获取完成");
-            int countOneRepo = countOneRepo(repoCommitsInfo);
-            System.out.println("开始组装结果集合");
+        CommitService commitService = new CommitService(client);
+        String yearMonth = getYearMonth();
+        List<CountRepoResult> results = new ArrayList<CountRepoResult>();
+        for (Repository repository : repositoryService.getRepositories("huifer")) {
+            System.out.println("当前仓库=" + repository.getName());
+//        Repository repository = repositoryService.getRepository("huifer", "spring-framework-read");
             CountRepoResult countRepoResult = new CountRepoResult();
-            countRepoResult.setDate(getYearMonth());
-//            countRepoResult.setUrl(repository.getCloneUrl());
-            countRepoResult.setUrl("");
-            countRepoResult.setRepoName(repoName);
-            countRepoResult.setCount(countOneRepo);
-            System.out.println(countRepoResult);
-            countRepoResults.add(countRepoResult);
+            int size = 25;
+            List<CommitsInfo> commitsInfos = new ArrayList<CommitsInfo>();
+            for (Collection<RepositoryCommit> commits : commitService.pageCommits(repository,
+                    size)) {
+                for (RepositoryCommit commit : commits) {
+                    String sha = commit.getSha().substring(0, 7);
+                    String author = commit.getCommit().getAuthor().getName();
+                    Date date = commit.getCommit().getAuthor().getDate();
+                    String message = commit.getCommit().getMessage();
+                    CommitsInfo commitsInfo = new CommitsInfo();
+                    commitsInfo.setSha(sha);
+                    commitsInfo.setAuthor(author);
+                    commitsInfo.setCreateTime(date);
+                    commitsInfo.setMesg(message);
+                    commitsInfos.add(commitsInfo);
+                }
+            }
+            write(yearMonth + "-info-" + repository.getName(), JSON.toJSONString(commitsInfos));
+            countRepoResult.setUrl(repository.getCloneUrl());
+            countRepoResult.setDate(yearMonth);
+            countRepoResult.setRepoName(repository.getName());
+            countRepoResult.setCount(commitsInfos.size());
+            write(yearMonth + "-result-" + repository.getName(), JSON.toJSONString(countRepoResult));
+            results.add(countRepoResult);
         }
-        if (!countRepoResults.isEmpty()) {
-            String s = JSON.toJSONString(countRepoResults);
-            write(countRepoResults.get(0).getDate(), s);
-        }
+        write(yearMonth, JSON.toJSONString(results));
+
+
+        System.out.println();
     }
+//    public static void main(String[] args) throws IOException {
+//        String user = "huifer";
+//        List<Repository> repositories = getUserRepoList(user);
+//        System.out.println("仓库获取完成");
+//        List<CountRepoResult> countRepoResults = new ArrayList<CountRepoResult>();
+//        for (Repository repository : repositories) {
+//            String repoName = repository.getName();
+//            RepoCommitsInfo repoCommitsInfo = getOneRepoCommits(user, repoName);
+//            System.out.println("当前仓库提交信息获取完成");
+//            int countOneRepo = countOneRepo(repoCommitsInfo);
+//            System.out.println("开始组装结果集合");
+//            CountRepoResult countRepoResult = new CountRepoResult();
+//            countRepoResult.setDate(getYearMonth());
+//            countRepoResult.setUrl(repository.getCloneUrl());
+//            countRepoResult.setRepoName(repoName);
+//            countRepoResult.setCount(countOneRepo);
+//            System.out.println(countRepoResult);
+//            countRepoResults.add(countRepoResult);
+//        }
+//        if (!countRepoResults.isEmpty()) {
+//            String s = JSON.toJSONString(countRepoResults);
+//            write(countRepoResults.get(0).getDate(), s);
+//        }
+//    }
 
     private static void write(String path, String content) {
         try {
@@ -69,7 +101,8 @@ public class GitHubDemo {
             fileWritter.write(content);
             fileWritter.close();
             System.out.println("finish");
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -84,7 +117,6 @@ public class GitHubDemo {
 
     /**
      * 统计,每个月提交数量
-     *
      * @param repoCommitsInfo 仓库提交信息
      */
     private static int countOneRepo(RepoCommitsInfo repoCommitsInfo) {
@@ -97,7 +129,7 @@ public class GitHubDemo {
             Date createTime = commitsInfo.getCreateTime();
             long createTimeTime = createTime.getTime();
             // 创建时间小于等于当月结束时间,创建时间大于等于当月开始时间
-            if (monthEndTime <= createTimeTime || monthStartTime <= createTimeTime) {
+            if (monthStartTime <= createTimeTime || createTimeTime <= monthEndTime) {
                 count++;
             }
         }
@@ -148,7 +180,6 @@ public class GitHubDemo {
 
     /**
      * 单个仓库个人提交数量记录
-     *
      * @param userName 用户名
      * @param repoName 仓库名
      * @return
@@ -174,16 +205,11 @@ public class GitHubDemo {
             }
         }
         repoCommitsInfo.setCommitsInfoList(commitsInfos);
-        // 写文件
-        if (!commitsInfos.isEmpty()) {
-            write(getYearMonth() + repoName + "记录", JSON.toJSONString(commitsInfos));
-        }
         return repoCommitsInfo;
     }
 
     /**
      * 获取仓库信息
-     *
      * @param userName 用户名
      * @return
      * @throws IOException
@@ -301,6 +327,8 @@ public class GitHubDemo {
 
         private Date createTime;
 
+        private String mesg;
+
         public CommitsInfo() {
         }
 
@@ -312,11 +340,20 @@ public class GitHubDemo {
 
         @Override
         public String toString() {
-            return "Commiter{" +
+            return "CommitsInfo{" +
                     "sha='" + sha + '\'' +
                     ", author='" + author + '\'' +
                     ", createTime=" + createTime +
+                    ", mesg='" + mesg + '\'' +
                     '}';
+        }
+
+        public String getMesg() {
+            return mesg;
+        }
+
+        public void setMesg(String mesg) {
+            this.mesg = mesg;
         }
 
         public String getSha() {
@@ -345,3 +382,4 @@ public class GitHubDemo {
     }
 
 }
+
