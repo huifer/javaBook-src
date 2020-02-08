@@ -59,6 +59,7 @@ public class ICommitServiceImpl implements ICommitService {
                         commitInfo.setName(commit.getCommit().getCommitter().getName());
                         commitInfo.setEmail(commit.getCommit().getCommitter().getEmail());
                         commitInfo.setDate(commit.getCommit().getCommitter().getDate());
+                        commitInfo.setRepoName(repository.getName());
                         if (commit.getStats() != null) {
 
                             commitInfo.setAdditions(commit.getStats().getAdditions());
