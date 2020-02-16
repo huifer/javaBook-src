@@ -72,6 +72,8 @@ public class ICommitServiceImpl implements ICommitService {
                         }
                         try {
                             this.commitInfoMapper.insert(commitInfo);
+                            System.out.println("插入");
+                            System.out.println(commitInfo);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

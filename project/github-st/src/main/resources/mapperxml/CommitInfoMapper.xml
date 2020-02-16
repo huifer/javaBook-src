@@ -38,7 +38,7 @@
       `name`, email, `date`, 
       additions, deletions, total,repo_name
       )
-    values (#{sha,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{message,jdbcType=VARCHAR}, 
+    values (#{sha,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}, #{message,jdbcType=LONGVARCHAR},
       #{name,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{date,jdbcType=TIMESTAMP}, 
       #{additions,jdbcType=INTEGER}, #{deletions,jdbcType=INTEGER}, #{total,jdbcType=INTEGER},#{repoName,jdbcType=VARCHAR}
       )
