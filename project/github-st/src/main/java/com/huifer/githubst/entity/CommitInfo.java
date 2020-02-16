@@ -26,4 +26,21 @@ public class CommitInfo {
 
     private Integer total;
     private String repoName;
+
+    @Override
+    public String toString() {
+        return "CommitInfo{" +
+                "id=" + id +
+                ", sha='" + sha + '\'' +
+                ", url='" + url + '\'' +
+                ", message='" + message + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", date=" + date +
+                ", additions=" + additions +
+                ", deletions=" + deletions +
+                ", total=" + total +
+                ", repoName='" + repoName + '\'' +
+                '}';
+    }
 }
