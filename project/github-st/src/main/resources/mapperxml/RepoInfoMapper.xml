@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huifer.githubst.mapper.RepoInfoMapper">
+  <resultMap id="BaseResultMap" type="com.huifer.githubst.entity.RepoInfo">
+    <!--@mbg.generated-->
+    <!--@Table repo_info-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
+    <result column="pushed_at" jdbcType="TIMESTAMP" property="pushedAt" />
+    <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt" />
+    <result column="forks" jdbcType="INTEGER" property="forks" />
+    <result column="size" jdbcType="INTEGER" property="size" />
+    <result column="watchers" jdbcType="INTEGER" property="watchers" />
+    <result column="clone_url" jdbcType="VARCHAR" property="cloneUrl" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="homepage" jdbcType="VARCHAR" property="homepage" />
+    <result column="git_url" jdbcType="VARCHAR" property="gitUrl" />
+    <result column="html_url" jdbcType="VARCHAR" property="htmlUrl" />
+    <result column="language" jdbcType="VARCHAR" property="language" />
+    <result column="master_branch" jdbcType="VARCHAR" property="masterBranch" />
+    <result column="mirror_url" jdbcType="VARCHAR" property="mirrorUrl" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="ssh_url" jdbcType="VARCHAR" property="sshUrl" />
+    <result column="svn_url" jdbcType="VARCHAR" property="svnUrl" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, created_at, pushed_at, updated_at, forks, `size`, watchers, clone_url, description, 
+    homepage, git_url, html_url, `language`, master_branch, mirror_url, `name`, ssh_url, 
+    svn_url, url
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from repo_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from repo_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.huifer.githubst.entity.RepoInfo" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into repo_info (created_at, pushed_at, updated_at, 
+      forks, `size`, watchers, 
+      clone_url, description, homepage, 
+      git_url, html_url, `language`, 
+      master_branch, mirror_url, `name`, 
+      ssh_url, svn_url, url
+      )
+    values (#{createdAt,jdbcType=TIMESTAMP}, #{pushedAt,jdbcType=TIMESTAMP}, #{updatedAt,jdbcType=TIMESTAMP}, 
+      #{forks,jdbcType=INTEGER}, #{size,jdbcType=INTEGER}, #{watchers,jdbcType=INTEGER}, 
+      #{cloneUrl,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{homepage,jdbcType=VARCHAR}, 
+      #{gitUrl,jdbcType=VARCHAR}, #{htmlUrl,jdbcType=VARCHAR}, #{language,jdbcType=VARCHAR}, 
+      #{masterBranch,jdbcType=VARCHAR}, #{mirrorUrl,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{sshUrl,jdbcType=VARCHAR}, #{svnUrl,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.huifer.githubst.entity.RepoInfo" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into repo_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="createdAt != null">
+        created_at,
+      </if>
+      <if test="pushedAt != null">
+        pushed_at,
+      </if>
+      <if test="updatedAt != null">
+        updated_at,
+      </if>
+      <if test="forks != null">
+        forks,
+      </if>
+      <if test="size != null">
+        `size`,
+      </if>
+      <if test="watchers != null">
+        watchers,
+      </if>
+      <if test="cloneUrl != null">
+        clone_url,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="homepage != null">
+        homepage,
+      </if>
+      <if test="gitUrl != null">
+        git_url,
+      </if>
+      <if test="htmlUrl != null">
+        html_url,
+      </if>
+      <if test="language != null">
+        `language`,
+      </if>
+      <if test="masterBranch != null">
+        master_branch,
+      </if>
+      <if test="mirrorUrl != null">
+        mirror_url,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="sshUrl != null">
+        ssh_url,
+      </if>
+      <if test="svnUrl != null">
+        svn_url,
+      </if>
+      <if test="url != null">
+        url,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="createdAt != null">
+        #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pushedAt != null">
+        #{pushedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedAt != null">
+        #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="forks != null">
+        #{forks,jdbcType=INTEGER},
+      </if>
+      <if test="size != null">
+        #{size,jdbcType=INTEGER},
+      </if>
+      <if test="watchers != null">
+        #{watchers,jdbcType=INTEGER},
+      </if>
+      <if test="cloneUrl != null">
+        #{cloneUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="homepage != null">
+        #{homepage,jdbcType=VARCHAR},
+      </if>
+      <if test="gitUrl != null">
+        #{gitUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="htmlUrl != null">
+        #{htmlUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="language != null">
+        #{language,jdbcType=VARCHAR},
+      </if>
+      <if test="masterBranch != null">
+        #{masterBranch,jdbcType=VARCHAR},
+      </if>
+      <if test="mirrorUrl != null">
+        #{mirrorUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sshUrl != null">
+        #{sshUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="svnUrl != null">
+        #{svnUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        #{url,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.huifer.githubst.entity.RepoInfo">
+    <!--@mbg.generated-->
+    update repo_info
+    <set>
+      <if test="createdAt != null">
+        created_at = #{createdAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="pushedAt != null">
+        pushed_at = #{pushedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updatedAt != null">
+        updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      </if>
+      <if test="forks != null">
+        forks = #{forks,jdbcType=INTEGER},
+      </if>
+      <if test="size != null">
+        `size` = #{size,jdbcType=INTEGER},
+      </if>
+      <if test="watchers != null">
+        watchers = #{watchers,jdbcType=INTEGER},
+      </if>
+      <if test="cloneUrl != null">
+        clone_url = #{cloneUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="homepage != null">
+        homepage = #{homepage,jdbcType=VARCHAR},
+      </if>
+      <if test="gitUrl != null">
+        git_url = #{gitUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="htmlUrl != null">
+        html_url = #{htmlUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="language != null">
+        `language` = #{language,jdbcType=VARCHAR},
+      </if>
+      <if test="masterBranch != null">
+        master_branch = #{masterBranch,jdbcType=VARCHAR},
+      </if>
+      <if test="mirrorUrl != null">
+        mirror_url = #{mirrorUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="sshUrl != null">
+        ssh_url = #{sshUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="svnUrl != null">
+        svn_url = #{svnUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.huifer.githubst.entity.RepoInfo">
+    <!--@mbg.generated-->
+    update repo_info
+    set created_at = #{createdAt,jdbcType=TIMESTAMP},
+      pushed_at = #{pushedAt,jdbcType=TIMESTAMP},
+      updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+      forks = #{forks,jdbcType=INTEGER},
+      `size` = #{size,jdbcType=INTEGER},
+      watchers = #{watchers,jdbcType=INTEGER},
+      clone_url = #{cloneUrl,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      homepage = #{homepage,jdbcType=VARCHAR},
+      git_url = #{gitUrl,jdbcType=VARCHAR},
+      html_url = #{htmlUrl,jdbcType=VARCHAR},
+      `language` = #{language,jdbcType=VARCHAR},
+      master_branch = #{masterBranch,jdbcType=VARCHAR},
+      mirror_url = #{mirrorUrl,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      ssh_url = #{sshUrl,jdbcType=VARCHAR},
+      svn_url = #{svnUrl,jdbcType=VARCHAR},
+      url = #{url,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

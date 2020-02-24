@@ -1,5 +1,11 @@
 package com.huifer.jdk.serializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 /**
  * <p>Title : MySerializerImpl </p>
  * <p>Description : </p>
@@ -18,9 +24,11 @@ public class MySerializerImpl implements MySerializer {
             oos.writeObject(obj);
             return bos.toByteArray();
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             if (oos != null) {
                 oos.close();
             }
@@ -37,11 +45,14 @@ public class MySerializerImpl implements MySerializer {
         try {
             ois = new ObjectInputStream(bis);
             return (T) ois.readObject();
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e) {
             e.printStackTrace();
-        } finally {
+        }
+        finally {
             if (ois != null) {
                 ois.close();
             }
