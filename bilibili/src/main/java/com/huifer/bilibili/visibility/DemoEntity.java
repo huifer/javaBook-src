@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class DemoEntity extends SuperDisplay implements ShowData {
+public class DemoEntity extends SuperDisplay  {
 
     private String name;
 
@@ -40,19 +40,5 @@ public class DemoEntity extends SuperDisplay implements ShowData {
         this.age = age;
     }
 
-    @Override
-    public Object display(List<String> displayFiled) throws IllegalAccessException {
-        HashMap<String, Object> result = new HashMap<>();
-        Field[] declaredFields = this.getClass().getDeclaredFields();
-        for (Field declaredField : declaredFields) {
-            String name = declaredField.getName();
-            // 在显示字段中
-            if (displayFiled.contains(name)) {
-                declaredField.setAccessible(true);
-                Object resultValue = declaredField.get(this);
-                result.put(name, resultValue);
-            }
-        }
-        return result;
-    }
+
 }

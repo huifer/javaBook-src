@@ -1,28 +1,29 @@
 package com.huifer.bilibili.redis.impl;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.alibaba.fastjson.JSON;
 import com.huifer.bilibili.redis.BookCacheService;
 import com.huifer.bilibili.redis.JedisFactory;
 import com.huifer.bilibili.redis.entity.BookEntity;
 import redis.clients.jedis.Jedis;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class BookCacheServiceImpl implements BookCacheService {
     public static final String BOOK_CACHE_KEY = "BOOK_CACHE_KEY";
+
     Jedis conn = JedisFactory.conn();
 
     public static void main(String[] args) {
         BookCacheServiceImpl bookCacheService = new BookCacheServiceImpl();
         BookEntity bookEntity = new BookEntity();
-        bookEntity.setId(1);
-        bookEntity.setName("11111111111111111");
+        bookEntity.setId(2);
+        bookEntity.setName("222");
         bookEntity.setPrice(new BigDecimal("0"));
         bookEntity.setCount(0);
 
-        bookCacheService.update(bookEntity);
+        bookCacheService.add(bookEntity);
 //        bookCacheService.delete(bookEntity);
     }
 

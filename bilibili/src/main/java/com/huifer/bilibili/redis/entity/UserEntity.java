@@ -18,9 +18,6 @@ public class UserEntity implements StringToEntity<UserEntity> {
         this.id = id;
     }
 
-    public UserEntity convert(String s) {
-        return JSON.parseObject(s, UserEntity.class);
-    }
 
     public String toJson() {
         return JSON.toJSONString(this);

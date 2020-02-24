@@ -59,9 +59,6 @@ public class BookEntity implements StringToEntity<BookEntity> {
 
     }
 
-    public BookEntity convert(String s) {
-        return JSON.parseObject(s, BookEntity.class);
-    }
 
     public String toJson() {
         return JSON.toJSONString(this);

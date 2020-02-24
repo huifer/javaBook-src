@@ -1,5 +1,7 @@
 package com.huifer.bilibili.redis;
 
+import java.util.List;
+
 import com.huifer.bilibili.redis.base.CacheService;
 import com.huifer.bilibili.redis.entity.UserEntity;
 import com.huifer.bilibili.redis.entity.bo.UserInfo;
