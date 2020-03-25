@@ -33,3 +33,10 @@ From https://github.com/doocs/source-code-hunter
 ```shell script
 git merge other_master/master
 ```
+
+
+
+## 获取远端的 tag
+git fetch upstream tag v5.2.5.RELEASE
+## 将本地的tag 推送到远端
+git push origin --tags
