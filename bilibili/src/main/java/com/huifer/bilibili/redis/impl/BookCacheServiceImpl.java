@@ -11,7 +11,7 @@ import com.huifer.bilibili.redis.entity.BookEntity;
 import redis.clients.jedis.Jedis;
 
 public class BookCacheServiceImpl implements BookCacheService {
-    public static final String BOOK_CACHE_KEY = "BOOK_CACHE_KEY";
+    public static final String BOOK_CACHE_KEY = "BOOK_CACHE_KEY:2";
 
     Jedis conn = JedisFactory.conn();
 
