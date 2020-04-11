@@ -27,10 +27,27 @@ public class Test {
 //        lazyTest3();
 //        lazy4Test();
 
-        registerTest();
+        hungryTest2();
 
 //        enumTest();
 //        serializableTest();
+    }
+    private static void hungryTest2() {
+        CountDownLatch latch = new CountDownLatch(count);
+
+        for (int i = 0; i < count; i++) {
+            new Thread(() -> {
+                try {
+                    latch.await();
+                    Lazy4 instance = Lazy4.getInstance();
+                    System.out.println(System.currentTimeMillis() + " : " + instance);
+                } catch (Exception e) {
+
+                }
+            }).start();
+            latch.countDown();
+        }
+
     }
 
 
