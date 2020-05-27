@@ -2,6 +2,14 @@ package org.huifer.rbac.entity.res;
 
 import java.util.Objects;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+
+@Data
+@EqualsAndHashCode
 public class Result<T> {
     private String msg;
 
