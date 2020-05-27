@@ -1,5 +1,7 @@
 package org.huifer.rbac.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -16,9 +18,11 @@ import org.huifer.rbac.entity.req.user.UserBindRoleReq;
 import org.huifer.rbac.entity.req.user.UserEditorReq;
 import org.huifer.rbac.entity.req.user.UserQueryReq;
 import org.huifer.rbac.entity.res.Result;
+import org.huifer.rbac.entity.res.user.UserQueryRes;
 import org.huifer.rbac.mapper.TUserMapper;
 import org.huifer.rbac.service.IUserService;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -70,21 +74,35 @@ public class IUserServiceImpl implements IUserService {
     }
 
     @Override
-    public Result<Page<TUser>> query(UserQueryReq req, PageReq pageReq) {
-        Page<TUser> page = new Page<>(pageReq.getNum(), pageReq.getSize());
+    public Result<Page<UserQueryRes>> query(UserQueryReq req, PageReq pageReq) {
+        Page<> page = new Page<>(pageReq.getNum(), pageReq.getSize());
 
         QueryWrapper<TUser> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq(TUser.COL_USER_NAME, req.getUsername());
+        if (StringUtils.isNotBlank(req.getUsername())) {
+            queryWrapper.like(TUser.COL_USER_NAME, req.getUsername());
+        }
         queryWrapper.orderByDesc(TUser.COL_CREATE_TIME);
 
-        Page<TUser> tUserPage = this.userMapper.selectPage(page, queryWrapper);
+        Page tUserPage = this.userMapper.selectPage(page, queryWrapper);
+        List<UserQueryRes> res = new ArrayList<>();
 
+        List records = tUserPage.getRecords();
+        for (TUser record : records) {
+            UserQueryRes userQueryRes = new UserQueryRes();
+            BeanUtils.copyProperties(record, userQueryRes);
+            res.add(userQueryRes);
+        }
+        tUserPage.setRecords(res);
         return OkResult.QUERY.to(tUserPage);
     }
 
     @Override
     public Result<Boolean> add(UserAddReq req) {
-        int insert = userMapper.insert(req.convert());
+        TUser convert = req.convert();
+        convert.setCreateTime(LocalDateTime.now());
+        convert.setUpdateTime(LocalDateTime.now());
+        // todo: 2020/5/27 设置create_user
+        int insert = userMapper.insert(convert);
         return (insert > 0) ? OkResult.INSERT.to(Boolean.TRUE) : ErrorResult.INSERT.to(Boolean.FALSE);
     }
 }

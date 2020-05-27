@@ -21,7 +21,7 @@ public class UserAddReq implements Convert<TUser> {
     private String username;
 
     @NotEmpty(message = "密码不能为空")
-    @Pattern(regexp = "[a-zA-Z0-9]{6,12}", message = "密码请输入英文和数字作为组合")
+    @Pattern(regexp = "[a-zA-Z0-9]{6,12}", message = "密码请输入英文数字作为组合")
     @Length(min = 6, max = 12, message = "密码请在 6-12 位之间")
     private String password;
 

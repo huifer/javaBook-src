@@ -1,5 +1,6 @@
 package org.huifer.rbac.controller;
 
+
 import javax.validation.Valid;
 
 import org.huifer.rbac.entity.req.IdsReq;
@@ -13,6 +14,7 @@ import org.huifer.rbac.service.IUserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,10 +39,10 @@ public class UserController {
         return userService.add(req);
     }
 
-    @PostMapping("/query")
+    @PostMapping(value = "/query" , produces = MediaType.APPLICATION_JSON_VALUE)
     public Result query(
-            @RequestBody @Validated UserQueryReq req,
-            @RequestBody @Validated PageReq pageReq
+            @RequestBody @Valid    UserQueryReq req,
+             @Validated PageReq pageReq
     ) {
 
         return userService.query(req, pageReq);

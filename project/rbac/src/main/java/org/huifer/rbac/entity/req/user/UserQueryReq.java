@@ -9,4 +9,8 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 public class UserQueryReq {
     private String username;
+
+    public UserQueryReq(String username) {
+        this.username = username;
+    }
 }

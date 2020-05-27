@@ -9,6 +9,7 @@ import org.huifer.rbac.entity.req.user.UserBindRoleReq;
 import org.huifer.rbac.entity.req.user.UserEditorReq;
 import org.huifer.rbac.entity.req.user.UserQueryReq;
 import org.huifer.rbac.entity.res.Result;
+import org.huifer.rbac.entity.res.user.UserQueryRes;
 
 public interface IUserService {
     Result<Boolean> settingRole(UserBindRoleReq req);
@@ -17,7 +18,7 @@ public interface IUserService {
 
     Result<Boolean> editor(UserEditorReq req);
 
-    Result<Page<TUser>> query(UserQueryReq req, PageReq pageReq);
+    Result<Page<UserQueryRes>> query(UserQueryReq req, PageReq pageReq);
 
     Result<Boolean> add(UserAddReq req);
 }
