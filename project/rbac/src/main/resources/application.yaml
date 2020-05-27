@@ -29,4 +29,9 @@ spring:
   redis:
     database: 11
     host: localhost
-    port: 32768
+    port: 6379
+
+  
+  gson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialize-nulls: true
