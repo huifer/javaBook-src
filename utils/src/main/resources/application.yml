@@ -4,9 +4,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driverClassName: com.mysql.jdbc.Driver
-    url:
-    username:
-    password:
+    url: jdbc:mysql://localhost:3306/douyu?serverTimezone=UTC&rewriteBatchedStatements=true&useUnicode=true&characterEncoding=utf8
+    username: root
+    password: root
   jackson:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
@@ -14,3 +14,5 @@ spring:
 # Mybatis配置
 mybatis:
   mapperLocations: classpath:mapper/**/*.xml
+server:
+  port: 9009
