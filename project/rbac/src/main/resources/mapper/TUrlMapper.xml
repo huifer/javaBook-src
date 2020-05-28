@@ -6,6 +6,7 @@
     <!--@Table rbac.t_url-->
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="url" jdbcType="VARCHAR" property="url" />
+	  <result column="context" jdbcType="VARCHAR" property="context"/>
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="create_user" jdbcType="BIGINT" property="createUser" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
@@ -15,6 +16,6 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, url, create_time, create_user, update_time, update_user, version, is_delete
+    id, url,context, create_time, create_user, update_time, update_user, version, is_delete
   </sql>
 </mapper>

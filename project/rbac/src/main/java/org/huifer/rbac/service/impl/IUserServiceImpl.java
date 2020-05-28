@@ -37,7 +37,6 @@ public class IUserServiceImpl implements IUserService {
 
     @Override
     public Result<Boolean> settingRole(UserBindRoleReq req) {
-
         return null;
     }
 

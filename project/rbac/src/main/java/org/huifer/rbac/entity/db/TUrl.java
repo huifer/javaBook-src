@@ -1,13 +1,13 @@
 package org.huifer.rbac.entity.db;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.baomidou.mybatisplus.annotation.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +21,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @TableName(value = "rbac.t_url")
 public class TUrl implements Serializable {
+    public static final String COL_ID = "id";
+
+    public static final String COL_URL = "url";
+
+    public static final String COL_CONTEXT = "context";
+
+    public static final String COL_CREATE_TIME = "create_time";
+
+    public static final String COL_CREATE_USER = "create_user";
+
+    public static final String COL_UPDATE_TIME = "update_time";
+
+    public static final String COL_UPDATE_USER = "update_user";
+
+    public static final String COL_VERSION = "version";
+
+    public static final String COL_IS_DELETE = "is_delete";
+
+    private static final long serialVersionUID = 1L;
+
     /**
      * 主键
      */
@@ -32,6 +52,9 @@ public class TUrl implements Serializable {
      */
     @TableField(value = "url")
     private String url;
+
+    @TableField(value = "context")
+    private String context;
 
     /**
      * 创建时间
@@ -70,22 +93,4 @@ public class TUrl implements Serializable {
     @TableField(value = "is_delete")
     @TableLogic
     private Integer isDelete;
-
-    private static final long serialVersionUID = 1L;
-
-    public static final String COL_ID = "id";
-
-    public static final String COL_URL = "url";
-
-    public static final String COL_CREATE_TIME = "create_time";
-
-    public static final String COL_CREATE_USER = "create_user";
-
-    public static final String COL_UPDATE_TIME = "update_time";
-
-    public static final String COL_UPDATE_USER = "update_user";
-
-    public static final String COL_VERSION = "version";
-
-    public static final String COL_IS_DELETE = "is_delete";
 }
