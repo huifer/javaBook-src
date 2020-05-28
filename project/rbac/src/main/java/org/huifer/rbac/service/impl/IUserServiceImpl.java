@@ -1,9 +1,5 @@
 package org.huifer.rbac.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,9 +17,13 @@ import org.huifer.rbac.entity.res.Result;
 import org.huifer.rbac.entity.res.user.UserQueryRes;
 import org.huifer.rbac.mapper.TUserMapper;
 import org.huifer.rbac.service.IUserService;
-
+import org.huifer.rbac.utils.Md5Util;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service("userService")
@@ -63,7 +63,7 @@ public class IUserServiceImpl implements IUserService {
                     tUser.setUserName(req.getUsername());
                 }
                 if (StringUtils.isNotBlank(req.getPassword())) {
-                    tUser.setPassword(req.getPassword());
+                    tUser.setPassword(Md5Util.MD5(req.getPassword()));
                 }
                 int update = this.userMapper.updateById(tUser);
                 return (update > 0) ? OkResult.UPDATE.to(Boolean.TRUE) : ErrorResult.UPDATE.to(Boolean.FALSE);
@@ -75,7 +75,7 @@ public class IUserServiceImpl implements IUserService {
 
     @Override
     public Result<Page<UserQueryRes>> query(UserQueryReq req, PageReq pageReq) {
-        Page<> page = new Page<>(pageReq.getNum(), pageReq.getSize());
+        Page page = new Page<>(pageReq.getNum(), pageReq.getSize());
 
         QueryWrapper<TUser> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotBlank(req.getUsername())) {
@@ -86,7 +86,7 @@ public class IUserServiceImpl implements IUserService {
         Page tUserPage = this.userMapper.selectPage(page, queryWrapper);
         List<UserQueryRes> res = new ArrayList<>();
 
-        List records = tUserPage.getRecords();
+        List<TUser> records = tUserPage.getRecords();
         for (TUser record : records) {
             UserQueryRes userQueryRes = new UserQueryRes();
             BeanUtils.copyProperties(record, userQueryRes);

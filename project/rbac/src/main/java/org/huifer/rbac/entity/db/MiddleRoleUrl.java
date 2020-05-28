@@ -3,9 +3,12 @@ package org.huifer.rbac.entity.db;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,12 +58,14 @@ public class MiddleRoleUrl implements Serializable {
      * 版本
      */
     @TableField(value = "version")
+    @Version
     private Long version;
 
     /**
      * 是否删除标记
      */
     @TableField(value = "is_delete")
+    @TableLogic
     private Integer isDelete;
 
     private static final long serialVersionUID = 1L;
