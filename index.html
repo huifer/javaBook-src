@@ -44,18 +44,6 @@
             crossChapter: true,
             crossChapterText: true
         },
-        markdown: {
-            renderer: {
-                code: function (code, lang) {
-                    if (lang === "mermaid") {
-                        return (
-                            '<div class="mermaid">' + mermaid.render('mermaid-svg-' + num++, code) + "</div>"
-                        );
-                    }
-                    return this.origin.code.apply(this, arguments);
-                }
-            }
-        }
     }
 </script>
 <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
