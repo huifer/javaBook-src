@@ -9,13 +9,15 @@
     <link href="//unpkg.com/docsify/lib/themes/vue.css" rel="stylesheet">
     <link href="//unpkg.com/docsify-dark-mode@0.6.1/dist/style.css" rel="stylesheet"/>
     <link href="//cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.css" rel="stylesheet">
-</head>
+
+    <script src="//unpkg.com/mermaid/dist/mermaid.js"></script>
+    <script src="//unpkg.com/docsify-mermaid@latest/dist/docsify-mermaid.js"/>
+
+    <script>mermaid.initialize({ startOnLoad: true });</script>
 <body>
 <div id="app">本项目由 huifer 进行开发</div>
 <script>
 
-    var num = 0;
-    mermaid.initialize({startOnLoad: false});
 
     window.$docsify = {
         name: 'learn-java',
@@ -69,6 +71,8 @@
 <script src="//unpkg.com/docsify/lib/plugins/zoom-image.js"></script>
 <script src="//unpkg.com/docsify-dark-mode@0.6.1/dist/index.js"></script>
 <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+<script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-java.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/prismjs/components/prism-php.min.js"></script>
 </body>
-</html>
+</head></html>
