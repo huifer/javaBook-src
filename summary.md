@@ -2,9 +2,9 @@
     - [Java 并发](/concurrence/readme.md)
     - [Java 设计模式](/design/readme.md)
         - 创建型模式
-            - 工厂模式
+            - [工厂模式](/design/docs/工厂模式.md)
             - 抽象工厂模式
-            - 单例模式
+            - [单例模式](/design/docs/单例模式.md)
             - 建造者模式
             - 原型模式
         - 结构性模式

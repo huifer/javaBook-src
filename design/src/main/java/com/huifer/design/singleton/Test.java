@@ -16,18 +16,18 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Test {
 
-    public static final int count = 10000;
+    public static final int count = 10;
 
 
     public static void main(String[] args) throws Exception {
         // 测试线程安全
 //        hungryTest();
-//        lazyTest1();
+        lazyTest1();
 //        lazyTest2();
 //        lazyTest3();
 //        lazy4Test();
 
-        hungryTest2();
+//        hungryTest2();
 
 //        enumTest();
 //        serializableTest();
