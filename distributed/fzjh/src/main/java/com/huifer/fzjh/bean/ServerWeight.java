@@ -11,8 +11,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ServerWeight {
-    private int weight;
-    private int currentWeight;
-    private String ip;
-    private int port;
+
+  /**
+   * 权重
+   */
+  private int weight;
+  /**
+   * 当前权重
+   */
+  private int currentWeight;
+  /**
+   * 服务器ip
+   */
+  private String ip;
+  /**
+   * 服务器端口
+   */
+  private int port;
 }
