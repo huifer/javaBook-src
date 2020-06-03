@@ -44,7 +44,7 @@
     - [分布式基础](distributed/认识分布式.md)
     - [分布式ID生成器](distributed/id-gen/readme.md)
     - [心跳机制](distributed/heartbeat/readme.md)
-    - [负载均衡算法](distributed/fzjh/readme.md)
+    - [负载均衡算法](docs/distributed/负载均衡.md)
     - [zookeeper](distributed/zookeeper/readme.md)
     - [RMI详情](distributed/RMI.md)
     - [dubbo](distributed/dubbo/readme.md)
