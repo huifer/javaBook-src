@@ -1,5 +1,8 @@
 # JAVA SRC
+[![Netlify Status](https://api.netlify.com/api/v1/badges/90509a89-27a6-4046-9a80-8e7d2a210026/deploy-status)](https://app.netlify.com/sites/huifer-learn-java/deploys)
 
+- GitHub Pages : https://huifer.github.io/javaBook-src/
+- Netlify : https://huifer-learn-java.netlify.app/
 ## 文章
 ### JAVA 基础
 - [JAVA 并发基础](concurrence/readme.md)
