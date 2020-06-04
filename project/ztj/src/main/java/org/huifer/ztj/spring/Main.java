@@ -1,6 +1,8 @@
 package org.huifer.ztj.spring;
 
 import java.util.EnumSet;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.action.Action;
@@ -13,11 +15,25 @@ public class Main {
   public static void main(String[] args) throws Exception {
     StateMachine<States, Events> stateMachine = buildMachine();
     stateMachine.start();
+
+//    stateMachine.sendEvent(Events.EVENT1);
+
+    Message<Events> user_id = MessageBuilder.withPayload(Events.EVENT1).setHeader("user_id", 100)
+        .build();
+    stateMachine.sendEvent(user_id);
+//    stateMachine.sendEvent(Events.EVENT2);
+    System.out.println("发送事件之后的状态");
+
+    printState(stateMachine);
+
+    System.out.println();
+  }
+
+  private static void printState(StateMachine<States, Events> stateMachine) {
     State<States, Events> state = stateMachine.getState();
 
-    stateMachine.sendEvent(Events.EVENT1);
-//    stateMachine.sendEvent(Events.EVENT2);
-    System.out.println();
+    States id = state.getId();
+    System.out.println(id);
   }
 
 
@@ -37,10 +53,10 @@ public class Main {
       @Override
       public void execute(
           StateContext<States, Events> context) {
-        State<States, Events> target = context.getTarget();
-        State<States, Events> source = context.getSource();
-        System.out.println(target.getId());
-        System.out.println(context);
+        // todo: 做状态变更的事情
+        Object user_id = context.getMessageHeaders().get("user_id");
+        System.out.println(user_id);
+        System.out.println();
       }
     })
     ;
