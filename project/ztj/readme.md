@@ -71,6 +71,7 @@ import org.springframework.statemachine.config.StateMachineBuilder;
 - withStates: 状态相关设置
 
 ## 实战
+### 基本用例
 - 设置状态信息
 
 ```java
@@ -303,4 +304,128 @@ public class Main {
   }
 }
 
+```
+
+- 执行结果
+
+```text
+发送事件之后的状态
+STATE2
+
+```
+
+- 条件引入 guard 
+
+```java
+public static StateMachine<States, Events> buildMachine() throws Exception {
+    Builder<States, Events> builder = StateMachineBuilder.builder();
+
+    builder.configureStates()
+        .withStates()
+        .initial(States.STATE1)
+        .end(States.STATE3)
+        .states(EnumSet.allOf(States.class))
+    ;
+    builder.configureTransitions()
+        .withExternal()
+        .source(States.STATE1).target(States.STATE2)
+        .event(Events.EVENT1)
+        .guard(new Guard<States, Events>() {
+          @Override
+          public boolean evaluate(
+              StateContext<States, Events> context) {
+            return false;
+          }
+        })
+
+        .action(new Action<States, Events>() {
+      @Override
+      public void execute(
+          StateContext<States, Events> context) {
+        // todo: 做状态变更的事情
+        Object user_id = context.getMessageHeaders().get("user_id");
+        System.out.println(user_id);
+        System.out.println();
+      }
+    })
+    ;
+
+    return builder.build();
+  }
+```
+
+- 输出结果
+
+```text
+发送事件之后的状态
+STATE1
+```
+
+观察输出结果可以发现状态没有变成 STATE1 说明生效. 有关 context 的属性就不一一列举
+
+
+
+### withInternal
+- 做了什么以后失败了状态设置成为上一个状态
+
+```java
+ public static void main(String[] args) throws Exception {
+    StateMachine<States, Events> stateMachine = buildWithInternal();
+    stateMachine.start();
+
+//    stateMachine.sendEvent(Events.EVENT1);
+
+    Message<Events> user_id = MessageBuilder.withPayload(Events.EVENT1).setHeader("user_id", 100)
+        .build();
+    stateMachine.sendEvent(Events.EVENT1);
+//    stateMachine.sendEvent(Events.EVENT2);
+
+    printState(stateMachine);
+    System.out.println();
+  }
+
+  private static void printState(StateMachine<States, Events> stateMachine) {
+    State<States, Events> state = stateMachine.getState();
+    States id = state.getId();
+    System.out.println("发送事件之后的状态");
+    System.out.println(id);
+  }
+
+
+public static StateMachine<States, Events> buildWithInternal() throws Exception {
+    Builder<States, Events> builder = StateMachineBuilder.builder();
+
+    builder.configureStates()
+        .withStates()
+        .initial(States.STATE1)
+        .end(States.STATE3)
+        .states(EnumSet.allOf(States.class))
+    ;
+    builder.configureTransitions()
+      .withExternal()
+        .source(States.STATE1).target(States.STATE2).event(Events.EVENT1)
+        .and()
+        // 做了什么失败了并且吧状态还原
+      .withInternal()
+        .source(States.STATE1).event(Events.EVENT1).action(new Action<States, Events>() {
+      @Override
+      public void execute(
+          StateContext<States, Events> context) {
+        System.out.println("123123123123123123123123132123");
+      }
+    })
+    ;
+
+    return builder.build();
+  }
+```
+
+
+- 解释: 初始状态1 发送了事件xxx后输出 123123123123123123123123132123 
+- 执行结果 
+
+```text
+123123123123123123123123132123
+发送事件之后的状态
+STATE1
 ```
