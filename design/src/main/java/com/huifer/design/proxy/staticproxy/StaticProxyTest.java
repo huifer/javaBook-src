@@ -7,7 +7,7 @@ package com.huifer.design.proxy.staticproxy;
  * @author huifer
  * @date 2019-05-17
  */
-public class StataicProxyTest {
+public class StaticProxyTest {
 
     public static void main(String[] args) {
         Person p = new Person();
