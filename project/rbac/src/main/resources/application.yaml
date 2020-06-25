@@ -6,9 +6,9 @@ mybatis-plus:
   typeAliasesPackage: org.huifer.rbac.entity.db
   global-config:
     db-config:
-      logic-delete-field: flag  #全局逻辑删除字段值 3.3.0开始支持，详情看下面。
-      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
-      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+      logic-delete-field: flag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
 
 
 
@@ -24,7 +24,7 @@ spring:
     max-wait: 10000
     min-idle: 5
     password: root
-    url: jdbc:mysql://localhost:3306/rbac?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://192.168.1.104:3306/rbac?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
   redis:
     database: 11

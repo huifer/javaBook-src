@@ -676,7 +676,7 @@ leader --> follower2: 死亡连接
    
 
 - 监听节点变化情况
-
+~
   ```java
   private void registerWatcher(String path) {
       try {
@@ -700,3 +700,6 @@ leader --> follower2: 死亡连接
   ```java
   curatorFramework.getChildren().forPath(path);
   ```
+  
+  
+  
