@@ -5,6 +5,7 @@
             - [工厂模式](/docs/design/创建型模式/工厂模式.md)
             - [抽象工厂模式](/docs/design/创建型模式/抽象工厂模式.md)
             - [单例模式](/docs/design/创建型模式/单例模式.md)
+                - [单例拓展](./docs/design/创建型模式/单例拓展.md)
             - [建造者模式](/docs/design/创建型模式/建造者模式.md)
             - [原型模式](/docs/design/创建型模式/原型模式.md)
         - 结构性模式
