@@ -9,6 +9,7 @@
 - 创建一个线程名称
 - 获取一个线程名称
 #### Thread
+
 ```java
 public class HelloThread extends Thread {
 
@@ -28,11 +29,14 @@ public class HelloThread extends Thread {
 }
 ```
 - 运行结果
+
 ```text
 hello Thread
 测试线程名称
 ```
+
 #### Runnable
+
 ```java
 public class HelloRunnable {
 
@@ -50,13 +54,16 @@ public class HelloRunnable {
     }
 }
 ```
+
 - 运行结果
+
 ```text
 hello runnable
 测试线程
 ```
 
 ### 线程状态
+
 - java.lang.Thread.State 有这个枚举定义
 - NEW:线程没有执行
 - RUNNABLE:线程在JVM中执行
@@ -67,7 +74,9 @@ hello runnable
 - 通过 java.lang.Thread.getState() 方法获取
 
 ### 线程优先级
+
 - 最大优先级、最小优先级、默认优先级
+
 ```java
  /**
      * The minimum priority that a thread can have.
@@ -87,9 +96,11 @@ hello runnable
      */
     public final static int MAX_PRIORITY = 10;
 ```
+
 - 设置优先级
 - java.lang.Thread.setPriority 方法
 - 参数值在1-10之间
+
 ```java
     public final void setPriority(int newPriority) {
         ThreadGroup g;
@@ -107,8 +118,10 @@ hello runnable
 ```
 
 ### 守护线程 & 非守护线程
+
 - java.lang.Thread.setDaemon() 方法设置守护线程
 - java.lang.Thread.isDaemon() 查看是否是守护线程
+
 
 ```java
     /* Whether or not the thread is a daemon thread. */
@@ -119,6 +132,7 @@ hello runnable
 - java.lang.Thread.start() 方法
 
 ### 完整的一个案例
+
 ```java
 public class ThreadDemo001 {
 
@@ -159,8 +173,11 @@ public class ThreadDemo001 {
 
 }
 ```
+
 ### 其他操作
+
 #### 中断线程 
+
 - java.lang.Thread.interrupt()
 
     - 当线程在阻塞状态中 sleep 或 join 方法,阻塞状态清除
@@ -199,6 +216,7 @@ public class ThreadInterrup {
 
 #### 等待线程
 - java.lang.Thread.join()等待直到线程死亡
+
 ```java
 public class ThreadJoin {
 
@@ -232,7 +250,9 @@ public class ThreadJoin {
 ```
 
 #### 线程睡眠
+
 - java.lang.Thread.sleep(long) 线程睡眠 毫秒
+
 ```java
 public class ThreadSleep {
     public static void main(String[] args) throws InterruptedException {
@@ -300,6 +320,7 @@ public class DataRace {
 ```
 
 - addOneSynchronized 输出
+
 ```text
 线程01 - 操作前 0 操作后 1
 线程01 - 操作前 1 操作后 2
@@ -312,7 +333,9 @@ public class DataRace {
 线程02 - 操作前 8 操作后 9
 线程02 - 操作前 9 操作后 10
 ```
+
 - addOne 输出
+
 ```text
 线程01 - 操作前 0 操作后 1
 线程01 - 操作前 2 操作后 3
@@ -327,6 +350,7 @@ public class DataRace {
 ```
 
 ### 临界区
+
 > 有多个线程试图同时访问临界区，那么在有一个线程进入后其他所有试图访问此临界区的线程将被挂起，并一直持续到进入临界区的线程离开。临界区在被释放后，其他线程可以继续抢占，并以此达到用原子方式操作共享资源的目的。
 ### jvm 中的同步临界区
 - 同步作为jvm的特性,功能在于保证两个或两个以上的线程**不会同时执行相同的临界区**,临界区必须**串行方式**访问
@@ -336,7 +360,9 @@ public class DataRace {
 
 
 ### 同步关键字
+
 - synchronized
+
 ```java
 public class SynchronizedDemo {
 
@@ -374,6 +400,7 @@ class Id {
 
 ### 活跃性问题
 #### 死锁
+
 - 线程1等待线程2持有的资源,线程2等待线程1持有的资源, 资源互斥(每一个资源只有一线程可以操作),导致程序无法正常运行
 ![](pic/死锁.png)
 
@@ -438,14 +465,17 @@ public class DeadlockDemo {
     }
 }
 ```
+
 - 死锁经常出现在: 多个方法间互相调用,形成环形调用
 
 #### 活锁
+
 - 线程持续重试一个失败的操作 ,导致程序无法正常运行
 - 不恰当的例子
   过年，家里有2个孩子一个叫做张三，一个叫做李四，长辈给了张三一个苹果，张三不要给了李四，李四也不要又还给了张三，如此往复
 ![](pic/活锁.png)
 - 代码实例  
+
 ```java
 public class Apple {
 
@@ -597,6 +627,7 @@ public class StarveDemo {
 
 
 #### 针对饿死的平均分配 Fairness
+
 ```java
 public class FairnessDemo {
     private static Object sharedObj = new Object();
@@ -644,6 +675,7 @@ public class FairnessDemo {
 ##### 案例
 - 线程1 初始化变量 ；线程2输出这个变量达到通讯
 
+
 ```java
 public class EZdemo {
 
@@ -668,6 +700,7 @@ public class EZdemo {
 }
 ```
 - 使用while会额外消费cpu资源 , "**Guarded Blocks**"，引出wait() notify()
+
 
 ```java
 public class WaitDemo {
@@ -710,6 +743,8 @@ public class WaitDemo {
 }
 
 ```
+
+
 
 ```java
 public class WaitNotifyDemo {
@@ -779,82 +814,82 @@ public class WaitNotifyDemo {
 
   这段代码出现的问题是仅有第一次修改后读取了数据,并没有持续读取count值
 
-  ```java
-  public class NotVolatileDemo {
-  
-      public static int count;
-  
-      public static void main(String[] args) {
-          Thread t1 = new Thread(() -> {
-              int tem = 0;
-              while (true) {
-                  if (tem != count) {
-                      tem = count;
-                      System.out.println("读取当前值 ：" + count);
-  
-                  }
+```java
+public class NotVolatileDemo {
+
+  public static int count;
+
+  public static void main(String[] args) {
+      Thread t1 = new Thread(() -> {
+          int tem = 0;
+          while (true) {
+              if (tem != count) {
+                  tem = count;
+                  System.out.println("读取当前值 ：" + count);
+
               }
-          });
-          Thread t2 = new Thread(() -> {
-              for (int i = 0; i < 10; i++) {
-                  count++;
-                  System.out.println("修改当前值 ：" + count);
-                  try {
-                      Thread.sleep(5);
-                  } catch (Exception e) {
-                      e.printStackTrace();
-                  }
-  
+          }
+      });
+      Thread t2 = new Thread(() -> {
+          for (int i = 0; i < 10; i++) {
+              count++;
+              System.out.println("修改当前值 ：" + count);
+              try {
+                  Thread.sleep(5);
+              } catch (Exception e) {
+                  e.printStackTrace();
               }
-              // 退出
-              System.exit(0);
-          });
-          t1.start();
-          
-          t2.start();
-      }
-  
+
+          }
+          // 退出
+          System.exit(0);
+      });
+      t1.start();
+      
+      t2.start();
   }
-  ```
+
+}
+```
 
 - 具有volatile修饰来改进
 
-    ```java
-    public class VolatileDemo {
-    
-        public static volatile int count;
-    
-        public static void main(String[] args) {
-            Thread t1 = new Thread(() -> {
-                int tem = 0;
-                while (true) {
-                    if (tem != count) {
-                        tem = count;
-                        System.out.println("读取当前值 ：" + count);
-    
-                    }
+```java
+public class VolatileDemo {
+
+    public static volatile int count;
+
+    public static void main(String[] args) {
+        Thread t1 = new Thread(() -> {
+            int tem = 0;
+            while (true) {
+                if (tem != count) {
+                    tem = count;
+                    System.out.println("读取当前值 ：" + count);
+
                 }
-            });
-            Thread t2 = new Thread(() -> {
-                for (int i = 0; i < 10; i++) {
-                    count++;
-                    System.out.println("修改当前值 ：" + count);
-                    try {
-                        Thread.sleep(5);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-    
+            }
+        });
+        Thread t2 = new Thread(() -> {
+            for (int i = 0; i < 10; i++) {
+                count++;
+                System.out.println("修改当前值 ：" + count);
+                try {
+                    Thread.sleep(5);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                // 退出
-                System.exit(0);
-            });
-            t1.start();
-            t2.start();
-        }
-    
+
+            }
+            // 退出
+            System.exit(0);
+        });
+        t1.start();
+        t2.start();
     }
-    ```
+
+}
+```
 
 #### 总结
 
@@ -889,106 +924,106 @@ public class WaitNotifyDemo {
 
 - 共享数据类SharedObject
 
-  ```java
-  public class SharedObject {
-  
-      private char aChar;
-      private volatile boolean writed = true;
-  
-      public synchronized char getaChar() {
-          while (writed) {
-              try {
-                  wait();
-              } catch (Exception e) {
-                  e.printStackTrace();
-              }
+```java
+public class SharedObject {
+
+  private char aChar;
+  private volatile boolean writed = true;
+
+  public synchronized char getaChar() {
+      while (writed) {
+          try {
+              wait();
+          } catch (Exception e) {
+              e.printStackTrace();
           }
-          this.writed = true;
-          notify();
-          return this.aChar;
       }
-  
-      public synchronized void setaChar(char aChar) {
-          while (!writed) {
-              try {
-                  wait();
-              } catch (Exception e) {
-                  e.printStackTrace();
-              }
-          }
-          this.aChar = aChar;
-          this.writed = false;
-          notify();
-      }
+      this.writed = true;
+      notify();
+      return this.aChar;
   }
-  ```
+
+  public synchronized void setaChar(char aChar) {
+      while (!writed) {
+          try {
+              wait();
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+      this.aChar = aChar;
+      this.writed = false;
+      notify();
+  }
+}
+```
 
   
 
 - 生产者类 Producer
 
-  ```java
-  public class Producer extends Thread {
-  
-      private final SharedObject sharedObject;
-  
-      public Producer(SharedObject sharedObject) {
-          this.sharedObject = sharedObject;
-      }
-  
-      @Override
-      public void run() {
-          for (char i = 'a'; i <= 'f'; i++) {
-  
-              synchronized (sharedObject) {
-  
-                  sharedObject.setaChar(i);
-                  System.out.println("生产数据字符  ：" + i);
-              }
+```java
+public class Producer extends Thread {
+
+  private final SharedObject sharedObject;
+
+  public Producer(SharedObject sharedObject) {
+      this.sharedObject = sharedObject;
+  }
+
+  @Override
+  public void run() {
+      for (char i = 'a'; i <= 'f'; i++) {
+
+          synchronized (sharedObject) {
+
+              sharedObject.setaChar(i);
+              System.out.println("生产数据字符  ：" + i);
           }
       }
   }
-  ```
+}
+```
 
   
 
 - 消费者类Consumer
 
-  ```java
-  public class Consumer extends Thread {
-  
-      private final SharedObject sharedObject;
-  
-      public Consumer(SharedObject sharedObject) {
-          this.sharedObject = sharedObject;
-      }
-  
-      @Override
-      public void run() {
-          char ch;
-          do {
-              synchronized (sharedObject) {
-  
-                  ch = sharedObject.getaChar();
-                  System.out.println("消费者取出数据 " + ch);
-              }
-          } while (ch != 'f');
-      }
+```java
+public class Consumer extends Thread {
+
+  private final SharedObject sharedObject;
+
+  public Consumer(SharedObject sharedObject) {
+      this.sharedObject = sharedObject;
   }
-  ```
+
+  @Override
+  public void run() {
+      char ch;
+      do {
+          synchronized (sharedObject) {
+
+              ch = sharedObject.getaChar();
+              System.out.println("消费者取出数据 " + ch);
+          }
+      } while (ch != 'f');
+  }
+}
+```
 
 - 执行类
 
-  ```java
-  public class Main {
-  
-      public static void main(String[] args) {
-          SharedObject sharedObject = new SharedObject();
-          new Producer(sharedObject).start();
-          new Consumer(sharedObject).start();
-      }
+```java
+public class Main {
+
+  public static void main(String[] args) {
+      SharedObject sharedObject = new SharedObject();
+      new Producer(sharedObject).start();
+      new Consumer(sharedObject).start();
   }
-  ```
+}
+```
 
 
 
@@ -1120,142 +1155,142 @@ public Disruptor(final EventFactory<T> eventFactory,
 
 - `OrderEvent`
 
-  ```java
-  public class OrderEvent implements Serializable {
-  
-  
-      private static final long serialVersionUID = 4026526345323124428L;
-      private int value;
-  
-      public OrderEvent() {
-      }
-  
-      public static long getSerialVersionUID() {
-          return serialVersionUID;
-      }
-  
-      public void setValue(int value) {
-          this.value = value;
-      }
-  
-      public long getValue() {
-          return value;
-      }
-  
-  
-      @Override
-      public String toString() {
-          final StringBuilder sb = new StringBuilder("{");
-          sb.append("\"value\":")
-                  .append(value);
-          sb.append('}');
-          return sb.toString();
-      }
+```java
+public class OrderEvent implements Serializable {
+
+
+  private static final long serialVersionUID = 4026526345323124428L;
+  private int value;
+
+  public OrderEvent() {
   }
-  ```
+
+  public static long getSerialVersionUID() {
+      return serialVersionUID;
+  }
+
+  public void setValue(int value) {
+      this.value = value;
+  }
+
+  public long getValue() {
+      return value;
+  }
+
+
+  @Override
+  public String toString() {
+      final StringBuilder sb = new StringBuilder("{");
+      sb.append("\"value\":")
+              .append(value);
+      sb.append('}');
+      return sb.toString();
+  }
+}
+```
 
 - `OrderEventFactory`
 
-  ```java
-  public class OrderEventFactory implements EventFactory {
-  
-      @Override
-      public Object newInstance() {
-          return new OrderEvent();
-      }
+```java
+public class OrderEventFactory implements EventFactory {
+
+  @Override
+  public Object newInstance() {
+      return new OrderEvent();
   }
-  ```
+}
+```
 
 - `OrderEventHandler`
 
-  ```java
-  public class OrderEventHandler implements EventHandler<OrderEvent> {
-  
-      @Override
-      public void onEvent(OrderEvent orderEvent, long l, boolean b) throws Exception {
-          System.out.println(orderEvent);
-      }
+```java
+public class OrderEventHandler implements EventHandler<OrderEvent> {
+
+  @Override
+  public void onEvent(OrderEvent orderEvent, long l, boolean b) throws Exception {
+      System.out.println(orderEvent);
   }
-  ```
+}
+```
 
 - `OrderEventProducer`
 
-  ```java
-  public class OrderEventProducer {
-  
-      private RingBuffer<OrderEvent> ringBuffer;
-  
-      public OrderEventProducer(RingBuffer<OrderEvent> ringBuffer) {
-          this.ringBuffer = ringBuffer;
-      }
-  
-      public void send(ByteBuffer byteBuffer) {
-          //1.从RingBuffer中获取可用序号
-          long sequence = ringBuffer.next();
-          try {
-              //2. 根据sequence 需要找到一个没有数据内容的 Event
-              OrderEvent orderEvent = ringBuffer.get(sequence);
-              //3. 填充数据
-              orderEvent.setValue(byteBuffer.getInt(0));
-          } finally {
-              //4. 提交数据
-              ringBuffer.publish(sequence);
-          }
-  
-      }
-  
+```java
+public class OrderEventProducer {
+
+  private RingBuffer<OrderEvent> ringBuffer;
+
+  public OrderEventProducer(RingBuffer<OrderEvent> ringBuffer) {
+      this.ringBuffer = ringBuffer;
   }
-  ```
+
+  public void send(ByteBuffer byteBuffer) {
+      //1.从RingBuffer中获取可用序号
+      long sequence = ringBuffer.next();
+      try {
+          //2. 根据sequence 需要找到一个没有数据内容的 Event
+          OrderEvent orderEvent = ringBuffer.get(sequence);
+          //3. 填充数据
+          orderEvent.setValue(byteBuffer.getInt(0));
+      } finally {
+          //4. 提交数据
+          ringBuffer.publish(sequence);
+      }
+
+  }
+
+}
+```
 
 - `Run`
 
-  ```java
-  public class Test {
-  
-      public static void main(String[] args) {
-          OrderEventFactory orderEventFactory = new OrderEventFactory();
-          int ringBufferSize = 1024 * 1024;
-          ExecutorService service = Executors
-                  .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-          /**
-           * com.lmax.disruptor.dsl.Disruptor#Disruptor(com.lmax.disruptor.EventFactory, int, java.util.concurrent.Executor, com.lmax.disruptor.dsl.ProducerType, com.lmax.disruptor.WaitStrategy) 参数说明
-           * 1. orderEventFactory: 创建event 消息工厂
-           * 2. ringBufferSize: 容器大小
-           * 3. service: 线程池
-           * 4. ProducerType: 单生产模式，多生产模式
-           * 5. waitStrategy: 等待策略
-           */
-          // 步骤1：Disruptor实例创建
-          Disruptor<OrderEvent> disruptor = new Disruptor<>(
-                  orderEventFactory,
-                  ringBufferSize,
-                  service,
-                  ProducerType.SINGLE,
-                  new BlockingWaitStrategy()
-          );
-          // 步骤2：添加消费者监听器
-          disruptor.handleEventsWith(new OrderEventHandler());
-          disruptor.start();
-          // 步骤3: 数据生产者
-          // 获取存储数据的实例
-          RingBuffer<OrderEvent> ringBuffer = disruptor.getRingBuffer();
-          ringBuffer.addGatingSequences();
-  
-          OrderEventProducer producer = new OrderEventProducer(ringBuffer);
-  
-          ByteBuffer byteBuffer = ByteBuffer.allocate(8);
-          for (int i = 0; i < 100; i++) {
-              byteBuffer.putInt(0, i);
-              producer.send(byteBuffer);
-          }
-  
-          disruptor.shutdown();
-          service.shutdown();
-  
+```java
+public class Test {
+
+  public static void main(String[] args) {
+      OrderEventFactory orderEventFactory = new OrderEventFactory();
+      int ringBufferSize = 1024 * 1024;
+      ExecutorService service = Executors
+              .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+      /**
+       * com.lmax.disruptor.dsl.Disruptor#Disruptor(com.lmax.disruptor.EventFactory, int, java.util.concurrent.Executor, com.lmax.disruptor.dsl.ProducerType, com.lmax.disruptor.WaitStrategy) 参数说明
+       * 1. orderEventFactory: 创建event 消息工厂
+       * 2. ringBufferSize: 容器大小
+       * 3. service: 线程池
+       * 4. ProducerType: 单生产模式，多生产模式
+       * 5. waitStrategy: 等待策略
+       */
+      // 步骤1：Disruptor实例创建
+      Disruptor<OrderEvent> disruptor = new Disruptor<>(
+              orderEventFactory,
+              ringBufferSize,
+              service,
+              ProducerType.SINGLE,
+              new BlockingWaitStrategy()
+      );
+      // 步骤2：添加消费者监听器
+      disruptor.handleEventsWith(new OrderEventHandler());
+      disruptor.start();
+      // 步骤3: 数据生产者
+      // 获取存储数据的实例
+      RingBuffer<OrderEvent> ringBuffer = disruptor.getRingBuffer();
+      ringBuffer.addGatingSequences();
+
+      OrderEventProducer producer = new OrderEventProducer(ringBuffer);
+
+      ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+      for (int i = 0; i < 100; i++) {
+          byteBuffer.putInt(0, i);
+          producer.send(byteBuffer);
       }
-  
+
+      disruptor.shutdown();
+      service.shutdown();
+
   }
-  ```
+
+}
+```
 
 
 
