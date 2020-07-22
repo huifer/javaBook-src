@@ -28,7 +28,6 @@ public class JdbcTemplate {
         int rowNum = 1;
         while (rs.next()) {
             result.add(rowMapper.mapRow(rs, rowNum++));
-
         }
         return result;
 
