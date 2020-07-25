@@ -8,11 +8,11 @@ public class CreamCakeDecorate extends CakeDecorate {
 
   @Override
   protected String msg() {
-    return super.msg() + "+奶油";
+    return this.baseCake.msg() + "+奶油";
   }
 
   @Override
   protected int price() {
-    return super.price() + 1;
+    return this.baseCake.price() + 1;
   }
 }
