@@ -118,6 +118,9 @@ public class HFDispatcherServlet extends HttpServlet {
 
   }
 
+  /**
+   * 实例化
+   */
   private void instance() {
     if (this.classNameList.isEmpty()) {
       return;
