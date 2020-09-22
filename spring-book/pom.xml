@@ -15,7 +15,19 @@
     </dependency>
   </dependencies>
 
+  <repositories>
+    <repository>
+      <id>spring</id>
+      <url>https://maven.aliyun.com/repository/spring</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
 
+  </repositories>
 
   <build>
     <plugins>
@@ -24,9 +36,8 @@
       <plugin>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.3.7.v20160115</version>
+        <version>9.4.30.v20200611</version>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
