@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+    <html lang="en"  xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>@demo</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<script>
+    function send(message , userList){
+
+    }
+</script>
+<body>
+<div>
+    <h2>写消息</h2>
+    
+
+</div>
+
+
+<div>
+    <h2>未读</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each=" iteam :${unReadList}">
+            <td th:text="${iteam.id}"></td>
+            <td th:text="${iteam.content}"></td>
+            <td > <a th:href="@{/read/{at_id}/{user_id}(at_id=${iteam.id},user_id=${cur_user_id})}" >read </a> </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <h2>已读</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>信息</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each=" iteam :${readList}">
+            <td th:text="${iteam.id}"></td>
+            <td th:text="${iteam.content}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
