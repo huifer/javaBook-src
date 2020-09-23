@@ -1,4 +1,4 @@
-package com.huifer.bilibili.monitoring.intf;
+package com.huifer.bilibili.monitoring.intf.label;
 
 public interface MonitoringInterface<T> {
 

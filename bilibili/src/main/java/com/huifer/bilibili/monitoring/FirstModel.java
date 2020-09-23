@@ -5,6 +5,16 @@ public class FirstModel {
 
 	private SecondModel secondModel;
 
+	private boolean work;
+
+	public boolean isWork() {
+		return work;
+	}
+
+	public void setWork(boolean work) {
+		this.work = work;
+	}
+
 	public String getName() {
 		return name;
 	}
