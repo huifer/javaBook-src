@@ -11,6 +11,7 @@
 
 - 接口抽象
 
+
 ```java
 public interface MonitoringInterface<T> {
 
@@ -39,14 +40,17 @@ public interface MonitoringFieldWork<T> {
 
 ```
 
+
 - 三个接口的作用
     1. MonitoringInterface 整体监控
     1. MonitoringFieldChange 字段变更的监控
     1. MonitoringFieldWork 字段决定行为的监控
     
     
+    
 - 综合前面的需求描述做出一个通用定义. 
     - 传入对象, 通过这个对象去调用 **字段变更监控方法** 和 **字段决定行为的监控方法**
+    
     
     
 ```java
@@ -75,11 +79,14 @@ public class SupperMonitor<T> {
 ```
 
 
+
 - 在这里还可以用工程去创建内部变量**fieldChange**和**fieldWork**
 - 暂且称**SupperMonitor**是一个统筹调用对象.接下来是几个接口的实现
     在实现之前定义出如下两个接口. 用来做类型限定. 
     下面两个接口内部填写的抽象方法是我们需要比较的字段或者需要根据某个字段去做操作的抽象
     将不同的字段处理方案放在两个不同的接口中,将行为逻辑隔离.
+
+
 ```java
 public interface FirstFieldChangeMonitoring extends MonitoringFieldChange<FirstModel> {
 
@@ -103,6 +110,7 @@ public interface FirstFieldWorkMonitoring extends MonitoringFieldWork<FirstModel
 
 
 - 实现以及调用
+
 
 ```java
 public class FirstFieldChangeMonitoringImpl implements MonitoringInterface<FirstModel>, FirstFieldWorkMonitoring, FirstFieldChangeMonitoring {
@@ -157,7 +165,7 @@ public class FirstFieldChangeMonitoringImpl implements MonitoringInterface<First
     
     
     
-```
+```java
 
 public interface SecondFieldWorkMonitoring extends MonitoringFieldWork<SecondModel> {
 	void workByWorkField(boolean work);
