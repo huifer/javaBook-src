@@ -20,7 +20,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.13.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.struts/struts2-core -->
         <dependency>
