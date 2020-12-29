@@ -1,8 +1,8 @@
 ---
-name: Custom issue template
-about: Describe this issue template's purpose here.
+name: 技术问答模板
+about: 技术问答模板
 title: ''
-labels: ''
+labels: bug, Q&A
 assignees: ''
 
 ---
