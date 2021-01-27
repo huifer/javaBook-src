@@ -8,11 +8,11 @@ public class SimpleSingleton {
     }
 
 
-    public synchronized static SimpleSingleton getInstance01() {
+    public static synchronized  SimpleSingleton getInstance01() {
         if (lazy == null) {
             synchronized (SimpleSingleton.class) {
                 if (lazy == null) {
-                    lazy = new SimpleSingleton();
+                    lazy = getLazy();
                 }
             }
         }
@@ -20,11 +20,15 @@ public class SimpleSingleton {
         return lazy;
     }
 
-    public synchronized static SimpleSingleton getInstance() {
+    public static synchronized SimpleSingleton getInstance() {
         if (lazy == null) {
-            lazy = new SimpleSingleton();
+            lazy = getLazy();
         }
 
         return lazy;
+    }
+
+    private static SimpleSingleton getLazy() {
+        return new SimpleSingleton();
     }
 }
