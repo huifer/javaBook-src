@@ -17,12 +17,13 @@ public class TcpHandler extends ChannelInboundHandlerAdapter {
         System.out.println("channel active。。。。。。。。。。。。。");
     }
 
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("服务端接到: " + msg.toString());
-        ctx.channel().writeAndFlush("服务端返回信息: 你好");
-        ctx.close();
-    }
+	@Override
+	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    	// 通道的内容是什么
+		System.out.println("服务端接到: " + msg.toString());
+		ctx.channel().writeAndFlush("服务端返回信息: 你好");
+		ctx.close();
+	}
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
