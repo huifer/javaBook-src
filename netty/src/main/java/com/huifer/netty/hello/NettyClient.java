@@ -55,7 +55,7 @@ public class NettyClient implements Runnable {
                     });
 
             for (int i = 0; i < 3; i++) {
-                ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", 9999).sync();
+                ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", 1010).sync();
                 channelFuture.channel().writeAndFlush(
                         "hello - server " + Thread.currentThread().getName() + " ----> "
                                 + i);
