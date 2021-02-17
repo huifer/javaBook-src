@@ -64,8 +64,6 @@ public class HelloNetty {
 
 接下来我们就来编写这个`SimpleChannelInboundHandler` 
 
-
-
 ```JAVA
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 
@@ -85,5 +83,4 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
 }
 ```
 
-这里我们编写一个返回 `hello netty` 的相关代码，这段代码的主要目的是通过 `ChannelHandlerContext` 对象将一个 `response` 返回
-
+这里我们编写一个返回 `hello netty` 的相关代码，这段代码的主要目的是通过 `ChannelHandlerContext` 对象将一个 `response` 返回，我们现在所编写的 `HttpServerHandler` 它实际上是一个处理器的某一环节，我们真正需要往 `childHandler` 放入的对象是 `ChannelInitializer`的一个子类，在这个类中我们主要实现 `io.netty.channel.ChannelInitializer#initChannel` 方法，在这个方法中会将一些 `ChannelHandler` 初始化，我们编写的 `HttpServerHandler` 就要放在这个方法中
