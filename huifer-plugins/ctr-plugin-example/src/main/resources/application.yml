@@ -1,6 +1,16 @@
 
 server:
   port: 8080
+logging:
+  level:
+    org.springframework.security:
+      - debug
+      - info
+    org.springframework.web: error
+    org.hibernate.SQL: debug
+    org.hibernate.engine.QueryParameters: debug
+    org.hibernate.engine.query.HQLQueryPlan: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
@@ -10,6 +20,8 @@ spring:
   jpa:
     show-sql: true # 默认false，在日志里显示执行的sql语句
     database: mysql
+    format_sql: true
+    use_sql_comments: true
     hibernate.ddl-auto: update #指定为update，每次启动项目检测表结构有变化的时候会新增字段，表不存在时会新建，如果指定create，则每次启动项目都会清空数据并删除表，再新建
     properties.hibernate.dialect: org.hibernate.dialect.MySQL5Dialect
     database-platform: org.hibernate.dialect.MySQL5Dialect
