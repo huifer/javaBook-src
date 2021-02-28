@@ -1,7 +1,6 @@
 package com.github.huifer.ctrpluginexample.entity;
 
 import com.github.huifer.ctrpluginexample.ann.CtrPlugin;
-import com.github.huifer.ctrpluginexample.req.AppAddParam;
 import java.sql.Timestamp;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -10,15 +9,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Version;
-
-@CtrPlugin(uri = "app", insertParamClazz = AppAddParam.class, updateParamClazz = AppAddParam.class)
+@CtrPlugin(uri = "company", insertParamClazz = CompanyEntity.class, updateParamClazz = CompanyEntity.class)
 @Entity
-@Table(name = "app", schema = "rbac", catalog = "")
-public class AppEntity {
+@Table(name = "company", schema = "rbac", catalog = "")
+public class CompanyEntity {
 
     private Long id;
     private String name;
+    private Integer pid;
+    private String address;
     private Long version;
     private Timestamp createTime;
     private Timestamp updateTime;
@@ -49,8 +48,27 @@ public class AppEntity {
     }
 
     @Basic
+    @Column(name = "pid")
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    @Basic
+    @Column(name = "address")
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Basic
     @Column(name = "version")
-    @Version
     public Long getVersion() {
         return version;
     }
@@ -118,40 +136,48 @@ public class AppEntity {
             return false;
         }
 
-        AppEntity appEntity = (AppEntity) o;
+        CompanyEntity that = (CompanyEntity) o;
 
-        if (id != null ? !id.equals(appEntity.id) : appEntity.id != null) {
+        if (id != null ? !id.equals(that.id) : that.id != null) {
             return false;
         }
-        if (name != null ? !name.equals(appEntity.name) : appEntity.name != null) {
+        if (name != null ? !name.equals(that.name) : that.name != null) {
             return false;
         }
-        if (version != null ? !version.equals(appEntity.version) : appEntity.version != null) {
+        if (pid != null ? !pid.equals(that.pid) : that.pid != null) {
             return false;
         }
-        if (createTime != null ? !createTime.equals(appEntity.createTime)
-                : appEntity.createTime != null) {
+        if (address != null ? !address.equals(that.address) : that.address != null) {
             return false;
         }
-        if (updateTime != null ? !updateTime.equals(appEntity.updateTime)
-                : appEntity.updateTime != null) {
+        if (version != null ? !version.equals(that.version) : that.version != null) {
             return false;
         }
-        if (createUser != null ? !createUser.equals(appEntity.createUser)
-                : appEntity.createUser != null) {
+        if (createTime != null ? !createTime.equals(that.createTime) : that.createTime != null) {
             return false;
         }
-        if (updateUser != null ? !updateUser.equals(appEntity.updateUser)
-                : appEntity.updateUser != null) {
+        if (updateTime != null ? !updateTime.equals(that.updateTime) : that.updateTime != null) {
             return false;
         }
-        return deleted != null ? deleted.equals(appEntity.deleted) : appEntity.deleted == null;
+        if (createUser != null ? !createUser.equals(that.createUser) : that.createUser != null) {
+            return false;
+        }
+        if (updateUser != null ? !updateUser.equals(that.updateUser) : that.updateUser != null) {
+            return false;
+        }
+        if (deleted != null ? !deleted.equals(that.deleted) : that.deleted != null) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (pid != null ? pid.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
         result = 31 * result + (version != null ? version.hashCode() : 0);
         result = 31 * result + (createTime != null ? createTime.hashCode() : 0);
         result = 31 * result + (updateTime != null ? updateTime.hashCode() : 0);
