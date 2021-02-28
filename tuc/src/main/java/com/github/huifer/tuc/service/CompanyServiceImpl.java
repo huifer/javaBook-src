@@ -41,17 +41,17 @@ public class CompanyServiceImpl implements CompanyService {
                 List<MiddleRoleAndUserEntity> middleRoleAndUserEntities = new ArrayList<>();
 
                 for (RoleEntity roleEntity : roleEntities) {
-                    // 1. 判断是否在本系统数据库中
-                    boolean b = hasRole(roleEntity);
-                    if (b) {
-                        updateRole(roleEntity);
-                    } else {
-                        Integer id = insertRole(roleEntity);
-                        saveRoleAndOthoerId(id, roleEntity);
-                    }
+//                    // 1. 判断是否在本系统数据库中
+//                    boolean b = hasRole(roleEntity);
+//                    if (b) {
+//                        updateRole(roleEntity);
+//                    } else {
+//                        Integer id = insertRole(roleEntity);
+//                        saveRoleAndOthoerId(id, roleEntity);
+//                    }
 
-                    demoService.handler(roleEntity, RoleEntity.class);
-//                    openmapi.handler(roleEntity);
+//                    demoService.handler(roleEntity, RoleEntity.class);
+                    openmapi.handler(roleEntity);
 
                 }
 
