@@ -18,6 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class DemoController {
 
     Gson gson = new Gson();
+    @PostMapping("/two/{table}")
+    public ResponseEntity<Object> two(
+            @PathVariable(value = "table") String table,
+            @RequestBody Object data
+    ) throws IllegalAccessException, InstantiationException {
+
+        CrudRepoCache crudRepoCache = DemoRunner.crudRepositoryMap.get(table);
+        // 转换成注解上的泛型
+        Object param = gson.fromJson(gson.toJson(data), crudRepoCache.getInsertedClass());
+        Object o = crudRepoCache.getInsertOrUpdateConvertBean().fromInsType(param);
+        Object save = crudRepoCache.getCrudRepository().save(o);
+        return ResponseEntity.ok(save);
+    }
+
 
     @PostMapping("/{table}")
     public ResponseEntity<Object> op(

@@ -1,6 +1,7 @@
 package com.github.huifer.ctrpluginexample.entity;
 
 import com.github.huifer.ctrpluginexample.ann.CtrPlugin;
+import com.github.huifer.ctrpluginexample.api.InsertOrUpdateConvertImpl;
 import com.github.huifer.ctrpluginexample.req.AppAddParam;
 import java.sql.Timestamp;
 import javax.persistence.Basic;
@@ -12,7 +13,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Version;
 
-@CtrPlugin(uri = "app", insertParamClazz = AppAddParam.class, updateParamClazz = AppAddParam.class)
+@CtrPlugin(
+        uri = "app",
+        insertParamClazz = AppAddParam.class,
+        updateParamClazz = AppAddParam.class,
+        INSERT_OR_UPDATE_CONVERT = InsertOrUpdateConvertImpl.class
+)
 @Entity
 @Table(name = "app", schema = "rbac", catalog = "")
 public class AppEntity {

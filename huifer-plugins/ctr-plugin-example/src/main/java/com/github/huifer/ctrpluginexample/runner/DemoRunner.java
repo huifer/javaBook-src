@@ -1,6 +1,7 @@
 package com.github.huifer.ctrpluginexample.runner;
 
 import com.github.huifer.ctrpluginexample.ann.CtrPlugin;
+import com.github.huifer.ctrpluginexample.api.InsertOrUpdateConvert;
 import com.github.huifer.ctrpluginexample.utils.InterfaceReflectUtils;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ public class DemoRunner implements ApplicationRunner, Ordered, ApplicationContex
                         // entity class
                         Class<?> entityClass = interfaceGenericLasses.get(0);
                         CtrPlugin annotation = entityClass.getAnnotation(CtrPlugin.class);
+
                         if (annotation != null) {
                             CrudRepoCache crudRepoCache = new CrudRepoCache(
                                     entityClass,
@@ -57,6 +59,24 @@ public class DemoRunner implements ApplicationRunner, Ordered, ApplicationContex
                                     annotation.updateParamClazz(),
                                     v1
                             );
+
+                            Class<? extends InsertOrUpdateConvert> aClass = annotation
+                                    .INSERT_OR_UPDATE_CONVERT();
+                            crudRepoCache.setInsertOrUpdateConvertClass(aClass);
+                            String[] beanNamesForType = context.getBeanNamesForType(aClass);
+                            // SpringIoC中存在托管的对象
+                            if (beanNamesForType.length > 0) {
+
+                                InsertOrUpdateConvert bean = context.getBean(aClass);
+                                crudRepoCache.setInsertOrUpdateConvertBean(
+                                        bean);
+                            }
+                            // 不存在托管的情况
+                            else {
+                                InsertOrUpdateConvert insertOrUpdateConvert = aClass.newInstance();
+                                crudRepoCache.setInsertOrUpdateConvertBean(
+                                        insertOrUpdateConvert);
+                            }
 
                             crudRepositoryMap.put(annotation.uri(), crudRepoCache);
                         }
@@ -84,6 +104,31 @@ public class DemoRunner implements ApplicationRunner, Ordered, ApplicationContex
         private Class<?> insertedClass;
         private Class<?> updatedClass;
         private CrudRepository crudRepository;
+        private Class<? extends InsertOrUpdateConvert> insertOrUpdateConvertClass;
+        private InsertOrUpdateConvert insertOrUpdateConvertBean;
+
+        public CrudRepoCache(Class<?> self, Class<?> insertedClass, Class<?> updatedClass,
+                CrudRepository crudRepository,
+                Class<InsertOrUpdateConvert> insertOrUpdateConvertClass,
+                InsertOrUpdateConvert insertOrUpdateConvertBean) {
+            this.self = self;
+            this.insertedClass = insertedClass;
+            this.updatedClass = updatedClass;
+            this.crudRepository = crudRepository;
+            this.insertOrUpdateConvertClass = insertOrUpdateConvertClass;
+            this.insertOrUpdateConvertBean = insertOrUpdateConvertBean;
+        }
+
+        public CrudRepoCache(Class<?> self, Class<?> insertedClass, Class<?> updatedClass,
+                CrudRepository crudRepository,
+                Class<InsertOrUpdateConvert> insertOrUpdateConvertClass) {
+            this.self = self;
+            this.insertedClass = insertedClass;
+            this.updatedClass = updatedClass;
+            this.crudRepository = crudRepository;
+            this.insertOrUpdateConvertClass = insertOrUpdateConvertClass;
+        }
+
         public CrudRepoCache(Class<?> self, Class<?> insertedClass, Class<?> updatedClass,
                 CrudRepository crudRepository) {
             this.self = self;

@@ -1,6 +1,7 @@
 package com.github.huifer.ctrpluginexample.entity;
 
 import com.github.huifer.ctrpluginexample.ann.CtrPlugin;
+import com.github.huifer.ctrpluginexample.api.InsertOrUpdateConvertImpl;
 import java.sql.Timestamp;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -9,7 +10,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-@CtrPlugin(uri = "company", insertParamClazz = CompanyEntity.class, updateParamClazz = CompanyEntity.class)
+
+@CtrPlugin(uri = "company", insertParamClazz = CompanyEntity.class, updateParamClazz = CompanyEntity.class,
+        INSERT_OR_UPDATE_CONVERT = InsertOrUpdateConvertImpl.class)
 @Entity
 @Table(name = "company", schema = "rbac", catalog = "")
 public class CompanyEntity {
@@ -165,11 +168,7 @@ public class CompanyEntity {
         if (updateUser != null ? !updateUser.equals(that.updateUser) : that.updateUser != null) {
             return false;
         }
-        if (deleted != null ? !deleted.equals(that.deleted) : that.deleted != null) {
-            return false;
-        }
-
-        return true;
+        return deleted != null ? deleted.equals(that.deleted) : that.deleted == null;
     }
 
     @Override

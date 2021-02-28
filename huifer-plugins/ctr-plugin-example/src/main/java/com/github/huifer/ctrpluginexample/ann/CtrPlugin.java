@@ -1,5 +1,6 @@
 package com.github.huifer.ctrpluginexample.ann;
 
+import com.github.huifer.ctrpluginexample.api.InsertOrUpdateConvert;
 import java.lang.annotation.ElementType;
 
 @java.lang.annotation.Target({ElementType.TYPE})
@@ -13,6 +14,8 @@ public @interface CtrPlugin {
     Class<?> insertParamClazz();
 
     Class<?> updateParamClazz();
+
+    Class<? extends InsertOrUpdateConvert> INSERT_OR_UPDATE_CONVERT();
 
 
 }
