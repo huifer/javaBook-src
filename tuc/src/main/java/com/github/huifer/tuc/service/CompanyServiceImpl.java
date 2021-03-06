@@ -58,6 +58,7 @@ public class CompanyServiceImpl implements CompanyService {
                 for (MiddleRoleAndUserEntity middleRoleAndUserEntity : middleRoleAndUserEntities) {
 //                    openmapi.handler(middleRoleAndUserEntity);
 //                    demoService.handler(middleRoleAndUserEntity, MiddleRoleAndUserEntity.class);
+                  openmapi.handler(middleRoleAndUserEntity);
 
                     boolean b = hasMiddleRoleAndUserEntity(middleRoleAndUserEntity);
                     if (b) {
