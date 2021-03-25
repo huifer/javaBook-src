@@ -15,7 +15,7 @@ public @interface CtrPlugin {
 
     Class<?> updateParamClazz();
 
-    Class<? extends InsertOrUpdateConvert> INSERT_OR_UPDATE_CONVERT();
+    Class<? extends InsertOrUpdateConvert> INSERT_OR_UPDATE_CONVERT() default InsertOrUpdateConvert.class ;
 
 
 }

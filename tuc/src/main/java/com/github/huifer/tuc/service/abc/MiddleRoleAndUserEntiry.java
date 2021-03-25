@@ -33,4 +33,9 @@ public class MiddleRoleAndUserEntiry<T extends AbsData> implements
     public Class<?> type() {
         return MiddleRoleAndUserEntity.class;
     }
+
+  @Override
+  public void handler(MiddleRoleAndUserEntity data) {
+
+  }
 }
