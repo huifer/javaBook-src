@@ -40,7 +40,7 @@
 1. 反射创建
 1. 设置属性
 1. aware 接口调用
-1. BeanPostProcessor， 前值方法 
+1. BeanPostProcessor， 前置方法 
 1. InitializingBean
     1. init-method
 1. BeanPostProcessor , 后置方法
