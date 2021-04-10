@@ -9,7 +9,7 @@
 
 
 
-![img](https://shiro.apache.org/assets/images/ShiroArchitecture.png)
+![img](images/ShiroArchitecture.png)
 
 
 
