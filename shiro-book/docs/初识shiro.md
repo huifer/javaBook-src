@@ -56,16 +56,16 @@ Shiro项目的全名是Apache Shiro，后续简称Shiro，是一个关于安全�
 
 1. **Subject**：主题。一般情况下是用户。
 2. **Security Manager**：安全管理器，它是整个Shiro的核心
-3. **Authenticator**：认证器。
+3. **Authenticator**：认证器，这是证明用户“我是谁”的行为。
    1. **Authentication Strategy**：认证策略。
-4. **Authorizer**：授权器。
+4. **Authorizer**：授权器，这是确认谁有权限访问什么。
 5. **SessionManager**：Session 管理器。
    1. **SessionDAO**：Session 持久操作
 6. **CacheManager**：缓存管理器
 7. **Cryptography**：密码学相关内容，主要负责加密解密。
 8. **Realms**：领域，权限。
 
-在Shiro中主要的对象就是上面八个，在后续的开发过程中会经常使用到，它们组成了Shiro的各种功能
+在Shiro中主要的对象就是上面八个，在后续的开发过程中会经常使用到，它们组成了Shiro的各种功能。
 
 
 
@@ -103,6 +103,10 @@ Shiro项目的全名是Apache Shiro，后续简称Shiro，是一个关于安全�
 2. SecurityManager进行授权判断，具体处理将委托Authorizer类进行。
 3. 在Authorizer处理过程中会依赖Realm相关操作。
 4. Realm检查相关配置。
+
+
+
+
 
 
 
