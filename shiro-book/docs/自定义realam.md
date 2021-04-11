@@ -126,3 +126,136 @@ protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token)
   return  null;
 }
 ```
+
+
+
+
+
+## 密码处理
+
+本节将介绍Shiro中的密码处理。在前文讲述自定义认证的过程中密码是通过明文的方式在代码中直接硬编码编写的，具体可以从下面代码中发现
+
+```java
+SimpleAuthenticationInfo(principal,"admin", getName());
+```
+
+在上述代码中明文存储了admin密码，这样的处理操作是不具备安全性的，需要对其进行修正。在Shiro中提供了处理方案，本节将采用MD5+salt的方式进行密码加密处理，从而提高安全性。首先需要确定密码处理的场景，在实际开发中关于密码的加密处理通常是在账号注册时进行的，下面将围绕账号注册进行相关实践。
+
+第一步：创建一个用于存储用户数据的容器，具体容器如下：
+
+```java
+Map<String, String> userMap = new HashMap<>(16);
+```
+
+在这个容器中key表示用户名，value表示密码。
+
+第二步：制作一个注册用户的方法，具体代码如下：
+
+```java
+public void register(String username, String password) {
+    userMap.put(username, password);
+}
+```
+
+在上述代码中直接将用户名密码保存到了容器中下面需要对其进行改进。首先进行MD5的改进，在Shiro中可以通过Md5Hash这个类进行处理，具体处理操作如下：
+
+```java
+Md5Hash md5Hash2 = new Md5Hash("password");
+String hex = md5Hash2.toHex();
+```
+
+上述代码是一个基本的MD5处理，下面对salt进行实际演示，具体代码如下：
+
+```java
+Md5Hash md5Hash2 = new Md5Hash("password","salt");
+String hex = md5Hash2.toHex();
+```
+
+注意：salt在本例中采用静态变量，实际开发中请采用随机值提高安全性。
+
+在Md5Hash类中还提供了hash散列的具体操作，具体代码如下：
+
+```java
+Md5Hash md5Hash2 = new Md5Hash("password","salt",1024);
+String hex = md5Hash2.toHex();
+```
+
+修改register方法，具体修改后代码如下：
+
+```java
+public void register(String username, String password) {
+  Md5Hash md5Hash = new Md5Hash(password, "salt", 1024);
+  userMap.put(username, md5Hash.toHex());
+}
+```
+
+第三步：实现AuthorizingRealm类，并重写doGetAuthenticationInfo方法，具体实现代码如下：
+
+```java
+@Override
+protected AuthenticationInfo doGetAuthenticationInfo(
+    AuthenticationToken token) throws AuthenticationException {
+    Object principal = token.getPrincipal();
+    String password = this.userMap.get(String.valueOf(principal));
+    if (password != null) {
+        return new SimpleAuthenticationInfo(principal, password, ByteSource.Util.bytes("salt"), getName());
+    }
+    return null;
+}
+
+```
+
+在这段代码中中需要注意的是SimpleAuthenticationInfo构造方法的第三个参数，该参数代表了salt值。
+
+第四步：测试用例编写，具体测试代码如下：
+
+```java
+@Test
+public void testMD5Realm() {
+  DefaultSecurityManager defaultSecurityManager = new DefaultSecurityManager();
+  MD5Realm realm = new MD5Realm();
+
+  HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher("md5");
+  credentialsMatcher.setHashIterations(1024);
+  realm.setCredentialsMatcher(credentialsMatcher);
+
+
+  defaultSecurityManager.setRealm(realm);
+  SecurityUtils.setSecurityManager(defaultSecurityManager);
+  Subject subject = SecurityUtils.getSubject();
+
+  realm.register("admin", "admin");
+  UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken("admin", "admin");
+  subject.login(usernamePasswordToken);
+}
+```
+
+在这段代码中需要关注的代码是下面几行：
+
+```java
+HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher("md5");
+credentialsMatcher.setHashIterations(1024);
+realm.setCredentialsMatcher(credentialsMatcher);
+```
+
+在这三行代码中主要目的是创建一个密码验证器，在这里采用的密码验证器是HashedCredentialsMatcher，具体的算法是md5，hash散列的计算次数是1024，这些内容需要和register方法中的处理相互匹配。
+
+通过上述四个操作就完成了密码的设置密码的验证相关内容，注意在实际开发中salt的数据值应该做到一个用户一个从而提高密码破解难度和安全性。用户表可以包含下面字段：
+
+1. username，用户名。
+2. password，密码，非明文密码，通过加密工具加密后的数据。
+3. salt，盐。
+
+
+
+
+
+
+
+## 授权
+
+本节将对Shiro中关于授权相关内容进行实际演示。在软甲开发中对于授权的定义可以简单理解为谁可以做什么。在授权场景中一般会有下面三个主要对象：
+
+1. Subject，主体，常规情况下是用户。
+2. Resource，资源，常见的资源有菜单，按钮，接口地址。
+3. Permission，权限，常见的权限有可读可写，不可读不可写。
