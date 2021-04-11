@@ -259,3 +259,103 @@ realm.setCredentialsMatcher(credentialsMatcher);
 1. Subject，主体，常规情况下是用户。
 2. Resource，资源，常见的资源有菜单，按钮，接口地址。
 3. Permission，权限，常见的权限有可读可写，不可读不可写。
+
+在授权方式中一般有如下两种权限管理模式：
+
+1. 基于角色的权限控制。
+
+   基于角色的权限控制一般情况下会和role相关联，在现实生活中比较常见的有这样一个例子：超级管理员可以进行访问。
+
+2. 基于资源的权限控制。
+
+   基于资源的权限控制在整体管控粒度中更加细致，一般情况下对资源而言有增删改查操作。
+
+在Shiro中基于资源的权限控制还涉及到权限字符串的一个概念，在Shiro中权限字符串的规则是“资源标识符”+“:”+操作+“:”+“资源标识符”。在这个规则中”:”表示分隔符，资源标识符可以使用“*”进行通配符表达，表示所有。
+
+下面将使用Shiro进行编码实战，本例的授权操作将在MD5Realm类中进行处理，主要重写doGetAuthorizationInfo方法，首先编写基于角色的权限控制代码，具体代码如下：
+
+```java
+@Override
+protected AuthorizationInfo doGetAuthorizationInfo(
+    PrincipalCollection principals) {
+
+  // 主要的身份信息
+  Object primaryPrincipal = principals.getPrimaryPrincipal();
+  log.info("主身份是 =[{}]", primaryPrincipal);
+
+  SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
+  simpleAuthorizationInfo.addRole("admin");
+  simpleAuthorizationInfo.addRole("test");
+  return simpleAuthorizationInfo;
+}
+```
+
+在这段代码中将通过硬编码将两个角色赋予给了SimpleAuthorizationInfo对象，具体通过addRole方法进行设置，在实际开发中需要通过主要的身份信息在数据库中进行查询对应数据在进行复制操作。上述代码对应的测试用例如下：
+
+```java
+@Test
+public void withRole() {
+  DefaultSecurityManager defaultSecurityManager = new DefaultSecurityManager();
+  MD5Realm realm = new MD5Realm();
+  HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher("md5");
+  credentialsMatcher.setHashIterations(1024);
+  realm.setCredentialsMatcher(credentialsMatcher);
+  defaultSecurityManager.setRealm(realm);
+  SecurityUtils.setSecurityManager(defaultSecurityManager);
+  Subject subject = SecurityUtils.getSubject();
+  realm.register("admin", "admin");
+  UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken("admin", "admin");
+  subject.login(usernamePasswordToken);
+  if (subject.isAuthenticated()) {
+    // 1. 基于角色进行授权
+    boolean admin = subject.hasRole("admin");
+    System.out.println(admin);
+  }
+}
+```
+
+下面将编写基于资源的权限控制的代码，具体代码如下：
+
+```java
+@Override
+protected AuthorizationInfo doGetAuthorizationInfo(
+    PrincipalCollection principals) {
+
+  // 主要的身份信息
+  Object primaryPrincipal = principals.getPrimaryPrincipal();
+  log.info("主身份是 =[{}]", primaryPrincipal);
+
+  SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
+  simpleAuthorizationInfo.addStringPermission("user:*:*");
+  return simpleAuthorizationInfo;
+}
+```
+
+在上述代码中通过addStringPermission方法将权限字符串进行设置，这段代码对应的测试用例如下：
+
+```java
+@Test
+public void withPermission(){
+  DefaultSecurityManager defaultSecurityManager = new DefaultSecurityManager();
+  MD5Realm realm = new MD5Realm();
+  HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher("md5");
+  credentialsMatcher.setHashIterations(1024);
+  realm.setCredentialsMatcher(credentialsMatcher);
+  defaultSecurityManager.setRealm(realm);
+  SecurityUtils.setSecurityManager(defaultSecurityManager);
+  Subject subject = SecurityUtils.getSubject();
+  realm.register("admin", "admin");
+  UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken("admin", "admin");
+  subject.login(usernamePasswordToken);
+  if (subject.isAuthenticated()) {
+    boolean user = subject.isPermitted("user:update:01");
+    System.out.println(user);
+  }
+
+}
+```
+
+通过上述两个方法的编写完成了基本的使用，在这里由于是演示用例对性能的要求不高，在实际开发过程中doGetAuthorizationInfo方法的权限查询操作会对数据库产生较大的压力，每当进行一次subject.hasRole方法或者subject.isPermitted方法都将进行一次查询操作，在doGetAuthorizationInfo方法中应该需要对数据进行缓存处理。
+
+
+

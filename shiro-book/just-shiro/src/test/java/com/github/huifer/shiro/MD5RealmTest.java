@@ -22,7 +22,6 @@ public class MD5RealmTest {
     credentialsMatcher.setHashIterations(1024);
     realm.setCredentialsMatcher(credentialsMatcher);
 
-
     defaultSecurityManager.setRealm(realm);
     SecurityUtils.setSecurityManager(defaultSecurityManager);
     Subject subject = SecurityUtils.getSubject();
@@ -42,5 +41,44 @@ public class MD5RealmTest {
     String hex = md5Hash2.toHex();
 
     System.out.println(hex);
+  }
+
+  @Test
+  public void withRole() {
+    DefaultSecurityManager defaultSecurityManager = new DefaultSecurityManager();
+    MD5Realm realm = new MD5Realm();
+    HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher("md5");
+    credentialsMatcher.setHashIterations(1024);
+    realm.setCredentialsMatcher(credentialsMatcher);
+    defaultSecurityManager.setRealm(realm);
+    SecurityUtils.setSecurityManager(defaultSecurityManager);
+    Subject subject = SecurityUtils.getSubject();
+    realm.register("admin", "admin");
+    UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken("admin", "admin");
+    subject.login(usernamePasswordToken);
+    if (subject.isAuthenticated()) {
+      // 1. 基于角色进行授权
+      boolean admin = subject.hasRole("admin");
+      System.out.println(admin);
+    }
+  }
+  @Test
+  public void withPermission(){
+    DefaultSecurityManager defaultSecurityManager = new DefaultSecurityManager();
+    MD5Realm realm = new MD5Realm();
+    HashedCredentialsMatcher credentialsMatcher = new HashedCredentialsMatcher("md5");
+    credentialsMatcher.setHashIterations(1024);
+    realm.setCredentialsMatcher(credentialsMatcher);
+    defaultSecurityManager.setRealm(realm);
+    SecurityUtils.setSecurityManager(defaultSecurityManager);
+    Subject subject = SecurityUtils.getSubject();
+    realm.register("admin", "admin");
+    UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken("admin", "admin");
+    subject.login(usernamePasswordToken);
+    if (subject.isAuthenticated()) {
+      boolean user = subject.isPermitted("user:update:01");
+      System.out.println(user);
+    }
+
   }
 }
