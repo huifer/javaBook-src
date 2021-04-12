@@ -1,4 +1,4 @@
-package com.github.huifer.shiro.boot.shiro;
+package boot.shiro;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
