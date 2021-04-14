@@ -1,6 +1,6 @@
-package boot.config;
+package com.github.huifer.simple.shiro.boot.config;
 
-import com.github.huifer.shiro.boot.shiro.CustomerRealm;
+import com.github.huifer.simple.shiro.boot.shiro.CustomerRealm;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.shiro.realm.Realm;
