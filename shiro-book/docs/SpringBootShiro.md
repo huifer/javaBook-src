@@ -371,6 +371,8 @@ graph TD
 1. 生成随机盐的方法。
 2. 加密密码的方法。
 
+### 加密工具开发
+
 为了处理上述两个方法需要创建一个新的类，类名为EncryptionUtils，该类只用于密码处理工作，下面进行代码编写，首先编写生成随机盐的方法，具体代码如下：
 
 ```java
@@ -396,3 +398,74 @@ return random.ints(leftLimit, rightLimit + 1)
   }
 ```
 
+完成随机盐的生成方法编写和测试后需要进行MD5+盐生成密码的方法编写，具体代码如下：
+
+```java
+public static String genMD5Hash(String password, String salt) {
+  Md5Hash md5Hash = new Md5Hash(password, salt, HASH_ITERATIONS);
+  return md5Hash.toHex();
+}
+```
+
+在这个方法中需要两个参数：
+
+1. password：用户在注册时输入的密码。
+2. salt：盐。
+
+在这个方法中整体处理逻辑就是调用Md5Hash对象的创建过程和toHex方法，该方法对应的测试用例如下：
+
+```
+@Test
+public void testMD5() {
+  String admin = EncryptionUtils.genMD5Hash("admin", "123casad");
+  System.out.println(admin);
+}
+```
+
+
+
+### 用户创建业务开发
+
+
+
+现在基本工具准备完成需要正式为userCreate方法添加具体业务逻辑，实现代码如下：
+
+```java
+@Override
+public boolean userCreate(UserCreateParam param) {
+  String salt = EncryptionUtils.randomSalt(EncryptionUtils.SLAT_LEN);
+  ShiroUserEntity shiroUserEntity = new ShiroUserEntity();
+  shiroUserEntity.setUsername(param.getUsername());
+  shiroUserEntity.setPassword(EncryptionUtils.genMD5Hash(param.getPassword(), salt));
+  shiroUserEntity.setSalt(salt);
+  ShiroUserEntity save = shiroUserRepo.save(shiroUserEntity);
+  return save.getId() > 0;
+}
+```
+
+在业务代码编写完成后需要编写测试用例，具体测试用例代码如下：
+
+```java
+@SpringBootTest(classes = {ShiroApp.class})
+class UserServiceImplTest {
+
+  @Autowired
+  private UserService userService;
+
+  @Test
+  void userCreate() {
+    UserCreateParam userCreateParam = new UserCreateParam();
+    userCreateParam.setUsername("admin");
+    userCreateParam.setPassword("admin");
+
+    boolean b = userService.userCreate(userCreateParam);
+    assert b;
+  }
+}
+```
+
+当执行该测试用例代码后会在数据库中插入数据，具体数据如图所示：
+
+![image-20210415200918796](images/image-20210415200918796.png)
+
+这样就做完了用户创建的业务代码及测试。

@@ -11,5 +11,10 @@ public class EncryptionUtilsTest {
     assert EncryptionUtils.randomSalt(10).length() == 10;
   }
 
+  @Test
+  public void testMD5() {
+    String admin = EncryptionUtils.genMD5Hash("admin", "123casad");
+    System.out.println(admin);
+  }
 
 }
