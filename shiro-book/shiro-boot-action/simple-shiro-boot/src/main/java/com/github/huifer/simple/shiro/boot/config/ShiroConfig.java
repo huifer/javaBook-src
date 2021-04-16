@@ -1,11 +1,14 @@
 package com.github.huifer.simple.shiro.boot.config;
 
 import com.github.huifer.simple.shiro.boot.shiro.CustomerRealm;
+import com.github.huifer.simple.shiro.boot.utils.EncryptionUtils;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +26,15 @@ import org.springframework.context.annotation.Configuration;
 public class ShiroConfig {
 
   @Bean
+  public static DefaultAdvisorAutoProxyCreator getDefaultAdvisorAutoProxyCreator() {
+
+    DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+    defaultAdvisorAutoProxyCreator.setUsePrefix(true);
+
+    return defaultAdvisorAutoProxyCreator;
+  }
+
+  @Bean
   public ShiroFilterFactoryBean shiroFilterFactoryBean(
       @Autowired DefaultWebSecurityManager defaultWebSecurityManager
   ) {
@@ -31,9 +43,10 @@ public class ShiroConfig {
     // 设置限制的资源
     Map<String, String> map = new HashMap<>();
     // 需要进行验证
-    map.put("/authc", "authc");
+    map.put("/**", "authc");
     // 表示资源不需要验证
-    map.put("/anon", "anon");
+    map.put("/user/", "anon");
+    map.put("/user/login", "anon");
     shiroFilterFactoryBean.setFilterChainDefinitionMap(map);
     return shiroFilterFactoryBean;
   }
@@ -48,8 +61,21 @@ public class ShiroConfig {
   }
 
   @Bean
-  public Realm realm() {
-    return new CustomerRealm();
+  public Realm realm(@Autowired HashedCredentialsMatcher credentialsMatcher) {
+    CustomerRealm customerRealm = new CustomerRealm();
+    customerRealm.setCredentialsMatcher(credentialsMatcher);
+    return customerRealm;
   }
+
+
+  @Bean
+  public HashedCredentialsMatcher hashedCredentialsMatcher() {
+    HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
+    hashedCredentialsMatcher.setHashAlgorithmName("md5");
+    hashedCredentialsMatcher.setHashIterations(EncryptionUtils.HASH_ITERATIONS);
+    return hashedCredentialsMatcher;
+  }
+
+
 
 }

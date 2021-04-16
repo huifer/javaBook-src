@@ -15,6 +15,8 @@ public class EncryptionUtilsTest {
   public void testMD5() {
     String admin = EncryptionUtils.genMD5Hash("admin", "123casad");
     System.out.println(admin);
+
+    System.out.println(EncryptionUtils.genMD5Hash("admin", "1Ps7OiJPctRjd"));
   }
 
 }

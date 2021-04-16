@@ -51,7 +51,8 @@ public class MD5Realm extends AuthorizingRealm {
     Object principal = token.getPrincipal();
     String password = this.userMap.get(String.valueOf(principal));
     if (password != null) {
-      return new SimpleAuthenticationInfo(principal, password, ByteSource.Util.bytes("salt"),
+      return new SimpleAuthenticationInfo(principal, password,
+          ByteSource.Util.bytes("salt"),
           getName()
       );
     }

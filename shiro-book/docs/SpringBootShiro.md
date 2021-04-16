@@ -468,4 +468,385 @@ class UserServiceImplTest {
 
 ![image-20210415200918796](images/image-20210415200918796.png)
 
-这样就做完了用户创建的业务代码及测试。
+这样就做完了用户创建的业务代码及测试。最后需要将Controller代码编写完成，Controller代码如下：
+
+```java
+@RestController
+@RequestMapping("/user")
+public class UserController {
+
+  @Autowired
+  private UserService userService;
+
+  @PostMapping("/")
+  public Result userCreate(
+      @RequestBody UserCreateParam param
+  ) {
+    boolean b = userService.userCreate(param);
+
+    return Result.ok("用户创建", b);
+  }
+}
+```
+
+在编写完成这个接口后需要注意，用户注册接口应该是不需要进行权限验证的，当然可能需要进行权限验证，本例用户创建不需要进行权限验证，需要在ShiroFilterFactoryBean的配置中进行说明，配置代码如下：
+
+```java
+@Bean
+public ShiroFilterFactoryBean shiroFilterFactoryBean(
+    @Autowired DefaultWebSecurityManager defaultWebSecurityManager
+) {
+  ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
+  shiroFilterFactoryBean.setSecurityManager(defaultWebSecurityManager);
+  // 设置限制的资源
+  Map<String, String> map = new HashMap<>();
+  // 需要进行验证
+  map.put("/authc", "authc");
+  // 表示资源不需要验证
+ map.put("/anon", "anon");
+ map.put("/user/", "anon");
+  shiroFilterFactoryBean.setFilterChainDefinitionMap(map);
+  return shiroFilterFactoryBean;
+}
+```
+
+此时发送如下请求，具体请求信息如下：
+
+```
+POST http://localhost:8080/user/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+```
+
+请求返回数据如下：
+
+```
+POST http://localhost:8080/user/
+
+HTTP/1.1 200 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Fri, 16 Apr 2021 04:56:41 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+{
+  "code": 200,
+  "msg": "用户创建",
+  "data": true
+}
+```
+
+此时数据库就会增加一条数据，现在对于用户创建的接口以及处理完成。
+
+
+
+
+
+### 用户角色资源数据查询开发
+
+在用户创建完成后需要进行绑定数据查询，在前文提到用户的绑定数据有角色和资源，本节将实现这两个数据的查询。首先实现角色查询，角色查询在UserService中定义如下接口方法：
+
+```java
+List<String> queryRolesForUsername(String username);
+```
+
+在接口方法定义完成后着手实现该方法，首先确认查询流程，在本例中查询流程需要通过用户名查询用户id，在根据用户id查询Role的数据，分步编写两个JPA查询规则，首先是根据用户名查询用户id，具体代码如下：
+
+```java
+@Repository
+public interface ShiroUserRepo extends CrudRepository<ShiroUserEntity, Integer> {
+  Optional<ShiroUserEntity> findShiroUserEntityByUsername(String username);
+}
+```
+
+其次是编写根据用户id查询Role的数据，具体代码如下：
+
+```java
+@Repository
+public interface ShiroRoleRepo extends JpaRepository<ShiroRoleEntity, Integer> {
+
+  @Query(value = "select * from shiro_role where id in (select role_id from user_bind_role where user_id = :user_id)",
+  nativeQuery = true)
+  List<ShiroRoleEntity> queryByUserId(@Param("user_id") Integer userId);
+}
+```
+
+通过上述代码完成role对象的查询，下面将实现资源数据查询，具体实现代码如下：
+
+```java
+@Repository
+public interface ShiroResourcesRepo extends CrudRepository<ShiroResourcesEntity, Integer> {
+  @Query(
+      value = "select * from shiro_resources where id in (select resource_id from user_bind_resource where user_id = :user_id)",
+      nativeQuery = true)
+  List<ShiroResourcesEntity> queryByUserId(@Param("user_id") Integer userId);
+
+}
+```
+
+完成SQL编写后在项目中将缺少的方法补充完整，具体代码如下：
+
+```java
+@Override
+public List<String> queryRolesForUsername(String username) {
+  Optional<ShiroUserEntity> shiroUserEntityByUsername = this.shiroUserRepo
+      .findShiroUserEntityByUsername(username);
+  if (shiroUserEntityByUsername.isPresent()) {
+    ShiroUserEntity shiroUserEntity = shiroUserEntityByUsername.get();
+    return this.shiroRoleRepo.queryByUserId(shiroUserEntity.getId()).stream()
+        .map(ShiroRoleEntity::getCode).collect(
+            Collectors.toList());
+  }
+  return Collections.emptyList();
+}
+
+@Override
+public List<String> queryPermissionsForUsername(String username) {
+  Optional<ShiroUserEntity> shiroUserEntityByUsername = this.shiroUserRepo
+      .findShiroUserEntityByUsername(username);
+  if (shiroUserEntityByUsername.isPresent()) {
+    ShiroUserEntity shiroUserEntity = shiroUserEntityByUsername.get();
+    return shiroResourcesRepo.queryByUserId(shiroUserEntity.getId()).stream()
+        .map(ShiroResourcesEntity::getVal).collect(
+            Collectors.toList());
+  }
+  return Collections.emptyList();
+}
+```
+
+
+
+下面在数据库中创建模拟数据，首先创建role数据，具体信息如图所示：
+
+![image-20210416134521056](images/image-20210416134521056.png)
+
+![image-20210416134531349](images/image-20210416134531349.png)
+
+其次创建permission数据，具体数据如图所示：
+
+![image-20210416134615856](images/image-20210416134615856.png)
+
+![image-20210416134635489](images/image-20210416134635489.png)
+
+
+
+
+
+
+
+
+
+### 自定义Realm开发
+
+本节将对CustomerRealm代码进行补充，首先实现用户校验，具体代码如下：
+
+```java
+  @Override
+  protected AuthenticationInfo doGetAuthenticationInfo(
+      AuthenticationToken token) throws AuthenticationException {
+    if (token instanceof UsernamePasswordToken
+    ) {
+
+      String username = ((UsernamePasswordToken) token).getUsername();
+      String pwd = new String(((UsernamePasswordToken) token).getPassword());
+
+      if (username == null) {
+        throw new RuntimeException("用户名称不能为空");
+      }
+      if (pwd == null) {
+        throw new RuntimeException("密码不能为空");
+      }
+
+      ShiroUserEntity byUsername = this.userService.findByUsername(username);
+      if (byUsername != null) {
+
+        String salt = byUsername.getSalt();
+        return new SimpleAuthenticationInfo(byUsername.getUsername(), byUsername.getPassword(),
+            ByteSource.Util.bytes(salt), getName());
+      }
+    }
+    return null;
+  }
+
+```
+
+完成认证代码编写后需要创建一个密码匹配器，这里采用Shiro所提供的HashedCredentialsMatcher，在ShiroConfig类中将其进行注册，具体注册代码如下：
+
+```java
+@Bean
+public HashedCredentialsMatcher hashedCredentialsMatcher() {
+  HashedCredentialsMatcher hashedCredentialsMatcher = new HashedCredentialsMatcher();
+  hashedCredentialsMatcher.setHashAlgorithmName("md5");
+  hashedCredentialsMatcher.setHashIterations(EncryptionUtils.HASH_ITERATIONS);
+  return hashedCredentialsMatcher;
+}
+```
+
+完成注册后需要将其设置给Realm对象，具体代码如下：
+
+```java
+@Bean
+public Realm realm(@Autowired HashedCredentialsMatcher credentialsMatcher) {
+  CustomerRealm customerRealm = new CustomerRealm();
+  customerRealm.setCredentialsMatcher(credentialsMatcher);
+  return customerRealm;
+}
+```
+
+至此关于用户验证的代码已经完成编写，下面将进入授权部分代码编写，授权代码实现如下：
+
+```java
+@Override
+protected AuthorizationInfo doGetAuthorizationInfo(
+    PrincipalCollection principals) {
+  Object primaryPrincipal = principals.getPrimaryPrincipal();
+  if (primaryPrincipal == null) {
+    throw new RuntimeException("ex");
+  }
+  List<String> permissions = this.userService
+      .queryPermissionsForUsername(String.valueOf(principals));
+  List<String> roles = this.userService.queryRolesForUsername(String.valueOf(principals));
+  SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
+  simpleAuthorizationInfo.addStringPermissions(permissions);
+  simpleAuthorizationInfo.addRoles(roles);
+  return simpleAuthorizationInfo;
+}
+```
+
+
+
+
+
+### 用户登陆开发
+
+本节将开发用户登陆，用户登陆需要使用Shrio进行登陆处理，具体登陆代码如下：
+
+```java
+@PostMapping("/login")
+public Result login(
+    @RequestBody UserCreateParam param
+) {
+  Subject subject = SecurityUtils.getSubject();
+  UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(
+      param.getUsername(),
+      param.getPassword()
+  );
+  subject.login(usernamePasswordToken);
+  return Result.ok("用户登录", true);
+}
+```
+
+在使用SpringBoot和Shiro整合是登陆需要使用Shiro的Subject进行登陆，这个处理和单独的Shiro使用相同，
+
+
+
+
+
+### 权限接口测试
+
+本节将进行权限接口测试，首先进行role测试，在前文添加的测试数据中role只有admin，现在需要编写2个controller其中一个包含admin其中一个不包含admin，具体代码如下：
+
+```java
+@RequiresRoles("admin")
+@GetMapping("/data")
+public String data() {
+  return "data";
+}
+
+@RequiresRoles("test")
+@GetMapping("/test")
+public String test() {
+  return "data";
+}
+```
+
+下面启动项目首先进行登陆接口调用，具体调用细节如下：
+
+```http
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+```
+
+在登陆接口调用后进行http://localhost:8080/data接口的调用，接口响应如下：
+
+```
+GET http://localhost:8080/data
+
+HTTP/1.1 200 
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 4
+Date: Fri, 16 Apr 2021 06:59:47 GMT
+Keep-Alive: timeout=60
+Connection: keep-alive
+
+data
+```
+
+下面进行http://localhost:8080/test接口的调用，接口响应如下：
+
+```
+GET http://localhost:8080/test
+
+HTTP/1.1 500 
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Fri, 16 Apr 2021 07:00:19 GMT
+Connection: close
+
+{
+  "timestamp": "2021-04-16T07:00:19.537+00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "",
+  "path": "/test"
+}
+```
+
+此时出现了一个异常，这个异常在响应中难以观察，可以通过观察控制台得到具体的数据，控制台输出如下：
+
+```
+org.apache.shiro.authz.AuthorizationException: Not authorized to invoke method: public java.lang.String com.github.huifer.simple.shiro.boot.rest.DataController.test()
+	at org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor.assertAuthorized(AuthorizingAnnotationMethodInterceptor.java:90) ~[shiro-core-1.7.1.jar:1.7.1]
+	at org.apache.shiro.authz.aop.AnnotationsAuthorizingMethodInterceptor.assertAuthorized(AnnotationsAuthorizingMethodInterceptor.java:100) ~[shiro-core-1.7.1.jar:1.7.1]
+
+```
+
+此时抛出的异常是AuthorizationException，当进行checkRole操作失败后会抛出该异常。
+
+
+
+下面进行permission的测试，首先编写两个测试接口，具体代码如下：
+
+```java
+@RequiresPermissions("user:query:*")
+@GetMapping("/p1")
+public String p1() {
+  return "p1";
+}
+
+@RequiresPermissions("user:create:*")
+@GetMapping("/p2")
+public String p2() {
+  return "p2";
+}
+```
+
+同样进行模拟请求，在模拟请求中p2接口的permission是不属于用户admin的资源值，因此访问该接口会抛出异常，异常如下：
+
+```
+org.apache.shiro.authz.AuthorizationException: Not authorized to invoke method: public java.lang.String com.github.huifer.simple.shiro.boot.rest.DataController.p2()
+	at org.apache.shiro.authz.aop.AuthorizingAnnotationMethodInterceptor.assertAuthorized(AuthorizingAnnotationMethodInterceptor.java:90) ~[shiro-core-1.7.1.jar:1.7.1]
+	at org.apache.shiro.authz.aop.AnnotationsAuthorizingMethodInterceptor.assertAuthorized(AnnotationsAuthorizingMethodInterceptor.java:100) ~[shiro-core-1.7.1.jar:1.7.1]
+
+```
+
