@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>simple-shiro-boot</module>
+        <module>full-shiro-boot</module>
     </modules>
 
     <properties>
