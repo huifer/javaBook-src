@@ -1,1 +1,0 @@
-package com.github.huifer.full.shir.entity;
