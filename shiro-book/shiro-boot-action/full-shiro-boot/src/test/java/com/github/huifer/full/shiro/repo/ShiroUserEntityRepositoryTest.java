@@ -1,11 +1,12 @@
 package com.github.huifer.full.shiro.repo;
 
 import com.github.huifer.full.shiro.FullShiroApp;
-import com.github.huifer.full.shiro.entity.ShiroUserEntity;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import org.junit.jupiter.api.Test;

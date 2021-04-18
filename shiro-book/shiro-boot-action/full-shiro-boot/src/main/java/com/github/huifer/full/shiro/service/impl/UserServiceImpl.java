@@ -1,12 +1,11 @@
 package com.github.huifer.full.shiro.service.impl;
 
-import com.github.huifer.full.shiro.entity.ShiroUserEntity;
+import com.github.huifer.full.shiro.dao.ShiroUserDao;
+import com.github.huifer.full.shiro.entity.ShiroUser;
 import com.github.huifer.full.shiro.ex.ServerEx;
 import com.github.huifer.full.shiro.model.req.user.UserCreateParam;
-import com.github.huifer.full.shiro.repo.ShiroUserEntityRepository;
 import com.github.huifer.full.shiro.service.UserService;
 import com.github.huifer.full.shiro.utils.EncryptionUtils;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,42 +13,42 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
   @Autowired
-  private ShiroUserEntityRepository userEntityRepository;
+  private ShiroUserDao userDao;
 
   @Override
-  public ShiroUserEntity create(
+  public boolean create(
       UserCreateParam param) {
 
-    Optional<ShiroUserEntity> shiroUserEntityByLoginName = userEntityRepository
+    ShiroUser shiroUserEntityByLoginName = userDao
         .findShiroUserEntityByLoginName(param.getLoginName());
-    if (!shiroUserEntityByLoginName.isPresent()) {
+    if (shiroUserEntityByLoginName == null) {
 
-      ShiroUserEntity shiroUserEntity = new ShiroUserEntity();
-      shiroUserEntity.setLoginName(param.getLoginName());
-      shiroUserEntity.setUsername(param.getUsername());
+      ShiroUser shiroUser = new ShiroUser();
+      shiroUser.setLoginName(param.getLoginName());
+      shiroUser.setUsername(param.getUsername());
       String salt = EncryptionUtils.randomSalt(EncryptionUtils.SLAT_LEN);
-      shiroUserEntity.setPassword(EncryptionUtils.genMD5Hash(param.getPassword(), salt));
-      shiroUserEntity.setSalt(salt);
-      shiroUserEntity.setEmail(param.getEmail());
-      shiroUserEntity.setGender(param.getGender());
-      return userEntityRepository.save(shiroUserEntity);
+      shiroUser.setPassword(EncryptionUtils.genMD5Hash(param.getPassword(), salt));
+      shiroUser.setSalt(salt);
+      shiroUser.setEmail(param.getEmail());
+      shiroUser.setGender(param.getGender());
+      return userDao.insert(shiroUser) > 0;
     }
     throw new ServerEx("登录名已存在");
   }
 
 
   @Override
-  public ShiroUserEntity update(UserCreateParam param, int id) {
-    Optional<ShiroUserEntity> byId = userEntityRepository.findById(id);
-    if (byId.isPresent()) {
-      ShiroUserEntity shiroUserEntity = byId.get();
-      shiroUserEntity.setUsername(param.getUsername());
+  public boolean update(UserCreateParam param, int id) {
+    ShiroUser byId = userDao.selectById(id);
+    if (byId != null) {
+      byId.setUsername(param.getUsername());
       String salt = EncryptionUtils.randomSalt(EncryptionUtils.SLAT_LEN);
-      shiroUserEntity.setPassword(EncryptionUtils.genMD5Hash(param.getPassword(), salt));
-      shiroUserEntity.setSalt(salt);
-      shiroUserEntity.setEmail(param.getEmail());
-      shiroUserEntity.setGender(param.getGender());
-      return userEntityRepository.save(shiroUserEntity);
+      byId.setPassword(EncryptionUtils.genMD5Hash(param.getPassword(), salt));
+      byId.setSalt(salt);
+      byId.setEmail(param.getEmail());
+      byId.setGender(param.getGender());
+      int i = userDao.updateById(byId);
+      return i > 0;
     }
     throw new ServerEx("当前id对应用户不存在");
 
