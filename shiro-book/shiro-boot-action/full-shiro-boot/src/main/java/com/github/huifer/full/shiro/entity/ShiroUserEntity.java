@@ -17,7 +17,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Entity
-@Accessors(chain = true)
 @Table(name = "shiro_user")
 @EqualsAndHashCode(callSuper = true)
 public class ShiroUserEntity extends BaseEntry implements

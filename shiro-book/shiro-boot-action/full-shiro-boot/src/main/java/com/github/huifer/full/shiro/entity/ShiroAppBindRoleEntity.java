@@ -15,7 +15,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Entity
-@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "shiro_app_bind_role")
 public class ShiroAppBindRoleEntity extends com.github.huifer.full.shiro.entity.BaseEntry implements

@@ -17,7 +17,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Entity
-@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @Table(name = "shiro_role_bind_resource")
 public class ShiroRoleBindResourceEntity extends

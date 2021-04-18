@@ -17,7 +17,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Entity
-@Accessors(chain = true)
 @Table(name = "shiro_resource")
 @EqualsAndHashCode(callSuper = true)
 public class ShiroResourceEntity extends com.github.huifer.full.shiro.entity.BaseEntry implements
