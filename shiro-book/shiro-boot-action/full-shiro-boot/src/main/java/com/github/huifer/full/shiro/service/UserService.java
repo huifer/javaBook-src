@@ -1,5 +1,6 @@
 package com.github.huifer.full.shiro.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.huifer.full.shiro.entity.ShiroUser;
 import com.github.huifer.full.shiro.model.req.user.UserCreateParam;
 
@@ -11,6 +12,6 @@ public interface UserService {
 
   boolean delete(int id);
 
-
+  Page<ShiroUser> findByUserList(String username, String loginName, int gender, String email);
 
 }

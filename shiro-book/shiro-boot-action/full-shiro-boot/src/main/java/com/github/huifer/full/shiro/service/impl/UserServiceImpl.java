@@ -1,5 +1,6 @@
 package com.github.huifer.full.shiro.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.huifer.full.shiro.dao.ShiroUserDao;
 import com.github.huifer.full.shiro.entity.ShiroUser;
 import com.github.huifer.full.shiro.ex.ServerEx;
@@ -56,6 +57,12 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public boolean delete(int id) {
-    return false;
+    return this.userDao.deleteById(id) > 0;
+  }
+
+  @Override
+  public Page<ShiroUser> findByUserList(
+      String username, String loginName, int gender, String email) {
+    return null;
   }
 }

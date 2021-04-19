@@ -1,5 +1,7 @@
 package com.github.huifer.full.shiro.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.Version;
 import java.util.Date;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import java.io.Serializable;
@@ -27,8 +29,9 @@ public class ShiroCompany extends Model<ShiroCompany> {
 
   private Date updateTime;
 
+  @Version
   private Integer version;
-
+  @TableField
   private Integer deleted;
 
 

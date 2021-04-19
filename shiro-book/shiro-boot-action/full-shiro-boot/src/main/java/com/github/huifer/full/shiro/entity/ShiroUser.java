@@ -1,6 +1,7 @@
 package com.github.huifer.full.shiro.entity;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.Version;
 import java.util.Date;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import java.io.Serializable;
@@ -36,6 +37,7 @@ public class ShiroUser extends Model<ShiroUser> {
 
   private Date updateTime;
 
+  @Version
   private Integer version;
 
   @TableLogic
