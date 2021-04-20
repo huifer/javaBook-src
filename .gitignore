@@ -548,3 +548,7 @@ microservice-core/spring-application/target/generated-sources/
 /netty/target
 /spring-session/target
 /security/sec-web/target/
+
+/shiro-book/shiro-boot-action/full-shiro-boot/target
+/shiro-book/shiro-boot-action/full-shiro-boot/fonted/.idea
+/shiro-book/shiro-boot-action/full-shiro-boot/fonted/node_modules

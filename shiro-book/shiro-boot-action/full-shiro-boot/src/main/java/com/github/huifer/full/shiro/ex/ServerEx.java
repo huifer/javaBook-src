@@ -4,6 +4,8 @@ public class ServerEx extends RuntimeException {
 
   private String msg;
 
+  public ServerEx() {
+  }
 
   public ServerEx(String message) {
     super(message);

@@ -1,41 +1,33 @@
 package com.github.huifer.full.shiro.entity;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.Version;
 import java.util.Date;
 import com.baomidou.mybatisplus.extension.activerecord.Model;
 import java.io.Serializable;
 
 /**
- * 资源表(ShiroResource)表实体类
+ * (ShiroApp)表实体类
  *
- * @author huifer
- * @since 2021-04-18 10:08:20
+ * @author HuiFer
+ * @since 2021-04-20 09:02:01
  */
 @SuppressWarnings("serial")
-public class ShiroResource extends Model<ShiroResource> {
+public class ShiroApp extends Model<ShiroApp> {
 
   private Integer id;
-  //应用id
-  private Integer appId;
-  //资源名称
+
   private String name;
-  //资源类型
-  private Integer type;
 
   private Date createTime;
 
   private Integer createUser;
 
-  private Integer updateUser;
+  private Integer deleted;
 
   private Date updateTime;
 
-  @Version
-  private Integer version;
+  private Integer updateUser;
 
-  @TableField
-  private Integer deleted;
+  private Integer version;
 
 
   public Integer getId() {
@@ -46,28 +38,12 @@ public class ShiroResource extends Model<ShiroResource> {
     this.id = id;
   }
 
-  public Integer getAppId() {
-    return appId;
-  }
-
-  public void setAppId(Integer appId) {
-    this.appId = appId;
-  }
-
   public String getName() {
     return name;
   }
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Integer getType() {
-    return type;
-  }
-
-  public void setType(Integer tyoe) {
-    this.type = tyoe;
   }
 
   public Date getCreateTime() {
@@ -86,12 +62,12 @@ public class ShiroResource extends Model<ShiroResource> {
     this.createUser = createUser;
   }
 
-  public Integer getUpdateUser() {
-    return updateUser;
+  public Integer getDeleted() {
+    return deleted;
   }
 
-  public void setUpdateUser(Integer updateUser) {
-    this.updateUser = updateUser;
+  public void setDeleted(Integer deleted) {
+    this.deleted = deleted;
   }
 
   public Date getUpdateTime() {
@@ -102,20 +78,20 @@ public class ShiroResource extends Model<ShiroResource> {
     this.updateTime = updateTime;
   }
 
+  public Integer getUpdateUser() {
+    return updateUser;
+  }
+
+  public void setUpdateUser(Integer updateUser) {
+    this.updateUser = updateUser;
+  }
+
   public Integer getVersion() {
     return version;
   }
 
   public void setVersion(Integer version) {
     this.version = version;
-  }
-
-  public Integer getDeleted() {
-    return deleted;
-  }
-
-  public void setDeleted(Integer deleted) {
-    this.deleted = deleted;
   }
 
   /**

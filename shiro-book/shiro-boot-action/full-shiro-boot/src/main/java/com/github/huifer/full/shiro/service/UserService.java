@@ -12,6 +12,9 @@ public interface UserService {
 
   boolean delete(int id);
 
-  Page<ShiroUser> findByUserList(String username, String loginName, int gender, String email);
+  ShiroUser byId(int id);
+
+  Page<ShiroUser> findByUserList(String username, String loginName, Integer gender, String email,
+      int start, int offset);
 
 }

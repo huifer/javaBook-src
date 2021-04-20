@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.github.huifer.full.shiro.dao.ShiroUserDao">
+  <select id="findShiroUserEntityByLoginName"
+    resultType="com.github.huifer.full.shiro.entity.ShiroUser">
+    select *
+    from shiro_user
+    where login_name = #{loginName}
+  </select>
+
+  <select id="findByUserList" resultType="com.github.huifer.full.shiro.entity.ShiroUser">
+    select * from shiro_user where 1=1
+    <if test="username!='' and username != null">
+      and username  like concat('%',#{username},'%')
+    </if>
+    <if test="loginName!='' and loginName != null">
+      and login_name  like concat('%',#{loginName},'%')
+    </if>
+    <if test="gender!=null">
+      and gender = #{gender}
+    </if>
+    <if test="email!='' and email != null">
+      and email  like concat('%',#{email},'%')
+    </if>
+
+  </select>
+</mapper>

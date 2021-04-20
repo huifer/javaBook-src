@@ -11,4 +11,5 @@ import com.github.huifer.full.shiro.entity.ShiroDept;
  */
 public interface ShiroDeptDao extends BaseMapper<ShiroDept> {
 
+  ShiroDept findByName(String name);
 }

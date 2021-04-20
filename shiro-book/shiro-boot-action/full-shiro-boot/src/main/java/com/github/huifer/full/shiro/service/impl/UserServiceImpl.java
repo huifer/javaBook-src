@@ -1,5 +1,6 @@
 package com.github.huifer.full.shiro.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.huifer.full.shiro.dao.ShiroUserDao;
 import com.github.huifer.full.shiro.entity.ShiroUser;
@@ -9,6 +10,7 @@ import com.github.huifer.full.shiro.service.UserService;
 import com.github.huifer.full.shiro.utils.EncryptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -19,7 +21,10 @@ public class UserServiceImpl implements UserService {
   @Override
   public boolean create(
       UserCreateParam param) {
-
+    String loginName = param.getLoginName();
+    if (!StringUtils.hasText(loginName)) {
+      throw new ServerEx("login name not null");
+    }
     ShiroUser shiroUserEntityByLoginName = userDao
         .findShiroUserEntityByLoginName(param.getLoginName());
     if (shiroUserEntityByLoginName == null) {
@@ -62,7 +67,14 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Page<ShiroUser> findByUserList(
-      String username, String loginName, int gender, String email) {
-    return null;
+      String username, String loginName, Integer gender, String email, int start, int offset) {
+    IPage<ShiroUser> userPage = new Page<>(start, offset);
+    return this.userDao
+        .findByUserList(username, loginName, gender, email, userPage);
+  }
+
+  @Override
+  public ShiroUser byId(int id) {
+    return this.userDao.selectById(id);
   }
 }
