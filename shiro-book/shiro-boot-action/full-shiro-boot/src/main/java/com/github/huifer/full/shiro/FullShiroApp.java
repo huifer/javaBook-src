@@ -11,5 +11,4 @@ public class FullShiroApp {
   public static void main(String[] args) {
     SpringApplication.run(FullShiroApp.class, args);
   }
-
 }
