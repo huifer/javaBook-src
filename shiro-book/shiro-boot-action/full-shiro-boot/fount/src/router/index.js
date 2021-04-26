@@ -56,6 +56,18 @@ export const constantRoutes = [
   },
 
   {
+    path: '/company',
+    component: Layout,
+    redirect: '/company',
+    children: [{
+      path: 'company',
+      name: '企业管理',
+      component: () => import('@/views/company/index'),
+      meta: { title: '企业管理', icon: 'dashboard' }
+    }]
+  },
+
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/table',
