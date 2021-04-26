@@ -46,6 +46,7 @@ public class ShiroConfig {
     map.put("/**", "authc");
     // 表示资源不需要验证
     map.put("/user/", "anon");
+    map.put("/user/**", "anon");
     map.put("/user/login", "anon");
     shiroFilterFactoryBean.setFilterChainDefinitionMap(map);
     return shiroFilterFactoryBean;

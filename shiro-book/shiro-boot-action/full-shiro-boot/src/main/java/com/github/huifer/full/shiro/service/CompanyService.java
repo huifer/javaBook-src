@@ -2,6 +2,7 @@ package com.github.huifer.full.shiro.service;
 
 import com.github.huifer.full.shiro.entity.ShiroCompany;
 import com.github.huifer.full.shiro.model.req.company.CompanyCreateParam;
+import java.util.List;
 
 public interface CompanyService {
 
@@ -14,4 +15,5 @@ public interface CompanyService {
 
   ShiroCompany byId(int id);
 
+  List<ShiroCompany> findByUserId(int userId);
 }
