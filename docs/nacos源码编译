@@ -1,0 +1,70 @@
+# Nacos 源码阅读环境搭建
+本章将围绕 Nacos 源码环境搭建进行叙述. 
+首先需要获取 nacos 源码, nacos 源代码托管在 [GitHub](https://github.com/alibaba/nacos.git )上, 可以执行下面这些命令进行获取
+
+1. 第一步: 克隆代码 
+```shell
+git clone https://github.com/alibaba/nacos.git 
+```
+2. 第二步: 选择阅读版本, 在本章及后续章节中将使用1.4.0版本
+```shell
+git checkout 1.4.0
+```
+
+获取完成代码后将其导入到 IDEA 中, 当IDEA加载完成后找到console工程（nacos-console）中的application.properties文件修改数据库配置. 需要修改的内容如下
+```properties
+spring.datasource.platform=mysql
+db.num=1
+db.url.0=jdbc:mysql://localhost:3306/nacos?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=UTC
+db.user=root
+db.password=root
+```
+在配置完成数据库相关内容后需要进行数据库初始化, 在本次源码阅读环节中所使用的数据库是 mysql, 数据库初始化文件在`distribution/conf/nacos-mysql.sql`文件中, 将该文件在前文配置的数据库中执行。通过上述操作可以将数据库初始化同时完成数据库相关配置，在完成这些配置准备工作后需要将启动命令修改，修改成为单机启动的模式，具体修改方式是添加`-Dnacos.standalone=true`代码在启动命令中，由于使用IDEA启动具体可以根据下图配置：
+
+![image-20210315105956910](images/image-20210315105956910.png)
+
+完成上述配置修改后即可启动项目。
+
+
+
+正常启动后在控制台会出现下面内容：
+
+```
+
+         ,--.
+       ,--.'|
+   ,--,:  : |                                           Nacos 
+,`--.'`|  ' :                       ,---.               Running in stand alone mode, All function modules
+|   :  :  | |                      '   ,'\   .--.--.    Port: 8848
+:   |   \ | :  ,--.--.     ,---.  /   /   | /  /    '   Pid: 7672
+|   : '  '; | /       \   /     \.   ; ,. :|  :  /`./   Console: http://localhost:8848/nacos/index.html
+'   ' ;.    ;.--.  .-. | /    / ''   | |: :|  :  ;_
+|   | | \   | \__\/: . ..    ' / '   | .; : \  \    `.      https://nacos.io
+'   : |  ; .' ," .--.; |'   ; :__|   :    |  `----.   \
+|   | '`--'  /  /  ,.  |'   | '.'|\   \  /  /  /`--'  /
+'   : |     ;  :   .'   \   :    : `----'  '--'.     /
+;   |.'     |  ,     .-./\   \  /            `--'---'
+'---'        `--`---'     `----'
+
+2021-03-15 11:01:36.432  INFO 7672 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler@270b6b5e' of type [org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2021-03-15 11:01:36.439  INFO 7672 --- [           main] trationDelegate$BeanPostProcessorChecker : Bean 'methodSecurityMetadataSource' of type [org.springframework.security.access.method.DelegatingMethodSecurityMetadataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2021-03-15 11:01:36.723  INFO 7672 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8848 (http)
+2021-03-15 11:01:36.964  INFO 7672 --- [           main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 2619 ms
+2021-03-15 11:01:40.225  INFO 7672 --- [           main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2021-03-15 11:01:40.585  INFO 7672 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2021-03-15 11:01:40.900  INFO 7672 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: Ant [pattern='/**'], []
+2021-03-15 11:01:40.936  INFO 7672 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Creating filter chain: any request, [org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@790654d5, org.springframework.security.web.context.SecurityContextPersistenceFilter@6bd7439d, org.springframework.security.web.header.HeaderWriterFilter@2d24cdd9, org.springframework.security.web.csrf.CsrfFilter@1b475663, org.springframework.security.web.authentication.logout.LogoutFilter@7d522180, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1231a1be, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7c4d1c7b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5f935d49, org.springframework.security.web.session.SessionManagementFilter@75e0a54c, org.springframework.security.web.access.ExceptionTranslationFilter@6182ffef]
+2021-03-15 11:01:41.015  INFO 7672 --- [           main] o.s.s.c.ThreadPoolTaskScheduler          : Initializing ExecutorService 'taskScheduler'
+2021-03-15 11:01:41.035  INFO 7672 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2021-03-15 11:01:41.136  INFO 7672 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8848 (http) with context path '/nacos'
+2021-03-15 11:01:41.140  INFO 7672 --- [           main] c.c.StartingSpringApplicationRunListener : Nacos Log files: C:\Users\admin\nacos\logs
+2021-03-15 11:01:41.141  INFO 7672 --- [           main] c.c.StartingSpringApplicationRunListener : Nacos Log files: C:\Users\admin\nacos\conf
+2021-03-15 11:01:41.141  INFO 7672 --- [           main] c.c.StartingSpringApplicationRunListener : Nacos Log files: C:\Users\admin\nacos\data
+2021-03-15 11:01:41.141  INFO 7672 --- [           main] c.c.StartingSpringApplicationRunListener : Nacos started successfully in stand alone mode. use external storage
+2021-03-15 11:01:41.685  INFO 7672 --- [5)-localhost] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2021-03-15 11:01:41.695  INFO 7672 --- [5)-localhost] o.s.web.servlet.DispatcherServlet        : Completed initialization in 10 ms
+```
+
+
+
+在看到上述内容后即可打开浏览器访问`http://localhost:8848/nacos/index.html`进入nacos前端项目
