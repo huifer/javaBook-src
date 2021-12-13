@@ -1,0 +1,6 @@
+applicationType: messaging
+defaultPackage: msg
+testFramework: junit
+sourceLanguage: java
+buildTool: gradle
+features: [annotation-api, app-name, gradle, java, java-application, junit, kafka, logback, readme, shade, yaml]
