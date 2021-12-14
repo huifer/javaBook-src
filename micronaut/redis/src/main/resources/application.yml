@@ -1,0 +1,5 @@
+micronaut:
+  application:
+    name: redis
+redis:
+  uri: redis://localhost:6379/15
