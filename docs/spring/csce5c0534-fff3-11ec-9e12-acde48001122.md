@@ -1,0 +1,19 @@
+```
+curl -u clientId:secret -X POST localhost:9001/oauth/token\?grant_type=password\&username=huifer\&password=123
+
+
+{
+  "access_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1NzQyMTc5ODMsInVzZXJfbmFtZSI6Imh1aWZlciIsImF1dGhvcml0aWVzIjpbIlVTRVIiXSwianRpIjoiZjI2NmU1YWUtZTgxMS00ODg5LThkY2ItNzc4MWY1OGUzNzZiIiwiY2xpZW50X2lkIjoiY2xpZW50SWQiLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXX0.OQ7pBZQny51OopNbYm0VkHPQe9tfRE0Ge8b50tlOPFUiswmS8EFKe_4Q4hbKs7LeiP7drnp_e6NDeJPHq87V_AVes2z315wyY2sjewrRMx_08wFvXFBLy82EbwZvR320NhDvI3dHaZ4iLEq7r3XFPuzdw63NKB-QiVRHZCQtF9bIHkzGvMi8jVH-Xow2jvZWlANKP11Ubmlxmq2t0PjQrnHdPYMU9jVF0Pfw_YjAldiltDHVdMT0FbBpT3iis7mPue9j57ooh3erDGMi9gZKkd2u0FPBxfn-8WH5_hLkW0IvNkl4jKjbTzPAQ6r-SXWK0T3h8Gks8S0WfiNRwMLvlQ",
+  "token_type" : "bearer",
+  "refresh_token" : "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJodWlmZXIiLCJzY29wZSI6WyJyZWFkIiwid3JpdGUiXSwiYXRpIjoiZjI2NmU1YWUtZTgxMS00ODg5LThkY2ItNzc4MWY1OGUzNzZiIiwiZXhwIjoxNTc2ODA5NjgzLCJhdXRob3JpdGllcyI6WyJVU0VSIl0sImp0aSI6IjEzZThiOGFhLTI1MjQtNDhkMS1hY2RmLTUwMGI5Yzg3NzlmZiIsImNsaWVudF9pZCI6ImNsaWVudElkIn0.CaPEkkzMWYU3fAGjw65mJTJasrnBsC2_sYNHNOLbPY_7ycq07fcNUrSy1bT0unFlqBz40_JyEOH-Y6XmnpZVvVjOtci7k-xaVgLdEV2uS23idGBTYrJmln_7YudyK50wn4wjyTk0b8vuwHMiTn8qrfN6DravJHZHest1xMlaQXZJMVVyH2Y23RKcg086t6WfGsd121JvgropT_QkEPDzY98DDmhMjL_dV0vMDjZgqAfWePr6-Aai0_P2cJ79jOwSfbY2pZFFes2t7RfDK8HRbpRpHQugaLbvCvzX8ptnw75lgc93hkhPPQIBPxbKyFA1XfalpQ7AyiKbZIfEY1uC4g",
+  "expires_in" : 299,
+  "scope" : "read write",
+  "jti" : "f266e5ae-e811-4889-8dcb-7781f58e376b"
+}
+```
+
+
+- 资源访问
+```
+curl localhost:9002/me -H "Authorization: Bearer {access_token}"
+```
