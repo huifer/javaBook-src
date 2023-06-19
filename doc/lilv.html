@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>年化收益率计算器</title>
+    <meta charset="UTF-8"> <!-- 设置编码为UTF-8 -->
+    <script>
+      function calculateAnnualizedReturn() {
+        var startDate = new Date(document.getElementById("start-date").value);
+        var endDateInput = document.getElementById("end-date");
+        var startValue = parseFloat(document.getElementById("start-value").value);
+        var endValue = parseFloat(document.getElementById("end-value").value);
+
+        // 设置终止日期为今天
+        var today = new Date();
+        var endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        // 计算持有期年数（以天为单位）
+        var holdingPeriod = (endDate - startDate) / (1000 * 60 * 60 * 24) / 365;
+
+        // 计算收益率
+        var returns = (endValue / startValue) ** (1 / holdingPeriod) - 1;
+        var annualizedReturn = returns * 100;
+
+        // 显示结果
+        document.getElementById("result").innerHTML = "年化收益率: " + annualizedReturn.toFixed(2) + "%";
+      }
+    </script>
+</head>
+<body>
+<h1>根据时间和净值计算</h1>
+<form>
+    <label for="start-date">起始日期：</label>
+    <input type="date" id="start-date"><br><br>
+
+    <label for="end-date">终止日期：</label>
+    <input type="date" id="end-date"><br><br>
+
+    <label for="start-value">起始净值：</label>
+    <input type="number" id="start-value"><br><br>
+
+    <label for="end-value">终止净值：</label>
+    <input type="number" id="end-value"><br><br>
+
+    <button type="button" onclick="calculateAnnualizedReturn()">计算</button>
+</form>
+
+<div id="result"></div>
+
+<script>
+  // 设置终止日期为今天
+  var today = new Date();
+  var endDateInput = document.getElementById("end-date");
+  var formattedDate = today.toISOString().substr(0, 10);
+  endDateInput.value = formattedDate;
+</script>
+</body>
+</html>
